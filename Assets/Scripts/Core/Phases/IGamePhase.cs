@@ -7,5 +7,7 @@
         void Exit();
         
         void Update();
+        
+        void Accept(IPhaseVisitor visitor);
     }
 }

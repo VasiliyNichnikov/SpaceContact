@@ -42,7 +42,7 @@ namespace App.Services
             }
             
             Logger.Log("GameStartupService.OnServerStarted: server have started.");
-            _networkGameController.ServerTransitionTo<RegroupPhase>();
+            _networkGameController.ServerTransitionTo<LobbyPhase>();
         }
     }
 }

@@ -8,11 +8,7 @@ namespace Logs
 
         static Logger()
         {
-#if UNITY_EDITOR || DEBUG
             _impl = new UnityLogger();
-#else
-            _impl = new ProdLogger();
-#endif
         }
         
         public static void Warning(string message) => _impl.Warning(message);
