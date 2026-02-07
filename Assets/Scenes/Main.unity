@@ -253,8 +253,7 @@ MonoBehaviour:
   _mainCanvasGameObject: {fileID: 403845387}
   _guiHolder: {fileID: 1670133857}
   _eventSystemGameObject: {fileID: 1540278626}
-  _gameLifeScopeGameObject: {fileID: 2093218034}
-  _networkGameController: {fileID: 971659593}
+  _projectLifeScope: {fileID: 2093218034}
 --- !u!4 &708544614
 Transform:
   m_ObjectHideFlags: 0
@@ -265,77 +264,6 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &971659593
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 971659596}
-  - component: {fileID: 971659594}
-  - component: {fileID: 971659595}
-  m_Layer: 0
-  m_Name: '[NetworkGameController]'
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &971659594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 971659593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 699490512
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 0
-  AlwaysReplicateAsRoot: 1
-  SynchronizeTransform: 0
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
---- !u!114 &971659595
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 971659593}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fccc4fb2f1ea42d98b7a8448b973e4d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Network::Network.NetworkGameController
-  ShowTopMostFoldoutHeaderGroup: 1
---- !u!4 &971659596
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 971659593}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -761,7 +689,7 @@ GameObject:
   - component: {fileID: 2093218036}
   - component: {fileID: 2093218035}
   m_Layer: 0
-  m_Name: '[GameLifeScope]'
+  m_Name: '[ProjectLifeScope]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -784,10 +712,10 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _networkManager: {fileID: 1374633362}
-  _networkGameController: {fileID: 971659595}
   _dialogsRegistrySO: {fileID: 11400000, guid: f001500218666a14d8446a20b71b55cd, type: 2}
   _sceneStorage: {fileID: 708544613}
   _appConfigs: {fileID: 11400000, guid: 1806b59a61e8a4539bc2a4c0eee2bf00, type: 2}
+  _simpleConnectionDialog: {fileID: 2123969318163460282}
 --- !u!4 &2093218036
 Transform:
   m_ObjectHideFlags: 0
@@ -947,7 +875,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Client::Client.UI.Dialogs.SimpleConnectionDialog
   _hostButton: {fileID: 8935609938219032489}
   _clientButton: {fileID: 7161578441546033305}
-  _networkManager: {fileID: 1374633362}
 --- !u!114 &2386891974742182574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1546,7 +1473,6 @@ SceneRoots:
   - {fileID: 1854130043}
   - {fileID: 1374633360}
   - {fileID: 2093218036}
-  - {fileID: 971659596}
   - {fileID: 708544614}
   - {fileID: 403845391}
   - {fileID: 1540278629}

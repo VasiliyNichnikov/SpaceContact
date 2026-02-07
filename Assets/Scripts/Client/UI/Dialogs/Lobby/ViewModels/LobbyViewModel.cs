@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Network.Player;
 using Reactivity;
-using Unity.Netcode;
 
 namespace Client.UI.Dialogs.Lobby
 {
@@ -12,23 +11,23 @@ namespace Client.UI.Dialogs.Lobby
         private readonly Dictionary<PlayerNetworkState, LobbyPlayerViewModel> _playerViewModelByState;
         private readonly EventProvider _refreshPlayersEvent;
         private readonly IGameLevelControl _levelControl;
-        private readonly NetworkManager _networkManager;
+        private readonly ILobbyController _lobbyController;
         
         public LobbyViewModel(
             PlayersRegistry playersRegistry, 
             IGameLevelControl levelControl, 
-            NetworkManager networkManager)
+            ILobbyController lobbyController)
         {
             _playersRegistry = playersRegistry;
             _levelControl = levelControl;
-            _networkManager = networkManager;
+            _lobbyController = lobbyController;
             _playersRegistry.OnPlayerJoined += PlayerJoined;
             _playersRegistry.OnPlayerLeft += PlayerLeft;
             _playerViewModelByState = CreatePlayers();
             _refreshPlayersEvent = new EventProvider();
         }
 
-        public bool IsOwnerLobby => _networkManager.LocalClientId == NetworkManager.ServerClientId;
+        public bool IsOwnerLobby => _lobbyController.IsOwnerLobby;
         
         public IReadOnlyCollection<LobbyPlayerViewModel> Players => _playerViewModelByState.Values;
 

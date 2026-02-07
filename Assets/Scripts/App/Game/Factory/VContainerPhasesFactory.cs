@@ -1,9 +1,9 @@
 ﻿using System;
-using Core.Factory;
-using Core.Phases;
+using Core.Game.Factory;
+using Core.Game.Phases;
 using VContainer;
 
-namespace App.Factory
+namespace App.Game.Factory
 {
     public class VContainerPhasesFactory : IPhaseFactory
     {

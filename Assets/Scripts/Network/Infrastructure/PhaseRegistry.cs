@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Core.Phases;
+using Core.Game.Phases;
 
 namespace Network.Infrastructure
 {

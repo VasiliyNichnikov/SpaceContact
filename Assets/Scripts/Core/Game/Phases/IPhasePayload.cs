@@ -1,4 +1,4 @@
-﻿namespace Core.Phases
+﻿namespace Core.Game.Phases
 {
     public interface IPhasePayload
     {

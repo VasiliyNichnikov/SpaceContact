@@ -1,6 +1,7 @@
-﻿using Unity.Netcode;
+﻿using Client.UI.Dialogs.Lobby;
 using UnityEngine;
 using UnityEngine.UI;
+using VContainer;
 using Logger = Logs.Logger;
 
 namespace Client.UI.Dialogs
@@ -11,23 +12,28 @@ namespace Client.UI.Dialogs
         private Button _hostButton = null!;
         [SerializeField]
         private Button _clientButton = null!;
+
+        private ILobbyController _lobbyController = null!;
         
-        [SerializeField]
-        private NetworkManager _networkManager = null!;
+        [Inject]
+        private void Constructor(ILobbyController lobbyController)
+        {
+            _lobbyController = lobbyController;
+        }
 
         private void Start()
         {
             _hostButton.onClick.AddListener(() =>
             {
                 Logger.Log("Host button clicked.");
-                _networkManager.StartHost();
+                _lobbyController.StartHost();
                 HideUi();
             });
             
             _clientButton.onClick.AddListener(() =>
             {
                 Logger.Log("Client Button clicked.");
-                _networkManager.StartClient();
+                _lobbyController.StartClient();
                 HideUi();
             });
         }

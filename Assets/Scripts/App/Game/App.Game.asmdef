@@ -1,13 +1,11 @@
 {
-    "name": "Client",
+    "name": "App.Game",
     "rootNamespace": "",
     "references": [
-        "GUID:aa34adc86bcc3c54b9513a92112a75a6",
-        "GUID:a04da826864b0774a89cf62a1a6ad65d",
-        "GUID:f17862d2f70a59441b796979866a1a1c",
-        "GUID:62493216304c21145a498f8da735d8fa",
         "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
-        "GUID:9423199d3d9a06b42a35b0a744e4d547"
+        "GUID:aa34adc86bcc3c54b9513a92112a75a6",
+        "GUID:f17862d2f70a59441b796979866a1a1c",
+        "GUID:a04da826864b0774a89cf62a1a6ad65d"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

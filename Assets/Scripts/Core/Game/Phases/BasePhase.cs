@@ -1,4 +1,4 @@
-namespace Core.Phases
+namespace Core.Game.Phases
 {
     public abstract class BasePhase : IGamePhase
     {

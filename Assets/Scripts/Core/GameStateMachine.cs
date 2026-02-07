@@ -1,6 +1,6 @@
 ﻿using System;
-using Core.Factory;
-using Core.Phases;
+using Core.Game.Factory;
+using Core.Game.Phases;
 
 namespace Core
 {

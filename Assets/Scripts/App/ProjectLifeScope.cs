@@ -1,15 +1,12 @@
 ﻿using App.Configs;
-using App.Factory;
 using App.Services;
 using Client;
 using Client.Configs;
 using Client.Factory;
-using Client.Phases;
+using Client.UI;
+using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
 using Core;
-using Core.Factory;
-using Core.Phases;
-using Network;
 using Network.Infrastructure;
 using Network.Player;
 using Unity.Netcode;
@@ -19,13 +16,10 @@ using VContainer.Unity;
 
 namespace App
 {
-    public class GameLifeScope : LifetimeScope
+    public class ProjectLifeScope : LifetimeScope
     {
         [SerializeField]
         private NetworkManager _networkManager = null!;
-        
-        [SerializeField]
-        private NetworkGameController _networkGameController = null!;
         
         [SerializeField]
         private DialogsRegistrySO _dialogsRegistrySO = null!;
@@ -35,11 +29,14 @@ namespace App
 
         [SerializeField] 
         private AppConfigs _appConfigs = null!;
+        
+        [SerializeField]
+        private SimpleConnectionDialog _simpleConnectionDialog = null!;
 
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponent(_networkManager);
-            builder.RegisterComponent(_networkGameController);
+            builder.RegisterComponent(_simpleConnectionDialog);
             
             // instance - не будет искать в объект inject
             builder.RegisterInstance(_dialogsRegistrySO);
@@ -52,34 +49,21 @@ namespace App
             builder.Register<PhaseRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<JsonNetworkSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<NetworkAutoInjector>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<PhaseRegistrationService>(Lifetime.Singleton).AsSelf();
             builder.Register<PlayersRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
-            
-            // Binders
-            builder.Register<UIPhasesBinder>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Factories
-            builder.Register<VContainerPhasesFactory>(Lifetime.Singleton).As<IPhaseFactory>();
             builder.Register<DialogsFactory>(Lifetime.Singleton);
             
             // Game State Machine
             builder.Register<GameStateMachine>(Lifetime.Singleton).AsSelf();
             
-            // Phases
-            RegisterPhases(builder);
+            // Services
+            builder.Register<LobbyService>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // ViewModels
             RegisterViewModels(builder);
-            
-            // Entry Point
-            builder.RegisterEntryPoint<GameStartupService>();
-        }
-
-        private static void RegisterPhases(IContainerBuilder builder)
-        {
-            builder.Register<LobbyPhase>(Lifetime.Transient);
-            builder.Register<RegroupPhase>(Lifetime.Transient);
         }
 
         private static void RegisterViewModels(IContainerBuilder builder)

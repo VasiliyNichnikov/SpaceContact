@@ -1,7 +1,7 @@
 ﻿using System;
-using Core.Phases;
+using Core.Game.Phases;
 
-namespace Core.Factory
+namespace Core.Game.Factory
 {
     public interface IPhaseFactory
     {

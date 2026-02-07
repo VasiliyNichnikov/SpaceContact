@@ -1,12 +1,11 @@
-﻿using Core.Phases;
+﻿using Core.Game.Phases;
 using Network.Infrastructure;
 
-namespace App.Services
+namespace App.Game.Services
 {
     public class PhaseRegistrationService
     {
-        private const byte LobbyPhaseId = 100;
-        private const byte RegroupPhaseId = 101;
+        private const byte GameInitializationPhaseId = 100;
         
         private readonly PhaseRegistry _phaseRegistry;
         
@@ -17,8 +16,7 @@ namespace App.Services
         
         public void ConfigureRegistry()
         {
-            _phaseRegistry.RegisterPhase<LobbyPhase>(LobbyPhaseId);
-            _phaseRegistry.RegisterPhase<RegroupPhase>(RegroupPhaseId);
+            _phaseRegistry.RegisterPhase<GameInitializationPhase>(GameInitializationPhaseId);
         }
     }
 }

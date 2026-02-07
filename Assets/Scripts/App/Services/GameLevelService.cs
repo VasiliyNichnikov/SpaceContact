@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using App.Data;
 using Client;
-using Core.Phases;
 using Logs;
-using Network;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
 
@@ -13,18 +11,15 @@ namespace App.Services
     public class GameLevelService : IGameLevelControl, IDisposable
     {
         private readonly NetworkManager _networkManager;
-        private readonly NetworkGameController _networkGameController;
         private readonly ScenesData _scenesData;
 
         private bool _isDownloadRunning;
 
         public GameLevelService(
             NetworkManager networkManager,
-            NetworkGameController networkGameController,
             ScenesData scenesData)
         {
             _networkManager = networkManager;
-            _networkGameController = networkGameController;
             _scenesData = scenesData;
 
             if (_networkManager.SceneManager != null)
@@ -70,11 +65,6 @@ namespace App.Services
             if (!_networkManager.IsServer)
             {
                 return;
-            }
-
-            if (_scenesData.GameSceneName == sceneName)
-            {
-                _networkGameController.ServerTransitionTo<RegroupPhase>();
             }
 
             _isDownloadRunning = false;

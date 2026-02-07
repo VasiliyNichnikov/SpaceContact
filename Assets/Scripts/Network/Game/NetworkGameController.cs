@@ -1,12 +1,12 @@
 ﻿using System;
 using Core;
-using Core.Phases;
+using Core.Game.Phases;
 using Logs;
 using Network.Infrastructure;
 using Unity.Netcode;
 using VContainer;
 
-namespace Network
+namespace Network.Game
 {
     public class NetworkGameController : NetworkBehaviour
     {

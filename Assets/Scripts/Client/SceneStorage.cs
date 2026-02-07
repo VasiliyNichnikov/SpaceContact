@@ -14,10 +14,7 @@ namespace Client
         private GameObject _eventSystemGameObject = null!;
         
         [SerializeField]
-        private GameObject _gameLifeScopeGameObject = null!;
-        
-        [SerializeField]
-        private GameObject _networkGameController = null!;
+        private GameObject _projectLifeScope = null!;
         
         public RectTransform GuiHolder => _guiHolder;
         
@@ -38,8 +35,7 @@ namespace Client
             
             DontDestroyOnLoad(_mainCanvasGameObject);
             DontDestroyOnLoad(_eventSystemGameObject);
-            DontDestroyOnLoad(_gameLifeScopeGameObject);
-            DontDestroyOnLoad(_networkGameController);
+            DontDestroyOnLoad(_projectLifeScope);
         }
     }
 }
