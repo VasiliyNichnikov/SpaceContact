@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
 
-namespace Network.Player
+namespace Core.Player
 {
     public class PlayersRegistry
     {
-        private readonly List<PlayerNetworkState> _players = new();
+        private readonly List<IPlayerManager> _players = new();
 
-        public event Action<PlayerNetworkState>? OnPlayerJoined;
+        public event Action<IPlayerManager>? OnPlayerJoined;
         
-        public event Action<PlayerNetworkState>? OnPlayerLeft;
+        public event Action<IPlayerManager>? OnPlayerLeft;
         
-        public IEnumerable<PlayerNetworkState> GetAllPlayers() => 
-            _players;
-
-        public void Register(PlayerNetworkState player)
+        public IEnumerable<IPlayerManager> Players => _players;
+        
+        public void Register(IPlayerManager player)
         {
             if (_players.Contains(player))
             {
@@ -25,7 +24,7 @@ namespace Network.Player
             OnPlayerJoined?.Invoke(player);
         }
 
-        public void Unregister(PlayerNetworkState player)
+        public void Unregister(IPlayerManager player)
         {
             if (_players.Remove(player))
             {
