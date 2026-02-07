@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Network.Player;
 using Reactivity;
+using Unity.Netcode;
 
 namespace Client.UI.Dialogs.Lobby
 {
@@ -10,20 +11,32 @@ namespace Client.UI.Dialogs.Lobby
         private readonly PlayersRegistry _playersRegistry;
         private readonly Dictionary<PlayerNetworkState, LobbyPlayerViewModel> _playerViewModelByState;
         private readonly EventProvider _refreshPlayersEvent;
+        private readonly IGameLevelControl _levelControl;
+        private readonly NetworkManager _networkManager;
         
-        public LobbyViewModel(PlayersRegistry playersRegistry)
+        public LobbyViewModel(
+            PlayersRegistry playersRegistry, 
+            IGameLevelControl levelControl, 
+            NetworkManager networkManager)
         {
             _playersRegistry = playersRegistry;
+            _levelControl = levelControl;
+            _networkManager = networkManager;
             _playersRegistry.OnPlayerJoined += PlayerJoined;
             _playersRegistry.OnPlayerLeft += PlayerLeft;
             _playerViewModelByState = CreatePlayers();
             _refreshPlayersEvent = new EventProvider();
         }
+
+        public bool IsOwnerLobby => _networkManager.LocalClientId == NetworkManager.ServerClientId;
         
         public IReadOnlyCollection<LobbyPlayerViewModel> Players => _playerViewModelByState.Values;
 
         public IEventProvider RefreshPlayersEvent => _refreshPlayersEvent;
 
+        public void RunBattleButtonClickHandler() => 
+            _levelControl.StartGame();
+        
         public void Dispose()
         {
             _playersRegistry.OnPlayerJoined -= PlayerJoined;

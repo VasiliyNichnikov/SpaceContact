@@ -1,10 +1,11 @@
-﻿using App.Factory;
+﻿using App.Configs;
+using App.Factory;
 using App.Services;
 using Client;
+using Client.Configs;
 using Client.Factory;
 using Client.Phases;
 using Client.UI.Dialogs.Lobby;
-using Configs.UI;
 using Core;
 using Core.Factory;
 using Core.Phases;
@@ -32,6 +33,9 @@ namespace App
         [SerializeField]
         private SceneStorage _sceneStorage = null!;
 
+        [SerializeField] 
+        private AppConfigs _appConfigs = null!;
+
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponent(_networkManager);
@@ -40,6 +44,9 @@ namespace App
             // instance - не будет искать в объект inject
             builder.RegisterInstance(_dialogsRegistrySO);
             builder.RegisterInstance(_sceneStorage);
+            
+            // Configs
+            _appConfigs.Build(builder);
 
             // Singletons
             builder.Register<PhaseRegistry>(Lifetime.Singleton).AsSelf();
@@ -47,6 +54,7 @@ namespace App
             builder.Register<NetworkAutoInjector>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PhaseRegistrationService>(Lifetime.Singleton).AsSelf();
             builder.Register<PlayersRegistry>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Binders
             builder.Register<UIPhasesBinder>(Lifetime.Singleton).AsImplementedInterfaces();

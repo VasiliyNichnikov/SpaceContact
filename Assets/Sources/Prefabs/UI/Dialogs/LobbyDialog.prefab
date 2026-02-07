@@ -118,6 +118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Client::Client.UI.Dialogs.Lobby.LobbyDialog
   _playersContainer: {fileID: 1397004862961022888}
   _lobbyPlayerView: {fileID: 5606058976915879634, guid: d8c4a86a733e3c74d83dc6fba07b848d, type: 3}
+  _startGameButtonGameObject: {fileID: 9189835969515659247}
 --- !u!1 &3481948069861706413
 GameObject:
   m_ObjectHideFlags: 0
@@ -639,4 +640,16 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 5892773649731291340}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1459682416050013130}
+        m_TargetAssemblyTypeName: Client.UI.Dialogs.Lobby.LobbyDialog, Client
+        m_MethodName: OnRunBattleButtonClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

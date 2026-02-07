@@ -250,7 +250,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 487045a7be474d2281b4a4a475fc8ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Client::Client.SceneStorage
+  _mainCanvasGameObject: {fileID: 403845387}
   _guiHolder: {fileID: 1670133857}
+  _eventSystemGameObject: {fileID: 1540278626}
+  _gameLifeScopeGameObject: {fileID: 2093218034}
+  _networkGameController: {fileID: 971659593}
 --- !u!4 &708544614
 Transform:
   m_ObjectHideFlags: 0
@@ -783,6 +787,7 @@ MonoBehaviour:
   _networkGameController: {fileID: 971659595}
   _dialogsRegistrySO: {fileID: 11400000, guid: f001500218666a14d8446a20b71b55cd, type: 2}
   _sceneStorage: {fileID: 708544613}
+  _appConfigs: {fileID: 11400000, guid: 1806b59a61e8a4539bc2a4c0eee2bf00, type: 2}
 --- !u!4 &2093218036
 Transform:
   m_ObjectHideFlags: 0

@@ -14,6 +14,9 @@ namespace Client.UI.Dialogs.Lobby
         
         [SerializeField]
         private LobbyPlayerView _lobbyPlayerView = null!;
+        
+        [SerializeField]
+        private GameObject _startGameButtonGameObject = null!;
 
         private LobbyViewModel _viewModel = null!;
         
@@ -26,7 +29,14 @@ namespace Client.UI.Dialogs.Lobby
         public void Start()
         {
             gameObject.Subscribe(_viewModel.RefreshPlayersEvent, RefreshPlayersBlocks);
+            _startGameButtonGameObject.SetActive(_viewModel.IsOwnerLobby);
         }
+
+        /// <summary>
+        /// Called from Unity
+        /// </summary>
+        public void OnRunBattleButtonClick() => 
+            _viewModel.RunBattleButtonClickHandler();
 
         private void RefreshPlayersBlocks()
         {

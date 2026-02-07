@@ -1,7 +1,7 @@
 using Client.UI.Dialogs.Lobby;
 using UnityEngine;
 
-namespace Configs.UI
+namespace Client.Configs
 {
     [CreateAssetMenu(fileName = "DialogsRegistrySO", menuName = "Configs/UI/DialogsRegistrySO", order = 0)]
     public class DialogsRegistrySO : ScriptableObject

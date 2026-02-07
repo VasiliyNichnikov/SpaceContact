@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Client.Configs;
 using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
-using Configs.UI;
 using Logs;
 using VContainer;
 using VContainer.Unity;
