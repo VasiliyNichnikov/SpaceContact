@@ -1,10 +1,9 @@
-﻿using System;
-using Unity.Netcode;
+﻿using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using Logger = Logs.Logger;
 
-namespace Client.Dialogs
+namespace Client.UI.Dialogs
 {
     public class SimpleConnectionDialog : MonoBehaviour
     {

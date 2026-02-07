@@ -18,5 +18,10 @@ namespace Core.Phases
         {
             Logger.Log("RegroupPhase.Update");
         }
+
+        public void Accept(IPhaseVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
     }
 }

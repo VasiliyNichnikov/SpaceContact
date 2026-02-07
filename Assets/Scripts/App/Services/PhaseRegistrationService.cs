@@ -5,7 +5,8 @@ namespace App.Services
 {
     public class PhaseRegistrationService
     {
-        private const byte RegroupPhaseId = 100;
+        private const byte LobbyPhaseId = 100;
+        private const byte RegroupPhaseId = 101;
         
         private readonly PhaseRegistry _phaseRegistry;
         
@@ -16,6 +17,7 @@ namespace App.Services
         
         public void ConfigureRegistry()
         {
+            _phaseRegistry.RegisterPhase<LobbyPhase>(LobbyPhaseId);
             _phaseRegistry.RegisterPhase<RegroupPhase>(RegroupPhaseId);
         }
     }
