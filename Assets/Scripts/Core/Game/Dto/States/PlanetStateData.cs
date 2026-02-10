@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Core.Game.Dto.Game.States
+namespace Core.Game.Dto.States
 {
     [Serializable]
     public class PlanetStateData

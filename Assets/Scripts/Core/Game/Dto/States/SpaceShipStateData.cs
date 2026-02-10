@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.Game.Dto.Game.States
+namespace Core.Game.Dto.States
 {
     [Serializable]
     public struct SpaceShipStateData

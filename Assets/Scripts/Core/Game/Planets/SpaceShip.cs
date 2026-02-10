@@ -1,4 +1,4 @@
-using Core.Game.Dto.Game.States;
+using Core.Game.Dto.States;
 
 namespace Core.Game.Planets
 {

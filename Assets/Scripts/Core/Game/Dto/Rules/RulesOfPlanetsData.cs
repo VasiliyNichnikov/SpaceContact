@@ -1,4 +1,4 @@
-namespace Core.Game.Dto.Game.Rules
+namespace Core.Game.Dto.Rules
 {
     public readonly struct RulesOfPlanetsData
     {
