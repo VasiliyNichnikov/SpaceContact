@@ -1,5 +1,5 @@
 ﻿using System;
-using Core;
+using Core.Game;
 using Core.Game.Phases;
 using Logs;
 using Network.Infrastructure;

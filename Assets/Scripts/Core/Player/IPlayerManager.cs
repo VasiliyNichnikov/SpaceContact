@@ -8,6 +8,8 @@ namespace Core.Player
     /// </summary>
     public interface IPlayerManager
     {
+        ulong ClientId { get; }
+        
         string Name { get; }
         
         Color Color { get; }

@@ -2,7 +2,7 @@
 using Core.Game.Factory;
 using Core.Game.Phases;
 
-namespace Core
+namespace Core.Game
 {
     public class GameStateMachine
     {

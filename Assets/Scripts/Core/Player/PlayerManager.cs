@@ -9,6 +9,8 @@ namespace Core.Player
         private const string DefaultName = "None";
         private const string DefaultColor = "#94D6D4";
 
+        public ulong ClientId { get; private set; }
+        
         public string Name { get; private set; } = DefaultName;
 
         public Color Color { get; private set; } = Color.FromHex(DefaultColor);
@@ -32,8 +34,9 @@ namespace Core.Player
             OnPlayerInfoUpdated?.Invoke();
         }
 
-        void IPlayerManagerNetwork.SetLocalStatus(bool isOwner, bool isHost)
+        void IPlayerManagerNetwork.SetLocalStatus(ulong clientId, bool isOwner, bool isHost)
         {
+            ClientId = clientId;
             IsCurrentPlayer = isOwner;
             IsOwnerLobby = isHost;
         }

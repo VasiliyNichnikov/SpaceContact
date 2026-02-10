@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Core.Player
 {
@@ -13,11 +14,21 @@ namespace Core.Player
         
         public IEnumerable<IPlayerManager> Players => _players;
         
+        public IEnumerable<IPlayerManager> OtherPlayers => _players
+            .Where(player => !player.IsCurrentPlayer);
+
+        public IPlayerManager? CurrentPlayer;
+        
         public void Register(IPlayerManager player)
         {
             if (_players.Contains(player))
             {
                 return;
+            }
+
+            if (player.IsCurrentPlayer)
+            {
+                CurrentPlayer = player;
             }
             
             _players.Add(player);
@@ -26,10 +37,17 @@ namespace Core.Player
 
         public void Unregister(IPlayerManager player)
         {
-            if (_players.Remove(player))
+            if (!_players.Remove(player))
             {
-                OnPlayerLeft?.Invoke(player);
+                return;
             }
+            
+            if (player.IsCurrentPlayer)
+            {
+                CurrentPlayer = null;
+            }
+                
+            OnPlayerLeft?.Invoke(player);
         }
     }
 }

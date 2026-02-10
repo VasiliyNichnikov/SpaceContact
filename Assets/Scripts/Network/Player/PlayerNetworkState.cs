@@ -31,12 +31,10 @@ namespace Network.Player
             _registry = registry;
         }
 
-        public IPlayerManager CorePlayer => _corePlayer;
-
         public override void OnNetworkSpawn()
         {
             var isHost = OwnerClientId == NetworkManager.ServerClientId;
-            _corePlayerNetwork.SetLocalStatus(IsOwner, isHost);
+            _corePlayerNetwork.SetLocalStatus(OwnerClientId, IsOwner, isHost);
 
             if (IsServer || IsOwner)
             {
@@ -46,7 +44,7 @@ namespace Network.Player
             _playerName.OnValueChanged += OnNetworkPlayerNameValueChanged;
             _playerColor.OnValueChanged += OnNetworkPlayerColorValueChanged;
 
-            _registry.Register(this);
+            _registry.Register(_corePlayer);
         }
 
         public override void OnNetworkDespawn()
@@ -58,7 +56,7 @@ namespace Network.Player
 
             _playerName.OnValueChanged -= OnNetworkPlayerNameValueChanged;
             _playerColor.OnValueChanged -= OnNetworkPlayerColorValueChanged;
-            _registry.Unregister(this);
+            _registry.Unregister(_corePlayer);
         }
 
         private void OnCoreInfoChanged()

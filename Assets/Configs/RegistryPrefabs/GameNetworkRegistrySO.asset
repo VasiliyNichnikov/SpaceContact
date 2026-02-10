@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f89bedfa367843f0b27e5e2640f8f901, type: 3}
+  m_Name: GameNetworkRegistrySO
+  m_EditorClassIdentifier: Network::Network.Configs.GamePlayerRegistrySO
+  _playerPrefab: {fileID: 7705997771917365606, guid: 148e4a507820547d0b7ba5a8eed84924, type: 3}
+  _galaxyNetworkSync: {fileID: 97858722741638357, guid: 043ea142066ed4c60a561741f749c518, type: 3}

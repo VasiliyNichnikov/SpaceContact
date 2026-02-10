@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using Client.UI.Dialogs;
 
 namespace Client.UI
@@ -12,5 +10,7 @@ namespace Client.UI
         event Action<BaseDialog>? OnDialogClosed;
         
         T ShowDialog<T>() where T : BaseDialog;
+
+        void CloseOpenedDialogs();
     }
 }

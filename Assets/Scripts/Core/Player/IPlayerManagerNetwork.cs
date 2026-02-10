@@ -4,7 +4,7 @@ namespace Core.Player
 {
     public interface IPlayerManagerNetwork
     {
-        void SetLocalStatus(bool isOwner, bool isHost);
+        void SetLocalStatus(ulong clientId, bool isOwner, bool isHost);
         
         void SyncNameFromNetwork(string oldValue, string newValue);
         

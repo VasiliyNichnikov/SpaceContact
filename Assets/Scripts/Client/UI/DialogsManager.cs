@@ -31,7 +31,7 @@ namespace Client.UI
             return dialog;
         }
 
-        public void CloseAllActiveDialogs()
+        public void CloseOpenedDialogs()
         {
             var dialogs = new List<BaseDialog>(_createdDialogs);
 

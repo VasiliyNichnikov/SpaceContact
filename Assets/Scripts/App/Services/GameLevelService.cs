@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using App.Data;
 using Client;
 using Logs;
@@ -8,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace App.Services
 {
-    public class GameLevelService : IGameLevelControl, IDisposable
+    public class GameLevelService : IGameLevelControl
     {
         private readonly NetworkManager _networkManager;
         private readonly ScenesData _scenesData;
@@ -21,11 +19,6 @@ namespace App.Services
         {
             _networkManager = networkManager;
             _scenesData = scenesData;
-
-            if (_networkManager.SceneManager != null)
-            {
-                _networkManager.SceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
-            }
         }
 
         void IGameLevelControl.StartGame()
@@ -46,28 +39,6 @@ namespace App.Services
 
             _isDownloadRunning = true;
             _networkManager.SceneManager.LoadScene(_scenesData.GameSceneName, LoadSceneMode.Single);
-        }
-        
-        public void Dispose()
-        {
-            if (_networkManager != null && _networkManager.SceneManager != null)
-            {
-                _networkManager.SceneManager.OnLoadEventCompleted -= OnSceneLoadCompleted;
-            }
-        }
-
-        private void OnSceneLoadCompleted(
-            string sceneName, 
-            LoadSceneMode loadMode,
-            List<ulong> clientsCompleted,
-            List<ulong> clientsTimedOut)
-        {
-            if (!_networkManager.IsServer)
-            {
-                return;
-            }
-
-            _isDownloadRunning = false;
         }
     }
 }

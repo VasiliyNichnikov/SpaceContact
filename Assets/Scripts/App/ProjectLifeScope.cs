@@ -6,9 +6,9 @@ using Client.Factory;
 using Client.UI;
 using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
-using Core;
+using Core.Player;
 using Network.Infrastructure;
-using Network.Player;
+using ServiceLayer;
 using Unity.Netcode;
 using UnityEngine;
 using VContainer;
@@ -46,18 +46,15 @@ namespace App
             _appConfigs.Build(builder);
 
             // Singletons
-            builder.Register<PhaseRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<JsonNetworkSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<NetworkAutoInjector>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<PlayersRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ContainerRegistrationService>(Lifetime.Singleton).AsSelf();
             
             // Factories
             builder.Register<DialogsFactory>(Lifetime.Singleton);
-            
-            // Game State Machine
-            builder.Register<GameStateMachine>(Lifetime.Singleton).AsSelf();
             
             // Services
             builder.Register<LobbyService>(Lifetime.Singleton).AsImplementedInterfaces();
