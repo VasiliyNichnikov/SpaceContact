@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Client.UI.Dialogs.Lobby.ViewModels;
+using Core.Lobby;
 using Core.Player;
 using Reactivity;
 
@@ -12,15 +14,18 @@ namespace Client.UI.Dialogs.Lobby
         private readonly EventProvider _refreshPlayersEvent;
         private readonly IGameLevelControl _levelControl;
         private readonly ILobbyController _lobbyController;
+        private readonly ILobbyColorProvider _colorProvider;
         
         public LobbyViewModel(
             PlayersRegistry playersRegistry, 
             IGameLevelControl levelControl, 
-            ILobbyController lobbyController)
+            ILobbyController lobbyController,
+            ILobbyColorProvider colorProvider)
         {
             _playersRegistry = playersRegistry;
             _levelControl = levelControl;
             _lobbyController = lobbyController;
+            _colorProvider = colorProvider;
             _playersRegistry.OnPlayerJoined += PlayerJoined;
             _playersRegistry.OnPlayerLeft += PlayerLeft;
             _playerViewModelByManager = CreatePlayers();
@@ -51,7 +56,7 @@ namespace Client.UI.Dialogs.Lobby
 
         private void PlayerJoined(IPlayerManager playerManager)
         {
-            _playerViewModelByManager[playerManager] = new LobbyPlayerViewModel(playerManager);
+            _playerViewModelByManager[playerManager] = new LobbyPlayerViewModel(playerManager, _colorProvider);
             _refreshPlayersEvent.Call();
         }
 
@@ -68,7 +73,7 @@ namespace Client.UI.Dialogs.Lobby
             
             foreach (var playerManager in _playersRegistry.Players)
             {
-                result[playerManager] = new LobbyPlayerViewModel(playerManager);
+                result[playerManager] = new LobbyPlayerViewModel(playerManager, _colorProvider);
             }
             
             return result;

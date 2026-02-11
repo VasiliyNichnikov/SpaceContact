@@ -1,8 +1,9 @@
+using System;
 using System.Globalization;
 
 namespace Core.EngineData
 {
-    public readonly struct Color
+    public readonly struct Color : IEquatable<Color>
     {
         private const float MaxAlpha = 1.0f;
         private const float MaxColorValue = 255.0f;
@@ -38,6 +39,21 @@ namespace Core.EngineData
             var b =  rabB / MaxColorValue;
             
             return new Color(r, g, b, MaxAlpha);
+        }
+
+        public bool Equals(Color other)
+        {
+            return R.Equals(other.R) && G.Equals(other.G) && B.Equals(other.B) && A.Equals(other.A);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Color other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(R, G, B, A);
         }
     }
 }

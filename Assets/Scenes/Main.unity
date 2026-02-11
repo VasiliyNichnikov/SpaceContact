@@ -715,6 +715,7 @@ MonoBehaviour:
   _dialogsRegistrySO: {fileID: 11400000, guid: f001500218666a14d8446a20b71b55cd, type: 2}
   _sceneStorage: {fileID: 708544613}
   _appConfigs: {fileID: 11400000, guid: 1806b59a61e8a4539bc2a4c0eee2bf00, type: 2}
+  _menuConfigs: {fileID: 11400000, guid: 4ecf2919ff58444b3b312c824dab1f37, type: 2}
   _simpleConnectionDialog: {fileID: 2123969318163460282}
 --- !u!4 &2093218036
 Transform:

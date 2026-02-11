@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Core.EngineData;
 using Core.Game.Planets;
 using Core.Player;
 
@@ -15,6 +16,8 @@ namespace Core.Game
         }
 
         public ulong PlayerId => _core.ClientId;
+
+        public Color PlayerColor => _core.Color;
         
         public IReadOnlyCollection<IPlanet> Planets { get; }
     }

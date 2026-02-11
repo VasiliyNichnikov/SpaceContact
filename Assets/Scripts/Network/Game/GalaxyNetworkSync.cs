@@ -1,5 +1,5 @@
 using Core.Game;
-using Core.Game.Dto.Game.States;
+using Core.Game.Dto.States;
 using Network.Infrastructure;
 using Unity.Netcode;
 using VContainer;

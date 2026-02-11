@@ -27,13 +27,13 @@ namespace Client.Game.Field
         public void InitPlanets()
         {
             var currentPlayer = _twoPlayerFieldManager.CurrentPlayer;
-            CreatePlanets(currentPlayer.Planets.ToArray(), true);
+            CreatePlanets(currentPlayer, currentPlayer.Planets.ToArray(), true);
 
             var oppositePlayer = _twoPlayerFieldManager.OpponentPlayer;
-            CreatePlanets(oppositePlayer.Planets.ToArray(), false);
+            CreatePlanets(oppositePlayer, oppositePlayer.Planets.ToArray(), false);
         }
 
-        private void CreatePlanets(IPlanet[] planets, bool isCurrentPlayer)
+        private void CreatePlanets(GamePlayer player, IPlanet[] planets, bool isCurrentPlayer)
         {
             var layout = isCurrentPlayer 
                 ? _planetLayoutSetData.GetPlayerPlanetsLayoutData(planets.Length)
@@ -52,7 +52,7 @@ namespace Client.Game.Field
                 var planetPosition = layout.PlanetPositions[i];
                 
                 var createdPlanet = _factory.CreatePlanet(planetPosition);
-                createdPlanet.Init(new PlanetViewModel(planetCore));
+                createdPlanet.Init(new PlanetViewModel(player, planetCore));
             }
         }
     }

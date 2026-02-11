@@ -1,3 +1,4 @@
+using Client.UI.Dialogs.Lobby.ViewModels;
 using Client.UI.Extensions;
 using Reactivity;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace Client.UI.Dialogs.Lobby
     public class LobbyPlayerView : MonoBehaviour
     {
         [SerializeField]
-        private Image _background = null!;
+        private Image _selectionColorButtonImage = null!;
         
         [SerializeField]
         private InputField _nameInputField = null!;
@@ -21,6 +22,9 @@ namespace Client.UI.Dialogs.Lobby
         
         [SerializeField]
         private GameObject _toLeaveButtonGameObject = null!;
+        
+        [SerializeField]
+        private LobbyColorSelectionPanel _colorSelectionPanel = null!;
 
         private LobbyPlayerViewModel _viewModel = null!;
         
@@ -28,6 +32,8 @@ namespace Client.UI.Dialogs.Lobby
         {
             gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.Name, _playerNameText.SetText);
+            gameObject.Subscribe(_viewModel.Color, color => _selectionColorButtonImage.color = color);
+            _colorSelectionPanel.Init(_viewModel.ColorSelectionPanelViewModel);
             RefreshView();
         }
         
@@ -42,6 +48,12 @@ namespace Client.UI.Dialogs.Lobby
         /// </summary>
         public void ToLeaveLobbyButtonClick() => 
             _viewModel.ToLeaveButtonClick();
+        
+        /// <summary>
+        /// Called from Unity
+        /// </summary>
+        public void OnColorSelectionButtonClick() => 
+            _viewModel.OnColorSelectionButtonClickHandler();
 
         private void RefreshView()
         {
@@ -58,8 +70,6 @@ namespace Client.UI.Dialogs.Lobby
             {
                 _playerNameText.SetText(_viewModel.Name.Value);
             }
-            
-            _background.color = _viewModel.Color;
         }
     }
 }

@@ -34,6 +34,19 @@ namespace Core.Player
             OnPlayerInfoUpdated?.Invoke();
         }
 
+        public void SetColor(Color color)
+        {
+            if (Equals(Color, color))
+            {
+                Logger.Error("PlayerManager.SetColor: current color and newColor are equals.");
+                
+                return;
+            }
+            
+            Color = color;
+            OnPlayerInfoUpdated?.Invoke();
+        }
+
         void IPlayerManagerNetwork.SetLocalStatus(ulong clientId, bool isOwner, bool isHost)
         {
             ClientId = clientId;

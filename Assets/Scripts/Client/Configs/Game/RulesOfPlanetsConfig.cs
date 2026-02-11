@@ -1,4 +1,4 @@
-using Core.Game.Dto.Game.Rules;
+using Core.Game.Dto.Rules;
 using UnityEngine;
 
 namespace Client.Configs.Game

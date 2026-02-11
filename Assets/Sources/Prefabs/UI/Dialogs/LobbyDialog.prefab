@@ -116,6 +116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02347a46f15744838a8c1cd792072486, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Client::Client.UI.Dialogs.Lobby.LobbyDialog
+  _animation: {fileID: 0}
   _playersContainer: {fileID: 1397004862961022888}
   _lobbyPlayerView: {fileID: 5606058976915879634, guid: d8c4a86a733e3c74d83dc6fba07b848d, type: 3}
   _startGameButtonGameObject: {fileID: 9189835969515659247}

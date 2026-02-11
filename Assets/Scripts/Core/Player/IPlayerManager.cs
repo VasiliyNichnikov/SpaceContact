@@ -21,5 +21,7 @@ namespace Core.Player
         event Action? OnPlayerInfoUpdated;
         
         void SetName(string newName);
+        
+        void SetColor(Color color);
     }
 }

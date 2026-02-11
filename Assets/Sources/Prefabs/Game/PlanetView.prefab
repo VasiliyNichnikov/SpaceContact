@@ -125,3 +125,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6afd63772414245a47a9ee519af57a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Client::Client.Game.Planets.PlanetView
+  _renderer: {fileID: 8736707007622861485}

@@ -2,10 +2,12 @@
 using App.Services;
 using Client;
 using Client.Configs;
+using Client.Configs.Menu;
 using Client.Factory;
 using Client.UI;
 using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
+using Core.Lobby;
 using Core.Player;
 using Network.Infrastructure;
 using ServiceLayer;
@@ -31,6 +33,9 @@ namespace App
         private AppConfigs _appConfigs = null!;
         
         [SerializeField]
+        private MenuConfigs _menuConfigs = null!;
+        
+        [SerializeField]
         private SimpleConnectionDialog _simpleConnectionDialog = null!;
 
         protected override void Configure(IContainerBuilder builder)
@@ -44,6 +49,7 @@ namespace App
             
             // Configs
             _appConfigs.Build(builder);
+            _menuConfigs.Build(builder);
 
             // Singletons
             builder.Register<JsonNetworkSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -52,6 +58,7 @@ namespace App
             builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ContainerRegistrationService>(Lifetime.Singleton).AsSelf();
+            builder.Register<LobbyColorProvider>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Factories
             builder.Register<DialogsFactory>(Lifetime.Singleton);
