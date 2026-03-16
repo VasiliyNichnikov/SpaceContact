@@ -1,22 +1,21 @@
+using Logs;
+
 namespace Core.Game.Phases
 {
     public sealed class GameInitializationPhase : BasePhase
     {
-        private readonly IGalaxyManager _galaxyManager;
-        private readonly ITwoPlayerFieldManager _fieldManager;
+        private readonly IGameFieldManager _fieldManager;
         
         public GameInitializationPhase(
             GameStateMachine stateMachine, 
-            IGalaxyManager galaxyManager,
-            ITwoPlayerFieldManager fieldManager) : base(stateMachine)
+            IGameFieldManager fieldManager) : base(stateMachine)
         {
-            _galaxyManager = galaxyManager;
             _fieldManager = fieldManager;
         }
 
         public override void Enter()
         {
-            _galaxyManager.Init();
+            Logger.Warning("GameInitializationPhase.Enter");
             _fieldManager.Init();
         }
 

@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f89bedfa367843f0b27e5e2640f8f901, type: 3}
   m_Name: GameNetworkRegistrySO
   m_EditorClassIdentifier: Network::Network.Configs.GamePlayerRegistrySO
-  _playerPrefab: {fileID: 7705997771917365606, guid: 148e4a507820547d0b7ba5a8eed84924, type: 3}
   _galaxyNetworkSync: {fileID: 97858722741638357, guid: 043ea142066ed4c60a561741f749c518, type: 3}
+  _cardsNetworkSync: {fileID: 1672684372796902337, guid: f2ac27dacdb3d47f1bad58c518a04d42, type: 3}
+  _gamePlayerNetworkSync: {fileID: 1814226487867341834, guid: 92f510ce7176e41ecb79348484844ac1, type: 3}

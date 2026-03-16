@@ -17,41 +17,54 @@ namespace App.Game.Services
         private readonly NetworkManager _networkManager;
         private readonly NetworkGameController _networkGameController;
         private readonly PhaseRegistrationService _phaseRegistrationService;
+        private readonly GameRequestsRegisterService _requestsRegisterService;
         private readonly IDialogsManager _dialogsManager;
         private readonly GameNetLoader _gameNetLoader;
         private readonly ContainerRegistrationService _containerRegistrationService;
         private readonly GameStateMachine _gameStateMachine;
+        private readonly GameServerCoreLoader _gameServerCoreLoader;
+        private readonly GamePlayersLoader _gamePlayersLoader;
 
         public GameStartupService(
             NetworkManager networkManager,
-            PhaseRegistrationService phaseRegistrationService, 
+            PhaseRegistrationService phaseRegistrationService,
+            GameRequestsRegisterService requestsRegisterService,
             IDialogsManager dialogsManager,
             NetworkGameController networkGameController,
             GameNetLoader gameNetLoader,
             ContainerRegistrationService containerRegistrationService,
             IObjectResolver gameResolver,
-            GameStateMachine gameStateMachine)
+            GameStateMachine gameStateMachine,
+            GameServerCoreLoader gameServerCoreLoader,
+            GamePlayersLoader gamePlayersLoader)
         {
             _phaseRegistrationService = phaseRegistrationService;
+            _requestsRegisterService = requestsRegisterService;
             _dialogsManager = dialogsManager;
             _networkManager = networkManager;
             _networkGameController = networkGameController;
             _gameNetLoader = gameNetLoader;
             _containerRegistrationService = containerRegistrationService;
             _gameStateMachine = gameStateMachine;
+            _gameServerCoreLoader = gameServerCoreLoader;
+            _gamePlayersLoader = gamePlayersLoader;
             
             if (_networkManager.SceneManager != null)
             {
                 _networkManager.SceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
             }
             
+            _gameNetLoader.OnGameIsReady += GameReady;
             _containerRegistrationService.Register(ContainerType.Game, gameResolver);
         }
         
-        public void Tick() => 
+        void ITickable.Tick() => 
             _gameStateMachine.Update();
         
-        public void Dispose()
+        void IStartable.Start() => 
+            _dialogsManager.CloseOpenedDialogs();
+        
+        void IDisposable.Dispose()
         {
             if (_networkManager != null && _networkManager.SceneManager != null)
             {
@@ -59,11 +72,7 @@ namespace App.Game.Services
             }
             
             _containerRegistrationService.Unregister(ContainerType.Game);
-        }
-        
-        public void Start()
-        {
-            _dialogsManager.CloseOpenedDialogs();
+            _gameNetLoader.OnGameIsReady -= GameReady;
         }
         
         private void OnSceneLoadCompleted(
@@ -75,11 +84,29 @@ namespace App.Game.Services
             // Регистрация фаз должна быть и на сервере и на клиенте
             _phaseRegistrationService.ConfigureRegistry();
             
+            // Загружаем игроков на клиенте и сервере
+            _gamePlayersLoader.Init();
+            
+            // Загружаем все игровые объекты
             if (_networkManager.IsServer)
             {
-                _gameNetLoader.LoadGalaxyNetwork();
-                _networkGameController.ServerTransitionTo<GameInitializationPhase>();
+                // Регистрируем игровые запросы
+                _requestsRegisterService.ConfigureRegistry();
+                // Сначала грузим основной Core
+                _gameServerCoreLoader.Init();
+                // Затем на основе Core грузится Net объекты
+                _gameNetLoader.LoadNetGame();
             }
+        }
+
+        private void GameReady()
+        {
+            if (!_networkManager.IsServer)
+            {
+                return;
+            }
+            
+            _networkGameController.ServerTransitionTo<GameInitializationPhase>();
         }
     }
 }

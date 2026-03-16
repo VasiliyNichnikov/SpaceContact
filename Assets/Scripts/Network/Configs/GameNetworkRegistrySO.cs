@@ -9,6 +9,13 @@ namespace Network.Configs
         [SerializeField]
         private GalaxyNetworkSync _galaxyNetworkSync = null!;
         
-        public GalaxyNetworkSync GalaxyNetworkSync => _galaxyNetworkSync;
+        [SerializeField]
+        private GamePlayerNetworkSync _gamePlayerNetworkSync = null!;
+        
+        public GalaxyNetworkSync GalaxyNetworkSync => 
+            _galaxyNetworkSync;
+        
+        public GamePlayerNetworkSync GamePlayerNetworkSync => 
+            _gamePlayerNetworkSync;
     }
 }

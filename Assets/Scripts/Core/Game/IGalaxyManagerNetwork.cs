@@ -6,6 +6,8 @@ namespace Core.Game
     public interface IGalaxyManagerNetwork
     {
         event Action? OnStateChanged;
+
+        void ServerGalaxyLoaded();
         
         void ApplyStateData(GalaxyStateData data);
         

@@ -5,8 +5,11 @@ using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
 using Core.Game;
+using Core.Game.Cards;
 using Core.Game.Factory;
+using Core.Game.Galaxy;
 using Core.Game.Phases;
+using Core.Game.Players;
 using Network.Configs;
 using Network.Game;
 using Network.Infrastructure;
@@ -38,10 +41,15 @@ namespace App.Game
             builder.Register<PhaseRegistrationService>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePhaseController>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameNetLoader>(Lifetime.Singleton).AsSelf();
+            builder.Register<GamePlayersRegistry>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
+            builder.Register<GamePlayersLoader>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
             
             // Managers
-            builder.Register<GalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<TwoPlayerFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Game State Machine
             builder.Register<GameStateMachine>(Lifetime.Singleton).AsSelf();

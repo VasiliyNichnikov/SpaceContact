@@ -1,6 +1,8 @@
 using System;
 using Client.UI;
 using Client.UI.Dialogs.Lobby;
+using Core;
+using Network;
 using Unity.Netcode;
 
 namespace App.Services
@@ -9,11 +11,19 @@ namespace App.Services
     {
         private readonly NetworkManager _networkManager;
         private readonly IDialogsManager _dialogsManager;
+        private readonly ProjectNetLoader _projectNetLoader;
+        private readonly CoreNetworkContext _networkContext;
 
-        public LobbyService(NetworkManager networkManager, IDialogsManager dialogsManager)
+        public LobbyService(
+            NetworkManager networkManager, 
+            IDialogsManager dialogsManager,
+            ProjectNetLoader projectNetLoader,
+            CoreNetworkContext networkContext)
         {
             _networkManager = networkManager;
             _dialogsManager = dialogsManager;
+            _projectNetLoader = projectNetLoader;
+            _networkContext = networkContext;
 
             _networkManager.OnServerStarted += OnHostStarted;
             _networkManager.OnClientConnectedCallback += OnLocalClientConnected;
@@ -27,6 +37,7 @@ namespace App.Services
             if (!_networkManager.IsListening)
             {
                 _networkManager.StartHost();
+                _projectNetLoader.LoadNetProject();
             }
         }
 
@@ -51,6 +62,7 @@ namespace App.Services
 
         private void OnHostStarted()
         {
+            _networkContext.SetThisServer().SetThisOwner();
             _dialogsManager.ShowDialog<LobbyDialog>();
         }
 
@@ -58,6 +70,7 @@ namespace App.Services
         {
             if (clientId == _networkManager.LocalClientId)
             {
+                _networkContext.SetThisOwner();
                 _dialogsManager.ShowDialog<LobbyDialog>();
             }
         }

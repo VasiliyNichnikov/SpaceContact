@@ -15,3 +15,4 @@ MonoBehaviour:
   _rulesOfPlanetsConfig: {fileID: 11400000, guid: 16389a3489fc34891a3cc1cc4c4a5002, type: 2}
   _cosmicFieldConfig: {fileID: 11400000, guid: dbad1b371bd314ebe8dc31faf2597b59, type: 2}
   _cosmicPrefabStore: {fileID: 11400000, guid: 5cf0ab63857eb4728b34b5f3e954a83a, type: 2}
+  _cardsConfig: {fileID: 11400000, guid: 5794516bcd6cf4c9888850f24ea3043c, type: 2}

@@ -15,10 +15,14 @@ namespace Client.Configs.Game
         [SerializeField]
         private CosmicPrefabStore _cosmicPrefabStore = null!;
         
+        [SerializeField]
+        private CardsConfig _cardsConfig = null!;
+        
         public void Build(IContainerBuilder builder)
         {
             builder.RegisterInstance(_rulesOfPlanetsConfig.BuildData());
             builder.RegisterInstance(_cosmicFieldConfig.BuildData());
+            builder.RegisterInstance(_cardsConfig.BuildData());
             builder.RegisterInstance(_cosmicPrefabStore);
         }
     }

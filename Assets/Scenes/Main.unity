@@ -717,6 +717,7 @@ MonoBehaviour:
   _appConfigs: {fileID: 11400000, guid: 1806b59a61e8a4539bc2a4c0eee2bf00, type: 2}
   _menuConfigs: {fileID: 11400000, guid: 4ecf2919ff58444b3b312c824dab1f37, type: 2}
   _simpleConnectionDialog: {fileID: 2123969318163460282}
+  _projectNetworkRegistrySo: {fileID: 11400000, guid: 31a3b5795a7224b50b39fb8657626046, type: 2}
 --- !u!4 &2093218036
 Transform:
   m_ObjectHideFlags: 0

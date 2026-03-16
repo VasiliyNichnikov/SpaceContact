@@ -4,6 +4,7 @@ using Client.Game.Factory;
 using Client.Game.Planets.ViewModels;
 using Core.Game;
 using Core.Game.Planets;
+using Core.Game.Players;
 using Logs;
 
 namespace Client.Game.Field
@@ -11,29 +12,29 @@ namespace Client.Game.Field
     public class FieldObjectsCreator
     {
         private readonly PlayerPlanetsFactory _factory;
-        private readonly ITwoPlayerFieldManager _twoPlayerFieldManager;
+        private readonly IGameFieldManager _fieldManager;
         private readonly PlanetLayoutSetData _planetLayoutSetData;
         
         public FieldObjectsCreator(
-            PlayerPlanetsFactory factory, 
-            ITwoPlayerFieldManager twoPlayerFieldManager,
+            PlayerPlanetsFactory factory,
+            IGameFieldManager fieldManager,
             PlanetLayoutSetData planetLayoutSetData)
         {
             _factory = factory;
-            _twoPlayerFieldManager = twoPlayerFieldManager;
+            _fieldManager = fieldManager;
             _planetLayoutSetData = planetLayoutSetData;
         }
         
         public void InitPlanets()
         {
-            var currentPlayer = _twoPlayerFieldManager.CurrentPlayer;
+            var currentPlayer = _fieldManager.CurrentPlayer;
             CreatePlanets(currentPlayer, currentPlayer.Planets.ToArray(), true);
-
-            var oppositePlayer = _twoPlayerFieldManager.OpponentPlayer;
+            
+            var oppositePlayer = _fieldManager.OpponentPlayer;
             CreatePlanets(oppositePlayer, oppositePlayer.Planets.ToArray(), false);
         }
 
-        private void CreatePlanets(GamePlayer player, IPlanet[] planets, bool isCurrentPlayer)
+        private void CreatePlanets(IGamePlayer player, IPlanet[] planets, bool isCurrentPlayer)
         {
             var layout = isCurrentPlayer 
                 ? _planetLayoutSetData.GetPlayerPlanetsLayoutData(planets.Length)

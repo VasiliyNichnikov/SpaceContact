@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 195f6b92b4104b3bbc379a25dd63e5a3, type: 3}
+  m_Name: CardsConfig
+  m_EditorClassIdentifier: Client::Client.Configs.Game.CardsConfig
+  _numberOfConversationsSpaceCards: 15
+  _playerStartingNumberOfSpaceCards: 3
+  _damageSpaceCards:
+  - Comment: "40 (\u041E\u0447\u0435\u043D\u044C \u0440\u0435\u0434\u043A\u0430\u044F)"
+    Count: 1
+    DamageCount: 40
+  - Comment: "30 (\u041E\u0447\u0435\u043D\u044C \u0440\u0435\u0434\u043A\u0430\u044F)"
+    Count: 1
+    DamageCount: 30
+  - Comment: "23 (\u0420\u0435\u0434\u043A\u0430\u044F)"
+    Count: 1
+    DamageCount: 23
+  - Comment: "20 (\u0420\u0435\u0434\u043A\u0430\u044F)"
+    Count: 2
+    DamageCount: 20
+  - Comment: "14 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 14
+  - Comment: "13 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 13
+  - Comment: "12 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 12
+  - Comment: "11 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 11
+  - Comment: "10 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 10
+  - Comment: "9 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 9
+  - Comment: "8 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 8
+  - Comment: "7 (\u0421\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u0430\u044F)"
+    Count: 4
+    DamageCount: 7
+  - Comment: "6 (\u0421\u0430\u043C\u0430\u044F \u0447\u0430\u0441\u0442\u0430\u044F)"
+    Count: 7
+    DamageCount: 6
+  - Comment: "5 (\u0420\u0435\u0434\u043A\u0430\u044F \u0441\u043B\u0430\u0431\u0430\u044F)"
+    Count: 1
+    DamageCount: 5
+  - Comment: "4 (\u0420\u0435\u0434\u043A\u0430\u044F \u0441\u043B\u0430\u0431\u0430\u044F)"
+    Count: 2
+    DamageCount: 4

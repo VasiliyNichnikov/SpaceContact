@@ -7,9 +7,13 @@ using Client.Factory;
 using Client.UI;
 using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
+using Core;
 using Core.Lobby;
 using Core.Player;
+using Network;
+using Network.Configs;
 using Network.Infrastructure;
+using Network.Requests;
 using ServiceLayer;
 using Unity.Netcode;
 using UnityEngine;
@@ -37,11 +41,15 @@ namespace App
         
         [SerializeField]
         private SimpleConnectionDialog _simpleConnectionDialog = null!;
+        
+        [SerializeField]
+        private ProjectNetworkRegistrySO _projectNetworkRegistrySo = null!;
 
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponent(_networkManager);
             builder.RegisterComponent(_simpleConnectionDialog);
+            builder.RegisterInstance(_projectNetworkRegistrySo);
             
             // instance - не будет искать в объект inject
             builder.RegisterInstance(_dialogsRegistrySO);
@@ -59,6 +67,8 @@ namespace App
             builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ContainerRegistrationService>(Lifetime.Singleton).AsSelf();
             builder.Register<LobbyColorProvider>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ProjectNetLoader>(Lifetime.Singleton).AsSelf();
+            builder.Register<CoreNetworkContext>(Lifetime.Singleton).AsSelf();
             
             // Factories
             builder.Register<DialogsFactory>(Lifetime.Singleton);
@@ -68,6 +78,10 @@ namespace App
             
             // ViewModels
             RegisterViewModels(builder);
+            
+            // Requests
+            builder.Register<NetworkRequestRouter>(Lifetime.Singleton).AsSelf();
+            builder.Register<NetworkService>(Lifetime.Singleton).AsImplementedInterfaces();
         }
 
         private static void RegisterViewModels(IContainerBuilder builder)
