@@ -4,6 +4,8 @@ using Client.Configs.Game;
 using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
+using Client.UI.HUDs.ViewModels;
+using Client.UI.Loaders;
 using Core.Game;
 using Core.Game.Cards;
 using Core.Game.Factory;
@@ -44,6 +46,7 @@ namespace App.Game
             builder.Register<GamePlayersRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersLoader>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameUILoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
             
             // Managers
@@ -57,6 +60,7 @@ namespace App.Game
             // Factories
             builder.Register<VContainerPhasesFactory>(Lifetime.Singleton).As<IPhaseFactory>();
             builder.Register<PlayerPlanetsFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<SpaceCardFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
             builder.Register<FieldObjectsCreator>(Lifetime.Singleton).AsSelf();
@@ -67,6 +71,9 @@ namespace App.Game
             // Configs
             _gameConfigs.Build(builder);
             
+            // ViewModels
+            RegisterViewModels(builder);
+            
             // Entry Point
             builder.RegisterEntryPoint<GameStartupService>();
         }
@@ -74,6 +81,16 @@ namespace App.Game
         private static void RegisterPhases(IContainerBuilder builder)
         {
             builder.Register<GameInitializationPhase>(Lifetime.Transient);
+        }
+        
+        private static void RegisterViewModels(IContainerBuilder builder)
+        {
+            RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
+        }
+
+        private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)
+        {
+            return builder.Register<T>(Lifetime.Transient);
         }
     }
 }

@@ -18,12 +18,16 @@ namespace Client.Configs.Game
         [SerializeField]
         private CardsConfig _cardsConfig = null!;
         
+        [SerializeField]
+        private PlayerHandDisplayConfig _handDisplayConfig = null!;
+        
         public void Build(IContainerBuilder builder)
         {
             builder.RegisterInstance(_rulesOfPlanetsConfig.BuildData());
             builder.RegisterInstance(_cosmicFieldConfig.BuildData());
             builder.RegisterInstance(_cardsConfig.BuildData());
             builder.RegisterInstance(_cosmicPrefabStore);
+            builder.RegisterInstance(_handDisplayConfig.BuildData());
         }
     }
 }

@@ -1,3 +1,4 @@
+using Core.Game.Cards;
 using Core.Game.Players;
 using Core.Player;
 
@@ -9,14 +10,19 @@ namespace Core.Game
         private readonly PlayersRegistry _playersRegistry;
         private readonly GamePlayersRegistry _gamePlayersRegistry;
 
+        private readonly SpaceCardFactory _spaceCardFactory;
+
         public GamePlayersLoader(
             PlayersRegistry playersRegistry,
             GamePlayersRegistry gamePlayersRegistry,
-            CoreNetworkContext networkContext)
+            CoreNetworkContext networkContext,
+            
+            SpaceCardFactory spaceCardFactory)
         {
             _playersRegistry = playersRegistry;
             _gamePlayersRegistry = gamePlayersRegistry;
             _networkContext = networkContext;
+            _spaceCardFactory = spaceCardFactory;
         }
 
         public void Init() => 
@@ -27,7 +33,7 @@ namespace Core.Game
             foreach (var playerCore in _playersRegistry.Players)
             {
                 var gamePlayer = CreateGamePlayer(playerCore);
-                _gamePlayersRegistry.AddPlayer(gamePlayer);
+                _gamePlayersRegistry.AddPlayer(gamePlayer, playerCore.IsCurrentPlayer);
             }
         }
 
@@ -37,11 +43,11 @@ namespace Core.Game
                 
             if (_networkContext.IsServer)
             {
-                player = new ServerGamePlayer(playerCore);
+                player = new ServerGamePlayer(playerCore, _spaceCardFactory);
             }
             else if (playerCore.IsCurrentPlayer)
             {
-                player = new OwnerGamePlayer(playerCore);
+                player = new OwnerGamePlayer(playerCore, _spaceCardFactory);
             }
             else
             {

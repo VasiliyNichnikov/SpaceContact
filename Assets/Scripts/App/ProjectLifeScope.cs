@@ -2,6 +2,7 @@
 using App.Services;
 using Client;
 using Client.Configs;
+using Client.Configs.Game;
 using Client.Configs.Menu;
 using Client.Factory;
 using Client.UI;
@@ -31,6 +32,9 @@ namespace App
         private DialogsRegistrySO _dialogsRegistrySO = null!;
         
         [SerializeField]
+        private HUDsRegistrySO _hudsRegistrySO = null!;
+        
+        [SerializeField]
         private SceneStorage _sceneStorage = null!;
 
         [SerializeField] 
@@ -53,6 +57,7 @@ namespace App
             
             // instance - не будет искать в объект inject
             builder.RegisterInstance(_dialogsRegistrySO);
+            builder.RegisterInstance(_hudsRegistrySO);
             builder.RegisterInstance(_sceneStorage);
             
             // Configs

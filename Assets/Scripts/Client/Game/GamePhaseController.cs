@@ -1,5 +1,6 @@
 using System;
 using Client.Game.Field;
+using Client.UI.Loaders;
 using Core.Game;
 using Core.Game.Phases;
 using VContainer.Unity;
@@ -10,17 +11,23 @@ namespace Client.Game
     {
         private readonly GameStateMachine _stateMachine;
         private readonly FieldObjectsCreator _fieldObjectsCreator;
+        private readonly GameUILoader _gameUILoader;
         
-        public GamePhaseController(GameStateMachine stateMachine, FieldObjectsCreator fieldObjectsCreator)
+        public GamePhaseController(
+            GameStateMachine stateMachine, 
+            FieldObjectsCreator fieldObjectsCreator,
+            GameUILoader gameUILoader)
         {
             _stateMachine = stateMachine;
             _fieldObjectsCreator = fieldObjectsCreator;
+            _gameUILoader = gameUILoader;
             _stateMachine.OnPhaseChanged += PhaseChanged;
         }
         
         void IPhaseVisitor.Visit(GameInitializationPhase phase)
         {
             _fieldObjectsCreator.InitPlanets();
+            _gameUILoader.Load();
         }
         
         void IStartable.Start()

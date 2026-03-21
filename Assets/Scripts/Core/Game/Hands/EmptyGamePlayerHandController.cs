@@ -16,7 +16,7 @@ namespace Core.Game.Hands
         public static IGamePlayerHandController Instance => 
             _instance ??= new EmptyGamePlayerHandController();
 
-        public event Action? OnInitialized;
+        public event Action? OnRefreshed;
         
         public event Action<ISpaceCard>? OnCardAdded;
         

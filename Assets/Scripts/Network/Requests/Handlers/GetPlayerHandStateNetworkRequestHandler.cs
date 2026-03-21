@@ -26,14 +26,19 @@ namespace Network.Requests
 
             if (player is ServerGamePlayer { HandState: not null } serverPlayer)
             {
-                var result = serverPlayer.HandState;
+                var originalState = serverPlayer.HandState;
+                var copyState = new PlayerHandStateData
+                {
+                    NumberOfCards = originalState.NumberOfCards,
+                    SpaceCardsOnYourHand = originalState.SpaceCardsOnYourHand,
+                };
 
                 if (request.OnlyNumberCardsInHand)
                 {
-                    result.SpaceCardsOnYourHand = null;
+                    copyState.SpaceCardsOnYourHand = null;
                 }
 
-                return result;
+                return copyState;
             }
             
             Logger.Error("GetPlayerHandStateNetworkRequestHandler.ProcessRequest: failed to get the player's hand.");
