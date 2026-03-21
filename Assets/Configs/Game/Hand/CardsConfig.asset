@@ -60,3 +60,11 @@ MonoBehaviour:
   - Comment: "4 (\u0420\u0435\u0434\u043A\u0430\u044F \u0441\u043B\u0430\u0431\u0430\u044F)"
     Count: 2
     DamageCount: 4
+  _numberOfColorCardsByPlayerCountData:
+  - Comment: "2 \u0438\u0433\u0440\u043E\u043A\u0430 (\u0434\u043B\u044F \u0442\u0435\u0441\u0442\u0430)"
+    PlayerCount: 2
+    NumberOfColorCards: 3
+  - Comment: "3 \u0438\u0433\u0440\u043E\u043A\u0430"
+    PlayerCount: 3
+    NumberOfColorCards: 3
+  _numberOfJokersDestiny: 2

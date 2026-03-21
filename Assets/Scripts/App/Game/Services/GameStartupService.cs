@@ -15,7 +15,7 @@ namespace App.Game.Services
     public class GameStartupService : IStartable, ITickable, IDisposable
     {
         private readonly NetworkManager _networkManager;
-        private readonly NetworkGameController _networkGameController;
+        private readonly IServerStateMachineNetwork _serverStateMachineNetwork;
         private readonly PhaseRegistrationService _phaseRegistrationService;
         private readonly GameRequestsRegisterService _requestsRegisterService;
         private readonly IDialogsManager _dialogsManager;
@@ -30,7 +30,7 @@ namespace App.Game.Services
             PhaseRegistrationService phaseRegistrationService,
             GameRequestsRegisterService requestsRegisterService,
             IDialogsManager dialogsManager,
-            NetworkGameController networkGameController,
+            IServerStateMachineNetwork serverStateMachineNetwork,
             GameNetLoader gameNetLoader,
             ContainerRegistrationService containerRegistrationService,
             IObjectResolver gameResolver,
@@ -42,7 +42,7 @@ namespace App.Game.Services
             _requestsRegisterService = requestsRegisterService;
             _dialogsManager = dialogsManager;
             _networkManager = networkManager;
-            _networkGameController = networkGameController;
+            _serverStateMachineNetwork = serverStateMachineNetwork;
             _gameNetLoader = gameNetLoader;
             _containerRegistrationService = containerRegistrationService;
             _gameStateMachine = gameStateMachine;
@@ -106,7 +106,7 @@ namespace App.Game.Services
                 return;
             }
             
-            _networkGameController.ServerTransitionTo<GameInitializationPhase>();
+            _serverStateMachineNetwork.ServerTransitionTo<GameInitializationPhase>();
         }
     }
 }

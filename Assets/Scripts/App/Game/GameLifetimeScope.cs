@@ -15,6 +15,7 @@ using Core.Game.Players;
 using Network.Configs;
 using Network.Game;
 using Network.Infrastructure;
+using Unity.Netcode;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -34,8 +35,10 @@ namespace App.Game
         
         protected override void Configure(IContainerBuilder builder)
         {
+            var netManager = FindFirstObjectByType<NetworkManager>();
+            
             // Components
-            builder.RegisterComponent(_networkGameController);
+            builder.RegisterComponent(_networkGameController).AsImplementedInterfaces();
             builder.RegisterInstance(_gameNetworkRegistrySo);
             
             // Singletons
@@ -48,6 +51,7 @@ namespace App.Game
             builder.Register<GamePlayersLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GameUILoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
+            builder.Register<GamePlayersPhaseTracker>(Lifetime.Singleton).AsSelf();
             
             // Managers
             builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -55,7 +59,7 @@ namespace App.Game
             builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Game State Machine
-            builder.Register<GameStateMachine>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameStateMachine>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
             
             // Factories
             builder.Register<VContainerPhasesFactory>(Lifetime.Singleton).As<IPhaseFactory>();
@@ -66,7 +70,7 @@ namespace App.Game
             builder.Register<FieldObjectsCreator>(Lifetime.Singleton).AsSelf();
             
             // Phases
-            RegisterPhases(builder);
+            RegisterPhases(builder, netManager.IsServer);
             
             // Configs
             _gameConfigs.Build(builder);
@@ -74,13 +78,22 @@ namespace App.Game
             // ViewModels
             RegisterViewModels(builder);
             
+            // Depended network
+            RegisterElementsDependedNetwork(builder, netManager.IsServer);
+            
             // Entry Point
             builder.RegisterEntryPoint<GameStartupService>();
         }
         
-        private static void RegisterPhases(IContainerBuilder builder)
+        private static void RegisterPhases(IContainerBuilder builder, bool isServer)
         {
-            builder.Register<GameInitializationPhase>(Lifetime.Transient);
+            builder.Register<GameInitializationPhase>(
+                resolver => GamePhaseFactory.CreateInitializationPhase(resolver, isServer), 
+                Lifetime.Transient);
+            
+            builder.Register<GameDestinyPhase>(
+                resolver => GamePhaseFactory.CreateDestinyPhase(resolver, isServer), 
+                Lifetime.Transient);
         }
         
         private static void RegisterViewModels(IContainerBuilder builder)
@@ -91,6 +104,18 @@ namespace App.Game
         private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)
         {
             return builder.Register<T>(Lifetime.Transient);
+        }
+
+        private static void RegisterElementsDependedNetwork(IContainerBuilder builder, bool isServer)
+        {
+            if (isServer)
+            {
+                builder.Register<GameServerDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
+            }
+            else
+            {
+                builder.Register<GameClientDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
+            }
         }
     }
 }

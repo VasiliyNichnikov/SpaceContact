@@ -9,12 +9,12 @@ namespace Client.Game
 {
     public class GamePhaseController : IPhaseVisitor, IStartable, IDisposable
     {
-        private readonly GameStateMachine _stateMachine;
+        private readonly IGameStateMachineReadOnly _stateMachine;
         private readonly FieldObjectsCreator _fieldObjectsCreator;
         private readonly GameUILoader _gameUILoader;
         
         public GamePhaseController(
-            GameStateMachine stateMachine, 
+            IGameStateMachineReadOnly stateMachine, 
             FieldObjectsCreator fieldObjectsCreator,
             GameUILoader gameUILoader)
         {
@@ -29,7 +29,12 @@ namespace Client.Game
             _fieldObjectsCreator.InitPlanets();
             _gameUILoader.Load();
         }
-        
+
+        public void Visit(GameDestinyPhase phase)
+        {
+            // nothing
+        }
+
         void IStartable.Start()
         {
             if (_stateMachine.CurrentPhase != null)
@@ -43,9 +48,10 @@ namespace Client.Game
             _stateMachine.OnPhaseChanged -= PhaseChanged;
         }
 
-        private void PhaseChanged(IGamePhase phase)
-        {
-            phase.Accept(this);
-        }
+        private void PhaseChanged() => 
+            PhaseChanged(_stateMachine.CurrentPhase);
+
+        private void PhaseChanged(IGamePhase? phase) => 
+            phase?.Accept(this);
     }
 }

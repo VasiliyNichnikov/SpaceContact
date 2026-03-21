@@ -1,4 +1,5 @@
 using Core.Game.Cards;
+using Core.Game.Phases;
 using Core.Game.Players;
 using Core.Game.Players.Visitors;
 
@@ -11,13 +12,16 @@ namespace Core.Game
     {
         private readonly IGameCardsManager _cardsManager;
         private readonly GamePlayersRegistry _registry;
+        private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         
         public GameServerCoreLoader(
             IGameCardsManager cardsManager,
-            GamePlayersRegistry registry)
+            GamePlayersRegistry registry,
+            GamePlayersPhaseTracker playersPhaseTracker)
         {
             _cardsManager = cardsManager;
             _registry = registry;
+            _playersPhaseTracker = playersPhaseTracker;
         }
 
         public void Init()
@@ -28,6 +32,8 @@ namespace Core.Game
                 var handDistributionVisitor = new GamePlayerHandDistributionVisitor(handState);
                 player.Apply(handDistributionVisitor);
             }
+            
+            _playersPhaseTracker.Init(_registry.Players);
         }
     }
 }

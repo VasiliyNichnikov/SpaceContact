@@ -19,7 +19,20 @@ namespace Client.Configs.Game
 
             public int DamageCount;
         }
+
+        [Serializable]
+        private struct NumberOfColorCardsByPlayerCountData
+        {
+            public string Comment;
+            
+            [Min(2)]
+            public int PlayerCount;
+            
+            [Min(0)]
+            public int NumberOfColorCards;
+        }
         
+        [Header("Space Cards")]
         [SerializeField, Min(0)]
         private int _numberOfConversationsSpaceCards;
 
@@ -28,12 +41,20 @@ namespace Client.Configs.Game
         
         [SerializeField]
         private DamageSpaceCardData[] _damageSpaceCards = null!;
+        
+        [Header("Destiny Cards")]
+        [SerializeField]
+        private NumberOfColorCardsByPlayerCountData[]  _numberOfColorCardsByPlayerCountData = null!;
+        
+        [SerializeField]
+        private int _numberOfJokersDestiny;
 
         public CardsData BuildData()
         {
             var decks = CreateDecks();
+            var destinyCardsGenerationData = CreateDestinyCardsGenerationData();
 
-            return new CardsData(decks, _playerStartingNumberOfSpaceCards);
+            return new CardsData(decks, _playerStartingNumberOfSpaceCards, destinyCardsGenerationData);
         }
 
         private DecksData CreateDecks()
@@ -50,6 +71,16 @@ namespace Client.Configs.Game
             return _damageSpaceCards
                 .Select(item => new SpaceCardDamageData(item.Count, item.DamageCount))
                 .ToList();
+        }
+
+        private DestinyCardsGenerationData CreateDestinyCardsGenerationData()
+        {
+            var dependence = _numberOfColorCardsByPlayerCountData
+                .ToDictionary(item => 
+                    item.PlayerCount, 
+                    item => item.NumberOfColorCards);
+
+            return new DestinyCardsGenerationData(dependence, _numberOfJokersDestiny);
         }
     }
 }

@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: GameNetworkRegistrySO
   m_EditorClassIdentifier: Network::Network.Configs.GamePlayerRegistrySO
   _galaxyNetworkSync: {fileID: 97858722741638357, guid: 043ea142066ed4c60a561741f749c518, type: 3}
-  _cardsNetworkSync: {fileID: 1672684372796902337, guid: f2ac27dacdb3d47f1bad58c518a04d42, type: 3}
   _gamePlayerNetworkSync: {fileID: 1814226487867341834, guid: 92f510ce7176e41ecb79348484844ac1, type: 3}
+  _destinyCardNetworkSync: {fileID: 3187387855678593587, guid: a6a5685d8ac5548e1be498b01630cb99, type: 3}

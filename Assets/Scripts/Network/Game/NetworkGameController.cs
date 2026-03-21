@@ -8,7 +8,7 @@ using VContainer;
 
 namespace Network.Game
 {
-    public class NetworkGameController : NetworkBehaviour
+    public class NetworkGameController : NetworkBehaviour, IServerStateMachineNetwork
     {
         private readonly struct CachePhase
         {
@@ -26,6 +26,7 @@ namespace Network.Game
         private GameStateMachine _stateMachine = null!;
         private PhaseRegistry _phaseRegistry = null!;
         private INetworkSerializer _serializer = null!;
+        private GamePlayersPhaseTracker _tracker = null!;
 
         private CachePhase? _cachePhase;
         
@@ -33,11 +34,13 @@ namespace Network.Game
         private void Constructor(
             GameStateMachine stateMachine, 
             PhaseRegistry phaseRegistry, 
-            INetworkSerializer serializer)
+            INetworkSerializer serializer,
+            GamePlayersPhaseTracker tracker)
         {
             _stateMachine = stateMachine;
             _phaseRegistry = phaseRegistry;
             _serializer = serializer;
+            _tracker = tracker;
         }
 
         public override void OnNetworkSpawn()
@@ -56,8 +59,7 @@ namespace Network.Game
             }
         }
 
-        public void ServerTransitionTo<TPhase>(IPhasePayload? payload = null) 
-            where TPhase : IGamePhase
+        void IServerStateMachineNetwork.ServerTransitionTo<TPhase>(IPhasePayload? payload)
         {
             if (!IsServer)
             {
@@ -72,6 +74,7 @@ namespace Network.Game
                 : Array.Empty<byte>();
 
             _cachePhase = new CachePhase(phaseId, dataBytes);
+            _tracker.ChangePhase(NetworkManager.LocalClientId, phaseId);
             SetPhaseClientRpc(phaseId, dataBytes);
         }
 
@@ -120,11 +123,19 @@ namespace Network.Game
                 }
                 
                 _stateMachine.TransitionTo(phaseType, payload);
+                ReportPlayerStateChangedRpc(phaseId);
             }
             catch (Exception e)
             {
                 Logger.Error($"NetworkGameController.SetPhaseClientRpc: during data transfer: {e.Message}.");
             }
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void ReportPlayerStateChangedRpc(int phaseId, RpcParams rpcParams = default)
+        {
+            var playerId = rpcParams.Receive.SenderClientId;
+            _tracker.ChangePhase(playerId, phaseId);
         }
     }
 }

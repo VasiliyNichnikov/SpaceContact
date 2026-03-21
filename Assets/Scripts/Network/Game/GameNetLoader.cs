@@ -18,6 +18,7 @@ namespace Network.Game
         private readonly PlayersRegistry _playersRegistry;
 
         private GalaxyNetworkSync? _galaxyNetworkSync;
+        private DestinyCardNetworkSync? _destinyCardNetworkSync;
         private readonly List<GamePlayerNetworkSync> _players = new();
 
         public GameNetLoader(
@@ -45,6 +46,7 @@ namespace Network.Game
             
             LoadGalaxyNetwork();
             LoadPlayersNetwork();
+            LoadDestinyCardNetwork();
         }
         
         public void Dispose()
@@ -60,6 +62,11 @@ namespace Network.Game
             {
                 _galaxyNetworkSync.Initializer.OnLoaded -= HandleGalaxyLoaded;
             }
+
+            if (_destinyCardNetworkSync != null && !_destinyCardNetworkSync.Initializer.IsLoaded)
+            {
+                _destinyCardNetworkSync.Initializer.OnLoaded -= HandleDestinyCardLoaded;
+            }
         }
 
         private void LoadGalaxyNetwork()
@@ -71,6 +78,15 @@ namespace Network.Game
             galaxyInstance.Initializer.OnLoaded += HandleGalaxyLoaded;
         }
 
+        private void LoadDestinyCardNetwork()
+        {
+            var destinyCardPrefab = _gameNetworkRegistrySO.DestinyCardNetworkSync;
+            var destinyCardInstance = _objectResolver.Instantiate(destinyCardPrefab, null);
+            destinyCardInstance.NetworkObject.Spawn(destroyWithScene: true);
+            _destinyCardNetworkSync = destinyCardInstance;
+            destinyCardInstance.Initializer.OnLoaded += HandleDestinyCardLoaded;
+        }
+        
         private void LoadPlayersNetwork()
         {
             var players = _playersRegistry.Players;
@@ -92,6 +108,12 @@ namespace Network.Game
             CheckGameFullyLoaded();
         }
 
+        private void HandleDestinyCardLoaded(ulong loadedPrefabId)
+        {
+            _destinyCardNetworkSync!.Initializer.OnLoaded -= HandleDestinyCardLoaded;
+            CheckGameFullyLoaded();
+        }
+        
         private void HandleGalaxyLoaded(ulong loadedPrefabId)
         {
             _galaxyNetworkSync!.Initializer.OnLoaded -= HandleGalaxyLoaded;
@@ -102,8 +124,9 @@ namespace Network.Game
         {
             var areAllPlayersLoaded = _players.All(p => p.Initializer.IsLoaded);
             var isGalaxyLoaded = _galaxyNetworkSync != null && _galaxyNetworkSync.Initializer.IsLoaded;
+            var isDestinyCardLoaded = _destinyCardNetworkSync != null;
 
-            if (areAllPlayersLoaded && isGalaxyLoaded)
+            if (areAllPlayersLoaded && isGalaxyLoaded && isDestinyCardLoaded)
             {
                 OnGameIsReady?.Invoke();
             }

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3914795930868881218
+--- !u!1 &7812830279570348597
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,24 +8,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8295891624363194467}
-  - component: {fileID: 197148503471079702}
-  - component: {fileID: 97858722741638357}
-  - component: {fileID: -71553558893435609}
+  - component: {fileID: 6118382775838955228}
+  - component: {fileID: 6388094500369370697}
+  - component: {fileID: 3187387855678593587}
+  - component: {fileID: 370958402121893126}
   m_Layer: 0
-  m_Name: '[GalaxyNetworkSync]'
+  m_Name: '[DestinyCardNetworkSync]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8295891624363194467
+--- !u!4 &6118382775838955228
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3914795930868881218}
+  m_GameObject: {fileID: 7812830279570348597}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -34,24 +34,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &197148503471079702
+--- !u!114 &6388094500369370697
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3914795930868881218}
+  m_GameObject: {fileID: 7812830279570348597}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 4123380466
+  GlobalObjectIdHash: 187704071
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 0
   AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 0
+  SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -59,26 +59,26 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 0
   AllowOwnerToParent: 0
---- !u!114 &97858722741638357
+--- !u!114 &3187387855678593587
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3914795930868881218}
+  m_GameObject: {fileID: 7812830279570348597}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cbf0463616c4fdb9c8cf8c14fdabf5a, type: 3}
+  m_Script: {fileID: 11500000, guid: 65f8f7327f02469b89a4d0a8119e1117, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Network::Network.Game.GalaxyNetworkSync
+  m_EditorClassIdentifier: Network::Network.Game.DestinyCardNetworkSync
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &-71553558893435609
+--- !u!114 &370958402121893126
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3914795930868881218}
+  m_GameObject: {fileID: 7812830279570348597}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b8204c278ea5466b8c59d90cf8adc7c4, type: 3}

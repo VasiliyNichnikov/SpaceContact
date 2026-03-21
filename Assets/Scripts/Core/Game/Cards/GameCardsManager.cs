@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using Core.Game.Dto.Rules.Cards;
 using Core.Game.Dto.States.Cards;
+using Core.Player;
+using Logs;
 
 namespace Core.Game.Cards
 {
@@ -11,11 +13,17 @@ namespace Core.Game.Cards
 
         private readonly CardsData _data;
         private readonly Queue<SpaceCardStateData> _collectedSpaceCards;
+        private readonly Queue<DestinyCardStateData> _collectedDestinyCards;
+
+        private List<DestinyCardStateData>? _discardDestinyCards; 
         
-        public GameCardsManager(CardsData data)
+        private DestinyCardStateData? _currentDestinyCard;
+        
+        public GameCardsManager(CardsData data, PlayersRegistry registry)
         {
             _data = data;
             _collectedSpaceCards = CreateCollectedSpaceCards(_data);
+            _collectedDestinyCards = CreateCollectedDestinyCards(_data, registry);
         }
 
         PlayerHandStateData IGameCardsManager.CreatePlayerHand()
@@ -35,6 +43,27 @@ namespace Core.Game.Cards
             };
             
             return handState;
+        }
+
+        DestinyCardStateData IGameCardsManager.OpenNextDestinyCard()
+        {
+            if (_currentDestinyCard != null)
+            {
+                _discardDestinyCards ??= new List<DestinyCardStateData>();
+                _discardDestinyCards.Add(_currentDestinyCard.Value);
+            }
+
+            if (_collectedDestinyCards.Count > 0)
+            {
+                _currentDestinyCard = _collectedDestinyCards.Dequeue();
+
+                return _currentDestinyCard.Value;
+            }
+            
+            RebuildDeck(ref _discardDestinyCards, _collectedDestinyCards);
+            _currentDestinyCard = _collectedDestinyCards.Dequeue();
+            
+            return _currentDestinyCard.Value;
         }
 
         private static Queue<SpaceCardStateData> CreateCollectedSpaceCards(CardsData data)
@@ -71,12 +100,69 @@ namespace Core.Game.Cards
             return new Queue<SpaceCardStateData>(cards);
         }
 
+        private static Queue<DestinyCardStateData> CreateCollectedDestinyCards(CardsData data, PlayersRegistry registry)
+        {
+            var cards = new List<DestinyCardStateData>();
+            var generationData = data.DestinyCardsGeneration;
+
+            CallMethodMultipleTimes(() =>
+            {
+                var jokerCard = DestinyCardStateData.JokerCard();
+                cards.Add(jokerCard);
+            }, generationData.NumberOfJokers);
+
+            var playersCount = registry.Players.Count;
+            var numberOfColorCards = generationData.GetNumberOfColorCards(playersCount);
+
+            foreach (var player in registry.Players)
+            {
+                CallMethodMultipleTimes(() =>
+                {
+                    var damageStateCard = DestinyCardStateData.ColorCard(player.ClientId);
+                    cards.Add(damageStateCard);
+                }, numberOfColorCards);
+            }
+            
+            // Еще надо добавить специфичные карты
+            
+            Shuffle(cards);
+            
+            return new Queue<DestinyCardStateData>(cards);
+        }
+        
         private static void CallMethodMultipleTimes(Action action, int count)
         {
             for (var i = 0; i < count; i++)
             {
                 action.Invoke();
             }
+        }
+        
+        private static void RebuildDeck<TDeck>(ref List<TDeck>? discardDeck, Queue<TDeck> deck)
+        {
+            if (discardDeck == null || discardDeck.Count == 0)
+            {
+                Logger.Error("GameCardsManager.RebuildDeck: discardDeck is null or empty.");
+                
+                return;
+            }
+
+            if (deck.Count != 0)
+            {
+                Logger.Error("GameCardsManager.RebuildDeck: deck is not empty.");
+                
+                return;
+            }
+            
+            Shuffle(discardDeck);
+            deck.Clear();
+
+            foreach (var card in discardDeck)
+            {
+                deck.Enqueue(card);
+            }
+
+            discardDeck = null;
         }
         
         private static void Shuffle<T>(IList<T> list)

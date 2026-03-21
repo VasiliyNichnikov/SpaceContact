@@ -4,7 +4,7 @@ using Core.Game.Phases;
 
 namespace Core.Game
 {
-    public class GameStateMachine
+    public class GameStateMachine : IGameStateMachineReadOnly, IDisposable
     {
         private readonly IPhaseFactory _phaseFactory;
 
@@ -15,7 +15,7 @@ namespace Core.Game
         
         public IGamePhase? CurrentPhase { get; private set; }
         
-        public event Action<IGamePhase>? OnPhaseChanged;
+        public event Action? OnPhaseChanged;
 
         public void TransitionTo<T>(IPhasePayload? payload) where T : IGamePhase => 
             TransitionTo(typeof(T), payload);
@@ -27,12 +27,18 @@ namespace Core.Game
             CurrentPhase = _phaseFactory.Create(phaseType, payload);
             CurrentPhase.Enter();
             
-            OnPhaseChanged?.Invoke(CurrentPhase);
+            OnPhaseChanged?.Invoke();
         }
 
         public void Update()
         {
             CurrentPhase?.Update();
+        }
+
+        public void Dispose()
+        {
+            CurrentPhase?.Exit();
+            CurrentPhase = null;
         }
     }
 }

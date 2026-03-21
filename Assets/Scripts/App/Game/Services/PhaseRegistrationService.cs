@@ -3,20 +3,17 @@ using Network.Infrastructure;
 
 namespace App.Game.Services
 {
-    public class PhaseRegistrationService
+    public sealed class PhaseRegistrationService
     {
-        private const byte GameInitializationPhaseId = 100;
-        
         private readonly PhaseRegistry _phaseRegistry;
         
-        public PhaseRegistrationService(PhaseRegistry phaseRegistry)
-        {
+        public PhaseRegistrationService(PhaseRegistry phaseRegistry) => 
             _phaseRegistry = phaseRegistry;
-        }
         
         public void ConfigureRegistry()
         {
-            _phaseRegistry.RegisterPhase<GameInitializationPhase>(GameInitializationPhaseId);
+            _phaseRegistry.RegisterPhase<GameInitializationPhase>(PhaseIds.GameInitializationPhaseId);
+            _phaseRegistry.RegisterPhase<GameDestinyPhase>(PhaseIds.GameDestinyPhaseId);
         }
     }
 }
