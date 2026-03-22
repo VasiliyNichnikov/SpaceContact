@@ -15,7 +15,7 @@ namespace Core.Game.Phases
                     return GamePhaseType.Initialization;
                 
                 case PhaseIds.GameRegroupingPhaseId:
-                    return GamePhaseType.Regrouping;
+                    return GamePhaseType.Regroup;
                 
                 case PhaseIds.GameDestinyPhaseId:
                     return GamePhaseType.Destiny;

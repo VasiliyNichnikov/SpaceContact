@@ -20,6 +20,9 @@ namespace Core.Game.Phases
             _playersPhaseTracker.PlayerPhaseChanged += OnPlayerPhaseChanged;
         }
 
+        public override GamePhaseType Type => 
+            GamePhaseType.Initialization;
+
         public override void Enter()
         {
             Logger.Warning("GameInitializationPhase.Enter");

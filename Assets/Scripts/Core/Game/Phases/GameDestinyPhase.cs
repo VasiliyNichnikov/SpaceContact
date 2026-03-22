@@ -13,7 +13,10 @@ namespace Core.Game.Phases
         {
             _serverDestinyCardController = serverDestinyCardController;
         }
-        
+
+        public override GamePhaseType Type => 
+            GamePhaseType.Destiny;
+
         public override void Enter()
         {
             Logger.Warning("GameDestinyPhase.Enter");

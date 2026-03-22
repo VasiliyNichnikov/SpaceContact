@@ -1,9 +1,7 @@
 using Client.UI.Dialogs.Game.Hand;
-using Client.UI.Extensions;
 using Client.UI.HUDs.ViewModels;
 using Reactivity;
 using UnityEngine;
-using UnityEngine.UI;
 using VContainer;
 
 namespace Client.UI.HUDs
@@ -11,10 +9,10 @@ namespace Client.UI.HUDs
     public class GameHUD : MonoBehaviour
     {
         [SerializeField]
-        private GamePlayerHandView _playerHandView = null!;
+        private GameHudTopView _topView = null!;
         
         [SerializeField]
-        private Text _phaseNameText = null!;
+        private GamePlayerHandView _playerHandView = null!;
 
         private IObjectResolver _resolver = null!;
         private IGameHudViewModel _viewModel = null!;
@@ -23,7 +21,7 @@ namespace Client.UI.HUDs
         private void Construct(IObjectResolver resolver, IGameHudViewModel viewModel)
         {
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
-            gameObject.Subscribe(_viewModel.PhaseName, _phaseNameText.SetText);
+            _topView.Init(viewModel.TopViewModel);
             _resolver = resolver;
             _resolver.Inject(_playerHandView);
         }

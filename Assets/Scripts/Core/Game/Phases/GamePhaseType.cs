@@ -4,7 +4,9 @@ namespace Core.Game.Phases
     {
         None,
         Initialization,
-        Regrouping,
-        Destiny
+        Regroup,
+        Destiny,
+        Launch,
+        Alliance,
     }
 }

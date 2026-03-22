@@ -4,6 +4,7 @@ using Client.Configs.Game;
 using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
+using Client.Helpers;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Loaders;
 using Core.Game;
@@ -52,6 +53,7 @@ namespace App.Game
             builder.Register<GameUILoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersPhaseTracker>(Lifetime.Singleton).AsSelf();
+            builder.Register<PhasesHelper>(Lifetime.Singleton).AsSelf();
             
             // Managers
             builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -99,6 +101,7 @@ namespace App.Game
         private static void RegisterViewModels(IContainerBuilder builder)
         {
             RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
+            RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
         }
 
         private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)

@@ -8,7 +8,9 @@ namespace Core.Game.Phases
         {
             StateMachine = stateMachine;
         }
-        
+
+        public abstract GamePhaseType Type { get; }
+
         public virtual void Enter()
         {
             // nothing

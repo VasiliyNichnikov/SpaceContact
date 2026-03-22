@@ -2,6 +2,8 @@
 {
     public interface IGamePhase
     {
+        GamePhaseType Type { get; }
+        
         void Enter();
 
         void Exit();
