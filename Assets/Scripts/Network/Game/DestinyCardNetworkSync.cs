@@ -1,6 +1,5 @@
 using Core.Game.Cards;
 using Core.Game.Dto.States.Cards;
-using Logs;
 using Network.Infrastructure;
 using Unity.Netcode;
 using VContainer;
@@ -21,13 +20,9 @@ namespace Network.Game
         private IGameServerDestinyCardController? _serverDestinyCardController;
         
         /// <summary>
-        /// Client Only
-        /// </summary>
-        private IGameClientDestinyCardController? _clientDestinyCardController;
-        
-        /// <summary>
         /// Other
         /// </summary>
+        private IGameClientDestinyCardController _clientDestinyCardController = null!;
         private INetworkSerializer _serializer = null!;
         private IObjectResolver _resolver = null!;
         
@@ -36,10 +31,12 @@ namespace Network.Game
         [Inject]
         private void Constructor(
             INetworkSerializer serializer, 
-            IObjectResolver resolver)
+            IObjectResolver resolver,
+            IGameClientDestinyCardController clientDestinyCardController)
         {
             _serializer = serializer;
             _resolver = resolver;
+            _clientDestinyCardController = clientDestinyCardController;
         }
 
         public override void OnNetworkSpawn()
@@ -53,7 +50,6 @@ namespace Network.Game
             }
             else
             {
-                _clientDestinyCardController = _resolver.Resolve<IGameClientDestinyCardController>();
                 _destinyCardState.OnValueChanged += OnStateReceived;
             }
 
@@ -80,6 +76,8 @@ namespace Network.Game
             var state = _serverDestinyCardController!.GetState();
             var bytes = _serializer.Serialize(state);
             _destinyCardState.Value = new ByteData(bytes);
+            // Данный стейт должен быть одинаков и на клиентах и на сервере
+            ApplyDestinyCardState(bytes);
         }
 
         private void OnStateReceived(ByteData oldValue, ByteData newValue) => 
@@ -89,12 +87,6 @@ namespace Network.Game
         {
             if (bytes == null || bytes.Length == 0)
             {
-                return;
-            }
-
-            if (_clientDestinyCardController == null)
-            {
-                Logger.Error("DestinyCardNetworkSync.ApplyDestinyCardState: clientDestinyCardController is null.");
                 return;
             }
             

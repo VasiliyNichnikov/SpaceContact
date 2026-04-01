@@ -67,6 +67,7 @@ namespace App.Game
             builder.Register<VContainerPhasesFactory>(Lifetime.Singleton).As<IPhaseFactory>();
             builder.Register<PlayerPlanetsFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<SpaceCardFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
             builder.Register<FieldObjectsCreator>(Lifetime.Singleton).AsSelf();
@@ -111,13 +112,11 @@ namespace App.Game
 
         private static void RegisterElementsDependedNetwork(IContainerBuilder builder, bool isServer)
         {
+            builder.Register<GameClientDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
+            
             if (isServer)
             {
                 builder.Register<GameServerDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
-            }
-            else
-            {
-                builder.Register<GameClientDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
             }
         }
     }
