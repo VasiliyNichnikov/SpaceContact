@@ -35,6 +35,7 @@ namespace Client.UI.HUDs.ViewModels
         
         public void Dispose()
         {
+            TopViewModel.Dispose();
             _destinyCardController.Changed -= OnDestinyCardChanged;
         }
 

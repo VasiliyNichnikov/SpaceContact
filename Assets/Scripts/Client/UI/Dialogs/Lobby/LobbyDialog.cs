@@ -41,6 +41,12 @@ namespace Client.UI.Dialogs.Lobby
         private void RefreshPlayersBlocks()
         {
             var viewModels = _viewModel.Players.ToList();
+
+            if (viewModels.Count == 0)
+            {
+                return;
+            }
+            
             UIUtils.CreateRequiredNumberOfItems(
                 _playersContainer,
                 _lobbyPlayerView,

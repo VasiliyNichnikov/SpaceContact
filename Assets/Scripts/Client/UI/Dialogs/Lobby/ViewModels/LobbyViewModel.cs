@@ -32,11 +32,14 @@ namespace Client.UI.Dialogs.Lobby
             _refreshPlayersEvent = new EventProvider();
         }
 
-        public bool IsOwnerLobby => _lobbyController.IsOwnerLobby;
+        public bool IsOwnerLobby => 
+            _lobbyController.IsOwnerLobby;
         
-        public IReadOnlyCollection<LobbyPlayerViewModel> Players => _playerViewModelByManager.Values;
+        public IReadOnlyCollection<LobbyPlayerViewModel> Players => 
+            _playerViewModelByManager.Values;
 
-        public IEventProvider RefreshPlayersEvent => _refreshPlayersEvent;
+        public IEventProvider RefreshPlayersEvent => 
+            _refreshPlayersEvent;
 
         public void RunBattleButtonClickHandler() => 
             _levelControl.StartGame();

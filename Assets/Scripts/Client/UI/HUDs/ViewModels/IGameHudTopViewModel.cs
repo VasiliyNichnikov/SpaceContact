@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using Core.Game.Phases;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public interface IGameHudTopViewModel
+    public interface IGameHudTopViewModel : IDisposable
     {
         IEventProvider ActivePhaseChangedEvent { get; }
         

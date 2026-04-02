@@ -23,7 +23,7 @@ namespace Client.UI.HUDs
         [Inject]
         private void Construct(IObjectResolver resolver, IGameHudViewModel viewModel)
         {
-            gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
+            gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
             gameObject.SubscribeWithoutCall(_viewModel.DestinyCardViewModel, _gameDestinyCard.Refresh);
             _topView.Init(viewModel.TopViewModel);
             _resolver = resolver;

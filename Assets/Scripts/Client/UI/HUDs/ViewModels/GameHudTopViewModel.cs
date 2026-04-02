@@ -7,7 +7,7 @@ using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public class GameHudTopViewModel : IGameHudTopViewModel, IDisposable
+    public class GameHudTopViewModel : IGameHudTopViewModel
     {
         private readonly EventProvider _activePhaseChangedEvent = new();
         private readonly IGameStateMachineReadOnly _stateMachine;
