@@ -7,7 +7,7 @@ namespace Core.Game.Cards
     {
         public DefaultPlayerColorDestinyCard(IGamePlayer targetPlayer)
         {
-            Description = $"Target: {targetPlayer.PlayerId}";
+            Description = $"Target: {targetPlayer.PlayerName}";
             BackgroundColor = targetPlayer.Color;
         }
         

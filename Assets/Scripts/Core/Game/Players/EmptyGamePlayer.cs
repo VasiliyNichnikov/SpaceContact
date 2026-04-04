@@ -9,6 +9,8 @@ namespace Core.Game.Players
 {
     public class EmptyGamePlayer : IGamePlayer
     {
+        private const string InvalidPlayerName = "None";
+        
         private static EmptyGamePlayer? _instance;
         
         private EmptyGamePlayer()
@@ -20,7 +22,9 @@ namespace Core.Game.Players
             _instance ??= new EmptyGamePlayer();
         
         public ulong PlayerId => ulong.MinValue;
-        
+
+        public string PlayerName => InvalidPlayerName;
+
         public int Order => int.MaxValue;
 
         public Color Color => default;

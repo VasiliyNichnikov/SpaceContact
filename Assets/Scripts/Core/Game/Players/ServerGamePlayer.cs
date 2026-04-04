@@ -24,11 +24,14 @@ namespace Core.Game.Players
             Color = playerColor;
             IsOwner = user.IsCurrentPlayer;
             Order = order;
+            PlayerName = user.Name;
             _handController = new GamePlayerHandController(spaceCardFactory);
         }
         
         public ulong PlayerId { get; }
         
+        public string PlayerName { get; }
+
         public int Order { get; }
 
         public Color Color { get; }

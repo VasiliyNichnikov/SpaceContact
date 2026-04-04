@@ -13,6 +13,8 @@ namespace Core.Game.Players
     {
         ulong PlayerId { get; }
         
+        string PlayerName { get; }
+        
         /// <summary>
         /// Порядок хода
         /// </summary>

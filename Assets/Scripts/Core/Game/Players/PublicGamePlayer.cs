@@ -20,10 +20,13 @@ namespace Core.Game.Players
             PlayerId = user.ClientId;
             Color = playerColor;
             Order = order;
+            PlayerName = user.Name;
         }
         
         public ulong PlayerId { get; }
         
+        public string PlayerName { get; }
+
         public int Order { get; }
 
         public Color Color { get; }
