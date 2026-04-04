@@ -4,17 +4,14 @@ namespace Core.Game.Phases
 {
     public sealed class GameInitializationPhase : BasePhase
     {
-        private readonly IGameFieldManager _fieldManager;
         private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         private readonly IServerStateMachineNetwork? _serverStateMachine;
         
         public GameInitializationPhase(
             GameStateMachine stateMachine, 
-            IGameFieldManager fieldManager,
             GamePlayersPhaseTracker playersPhaseTracker,
             IServerStateMachineNetwork? serverStateMachine) : base(stateMachine)
         {
-            _fieldManager = fieldManager;
             _playersPhaseTracker = playersPhaseTracker;
             _serverStateMachine = serverStateMachine;
             _playersPhaseTracker.PlayerPhaseChanged += OnPlayerPhaseChanged;
@@ -26,7 +23,6 @@ namespace Core.Game.Phases
         public override void Enter()
         {
             Logger.Warning("GameInitializationPhase.Enter");
-            _fieldManager.Init();
         }
 
         public override void Exit()

@@ -30,3 +30,4 @@ MonoBehaviour:
     - Comment: Left planet 2
       PlayerPlanetPosition: {x: -8, y: 0.5, z: -14}
       OppositePlanetPosition: {x: -8, y: 0.5, z: 14}
+  _distanceBetweenCentralPlanetsByX: 100

@@ -1,14 +1,20 @@
 using System.Collections.Generic;
+using System.Linq;
 using Logs;
 
 namespace Core.Game.Players
 {
-    public class GamePlayersRegistry
+    public sealed class GamePlayersRegistry
     {
         private readonly Dictionary<ulong, IGamePlayer> _playerByClientId = new();
 
         public IReadOnlyCollection<IGamePlayer> Players => 
             _playerByClientId.Values;
+        
+        public IEnumerable<IGamePlayer> SortedByOrderPlayers => 
+            _playerByClientId
+            .Values
+            .OrderBy(p => p.Order); 
 
         private ulong? _ownerPlayerId;
 

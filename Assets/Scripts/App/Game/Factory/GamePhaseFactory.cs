@@ -10,7 +10,6 @@ namespace App.Game.Factory
         public static GameInitializationPhase CreateInitializationPhase(IObjectResolver resolver, bool isServer)
         {
             var stateMachine = resolver.Resolve<GameStateMachine>();
-            var fieldManager = resolver.Resolve<IGameFieldManager>();
             var playersPhaseTracker = resolver.Resolve<GamePlayersPhaseTracker>();
             IServerStateMachineNetwork? stateMachineNetwork = null;
 
@@ -21,7 +20,6 @@ namespace App.Game.Factory
             
             return new GameInitializationPhase(
                 stateMachine, 
-                fieldManager, 
                 playersPhaseTracker, 
                 stateMachineNetwork);
         }

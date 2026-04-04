@@ -30,6 +30,9 @@ namespace Client.Configs.Game
         [SerializeField]
         private DependenceOnNumberOfPlanets[] _settings = null!;
         
+        [SerializeField, Min(0)]
+        private float _distanceBetweenCentralPlanetsByX;
+        
         public PlanetLayoutSetData BuildData()
         {
             var playerLayoutsByPlanetCount = new Dictionary<int, PlanetsLayoutData>();
@@ -55,7 +58,8 @@ namespace Client.Configs.Game
 
             return new PlanetLayoutSetData(
                 playerLayoutsByPlanetCount,
-                oppositeLayoutsByPlanetCount
+                oppositeLayoutsByPlanetCount,
+                _distanceBetweenCentralPlanetsByX
             );
         }
     }

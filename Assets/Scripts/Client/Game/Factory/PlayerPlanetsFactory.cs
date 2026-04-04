@@ -19,9 +19,11 @@ namespace Client.Game.Factory
             _cosmicPrefabStore = prefabStore;
         }
 
-        public PlanetView CreatePlanet(Vector3 position)
+        public PlanetView CreatePlanet(Vector3 localPosition, Transform parent)
         {
-            return _resolver.Instantiate(_cosmicPrefabStore.PlanetPrefab, position, Quaternion.identity);
+            var view = _resolver.Instantiate(_cosmicPrefabStore.PlanetPrefab, parent);
+            view.transform.localPosition = localPosition;
+            return view;
         }
     }
 }

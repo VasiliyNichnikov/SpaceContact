@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Core.Game.Players;
 
 namespace Core.Game
@@ -6,8 +7,8 @@ namespace Core.Game
     {
         IGamePlayer CurrentPlayer { get; }
         
-        IGamePlayer OpponentPlayer { get; }
-
-        void Init();
+        IReadOnlyCollection<IGamePlayer> Opponents { get; }
+        
+        int NumberOfPlanetsOnPlayer { get; }
     }
 }

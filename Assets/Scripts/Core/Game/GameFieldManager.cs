@@ -1,57 +1,40 @@
+using System.Collections.Generic;
 using System.Linq;
 using Core.Game.Players;
-using Logs;
 
 namespace Core.Game
 {
-    public class GameFieldManager : IGameFieldManager
+    public sealed class GameFieldManager : IGameFieldManager
     {
-        private readonly GamePlayersRegistry _playersRegistry;
+        /// <summary>
+        /// В будущем будет настраиваться во время запуска игры
+        /// </summary>
+        private const int NumberPlanetsOnPlayer = 5;
         
-        private IGamePlayer? _loadedCurrentPlayer;
-        private IGamePlayer? _loadedOpponentPlayer;
+        private readonly GamePlayersRegistry _playersRegistry;
         
         public GameFieldManager(GamePlayersRegistry playersRegistry)
         {
             _playersRegistry = playersRegistry;
         }
 
-        public IGamePlayer CurrentPlayer
+        public IGamePlayer CurrentPlayer => 
+            _playersRegistry.GetOwnerWithError() ?? EmptyGamePlayer.Instance;
+
+        public IReadOnlyCollection<IGamePlayer> Opponents
         {
             get
             {
-                if (_loadedCurrentPlayer == null)
-                {
-                    Logger.Error("GameFieldManager.CurrentPlayer is null.");
-                    
-                    return EmptyGamePlayer.Instance;
-                }
-                
-                return _loadedCurrentPlayer;
+                var players = _playersRegistry
+                    .SortedByOrderPlayers
+                    .Where(p => !p.IsOwner)
+                    .ToList();
+
+                return players;
             }
         }
 
-        public IGamePlayer OpponentPlayer
-        {
-            get
-            {
-                if (_loadedOpponentPlayer == null)
-                {
-                    Logger.Error("GameFieldManager.OpponentPlayer is null.");
-                    
-                    return EmptyGamePlayer.Instance;
-                }
-                
-                return _loadedOpponentPlayer;
-            }
-        }
-
-        public void Init()
-        {
-            var players = _playersRegistry.Players;
-            
-            _loadedCurrentPlayer = players.First(p => p.IsOwner);
-            _loadedOpponentPlayer = players.First(p => !p.IsOwner);
-        }
+        public int NumberOfPlanetsOnPlayer => 
+            NumberPlanetsOnPlayer;
     }
 }

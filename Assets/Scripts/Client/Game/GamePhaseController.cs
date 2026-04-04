@@ -10,23 +10,28 @@ namespace Client.Game
     public class GamePhaseController : IPhaseVisitor, IStartable, IDisposable
     {
         private readonly IGameStateMachineReadOnly _stateMachine;
-        private readonly FieldObjectsCreator _fieldObjectsCreator;
+        private readonly GameFieldPlanetsViewProvider _fieldPlanetsViewProvider;
         private readonly GameUILoader _gameUILoader;
+        private readonly IGameFieldViewManager _fieldViewManager;
         
         public GamePhaseController(
             IGameStateMachineReadOnly stateMachine, 
-            FieldObjectsCreator fieldObjectsCreator,
-            GameUILoader gameUILoader)
+            GameFieldPlanetsViewProvider fieldPlanetsViewProvider,
+            GameUILoader gameUILoader,
+            IGameFieldViewManager fieldViewManager)
         {
             _stateMachine = stateMachine;
-            _fieldObjectsCreator = fieldObjectsCreator;
+            _fieldPlanetsViewProvider = fieldPlanetsViewProvider;
             _gameUILoader = gameUILoader;
+            _fieldViewManager = fieldViewManager;
             _stateMachine.OnPhaseChanged += PhaseChanged;
         }
         
         void IPhaseVisitor.Visit(GameInitializationPhase phase)
         {
-            _fieldObjectsCreator.InitPlanets();
+            _fieldPlanetsViewProvider.CreateFieldPlanets();
+            // После инициализации планет
+            _fieldViewManager.Init();
             _gameUILoader.Load();
         }
 

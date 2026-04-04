@@ -5,6 +5,7 @@ using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
 using Client.Helpers;
+using Client.UI.Dialogs.Game.PlayerChoice.ViewModels;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Loaders;
 using Core.Game;
@@ -20,6 +21,7 @@ using Unity.Netcode;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
+using GameFieldManager = Core.Game.GameFieldManager;
 
 namespace App.Game
 {
@@ -59,6 +61,7 @@ namespace App.Game
             builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameFieldViewManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Game State Machine
             builder.Register<GameStateMachine>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
@@ -70,7 +73,7 @@ namespace App.Game
             builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
-            builder.Register<FieldObjectsCreator>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameFieldPlanetsViewProvider>(Lifetime.Singleton).AsSelf();
             
             // Phases
             RegisterPhases(builder, netManager.IsServer);
@@ -103,6 +106,7 @@ namespace App.Game
         {
             RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
+            RegisterViewModel<GameArrowsHolderViewModel>(builder);
         }
 
         private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)
