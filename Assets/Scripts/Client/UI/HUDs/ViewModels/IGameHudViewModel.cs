@@ -11,5 +11,7 @@ namespace Client.UI.HUDs.ViewModels
         IGamePlayerHandViewModel PlayerHandViewModel { get; }
         
         IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel { get; }
+        
+        IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel { get; }
     }
 }

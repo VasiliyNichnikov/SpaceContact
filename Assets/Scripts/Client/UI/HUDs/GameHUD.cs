@@ -16,6 +16,9 @@ namespace Client.UI.HUDs
         
         [SerializeField]
         private GameDestinyCardView _gameDestinyCard = null!;
+        
+        [SerializeField]
+        private GameOpponentPlayerBlockView _gameOpponentPlayerBlockView = null!;
 
         private IObjectResolver _resolver = null!;
         private IGameHudViewModel _viewModel = null!;
@@ -25,6 +28,7 @@ namespace Client.UI.HUDs
         {
             gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
             gameObject.SubscribeWithoutCall(_viewModel.DestinyCardViewModel, _gameDestinyCard.Refresh);
+            gameObject.Subscribe(_viewModel.OpponentPlayerViewModel, _gameOpponentPlayerBlockView.Refresh);
             _topView.Init(viewModel.TopViewModel);
             _resolver = resolver;
             _resolver.Inject(_playerHandView);

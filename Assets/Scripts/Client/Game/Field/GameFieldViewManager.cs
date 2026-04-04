@@ -29,7 +29,11 @@ namespace Client.Game.Field
             _fieldManager = fieldManager;
             _planetsViewProvider = planetsViewProvider;
         }
-        
+
+        public event Action? OnViewedOpponentChanged;
+
+        public IGamePlayer? ViewedOpponentPlayer { get; private set; }
+
         public void Init()
         {
             var playerPlanetsViewModels = CreatePlanetsViewModelsForPlayer(_fieldManager.CurrentPlayer);
@@ -48,6 +52,9 @@ namespace Client.Game.Field
             var firstOpponent = _opponents[_selectedOpponentIndex];
             var opponentPlanetsViewModels = CreatePlanetsViewModelsForPlayer(firstOpponent);
             _planetsViewProvider.InitCenterOpponentPlanets(opponentPlanetsViewModels);
+            
+            ViewedOpponentPlayer = firstOpponent;
+            OnViewedOpponentChanged?.Invoke();
         }
 
         public bool CanMoveToLeftOpponent() => 
@@ -89,6 +96,9 @@ namespace Client.Game.Field
             var otherOpponentViewModels = CreatePlanetsViewModelsForPlayer(otherOpponent);
             initOpponentPlanetsAction.Invoke(otherOpponentViewModels);
             MoveOpponentPlanetsOnAxisX(deltaX, duration, () => ResetPositionsAndSetCenterOpponentPlanets(otherOpponentViewModels));
+            
+            ViewedOpponentPlayer = otherOpponent;
+            OnViewedOpponentChanged?.Invoke();
         }
         
         private void MoveOpponentPlanetsOnAxisX(float deltaX, float duration, Action? onCompleteAction)
