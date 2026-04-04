@@ -1,3 +1,4 @@
+using Client.Game.Planets;
 using Client.UI.Dialogs.Game.PlayerChoice;
 using UnityEngine;
 
@@ -8,8 +9,14 @@ namespace Client.Configs.Game
     {
         [SerializeField]
         private GameArrowsHolder _arrowsHolder = null!;
+
+        [SerializeField] 
+        private GameShipsOnPlanetInfoView _shipsOnPlanetInfoView = null!;
         
         public GameArrowsHolder ArrowsHolder => 
             _arrowsHolder;
+        
+        public GameShipsOnPlanetInfoView ShipsOnPlanetInfoView =>
+            _shipsOnPlanetInfoView;
     }
 }

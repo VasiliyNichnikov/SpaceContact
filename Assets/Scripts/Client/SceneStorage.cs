@@ -18,6 +18,9 @@ namespace Client
         
         public RectTransform GuiHolder => _guiHolder;
         
+        public RectTransform MainCanvasRectTransform => 
+            _mainCanvasGameObject.GetComponent<RectTransform>();
+        
         private static SceneStorage? _instance;
 
         private void Awake()

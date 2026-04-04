@@ -31,6 +31,12 @@ namespace Client.Game.Field
         }
 
         public event Action? OnViewedOpponentChanged;
+        
+        public event Action? OnInitialized;
+
+        public event Action? OnMovementAnimationStarted;
+        
+        public event Action? OnMovementAnimationEnded;
 
         public IGamePlayer? ViewedOpponentPlayer { get; private set; }
 
@@ -54,7 +60,7 @@ namespace Client.Game.Field
             _planetsViewProvider.InitCenterOpponentPlanets(opponentPlanetsViewModels);
             
             ViewedOpponentPlayer = firstOpponent;
-            OnViewedOpponentChanged?.Invoke();
+            OnInitialized?.Invoke();
         }
 
         public bool CanMoveToLeftOpponent() => 
@@ -131,11 +137,13 @@ namespace Client.Game.Field
             {
                 onCompleteAction?.Invoke();
                 _currentSequenceAnimation = null;
+                OnMovementAnimationEnded?.Invoke();
             });
 
             sequence.OnKill(() => _currentSequenceAnimation = null);
             
             sequence.Play();
+            OnMovementAnimationStarted?.Invoke();
             _currentSequenceAnimation = sequence;
         }
         

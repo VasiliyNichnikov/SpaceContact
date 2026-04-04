@@ -57,6 +57,9 @@ namespace Client.Game.Field
         public Transform? RightOpponentRootPlanets =>
             _rightOpponentRootPlanets;
         
+        public IReadOnlyCollection<PlanetView> ViewedOpponentPlanets => 
+            _centerOpponentPlanets;
+        
         public float DistanceBetweenCentralPlanetsByX => 
             _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
         

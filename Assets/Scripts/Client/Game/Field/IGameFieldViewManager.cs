@@ -7,6 +7,12 @@ namespace Client.Game.Field
     {
         event Action? OnViewedOpponentChanged;
         
+        event Action? OnInitialized;
+        
+        event Action? OnMovementAnimationStarted;
+        
+        event Action? OnMovementAnimationEnded;
+        
         IGamePlayer? ViewedOpponentPlayer { get; }
         
         void Init();

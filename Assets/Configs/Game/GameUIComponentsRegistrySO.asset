@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: GameUIComponentsRegistrySO
   m_EditorClassIdentifier: Client::Client.Configs.Game.GameUIComponentsRegistrySO
   _arrowsHolder: {fileID: 6075799621892926453, guid: 5c2129abfb3474e37994659c420a5c5a, type: 3}
+  _shipsOnPlanetInfoView: {fileID: 494885791809957389, guid: 25b3e9d44d8bd424f9024c1d0503a924, type: 3}

@@ -17,17 +17,17 @@ MonoBehaviour:
     PlanetPositions:
     - Comment: Center planet
       PlayerPlanetPosition: {x: 0, y: 0.5, z: -16}
-      OppositePlanetPosition: {x: 0, y: 0.5, z: 16}
+      OppositePlanetPosition: {x: 0, y: 7, z: -10}
     - Comment: Right planet 1
       PlayerPlanetPosition: {x: 4, y: 0.5, z: -15}
-      OppositePlanetPosition: {x: 4, y: 0.5, z: 15}
+      OppositePlanetPosition: {x: 4, y: 7, z: -11}
     - Comment: Right planet 2
       PlayerPlanetPosition: {x: 8, y: 0.5, z: -14}
-      OppositePlanetPosition: {x: 8, y: 0.5, z: 14}
+      OppositePlanetPosition: {x: 8, y: 7, z: -12}
     - Comment: Left planet 1
       PlayerPlanetPosition: {x: -4, y: 0.5, z: -15}
-      OppositePlanetPosition: {x: -4, y: 0.5, z: 15}
+      OppositePlanetPosition: {x: -4, y: 7, z: -10}
     - Comment: Left planet 2
       PlayerPlanetPosition: {x: -8, y: 0.5, z: -14}
-      OppositePlanetPosition: {x: -8, y: 0.5, z: 14}
+      OppositePlanetPosition: {x: -8, y: 7, z: -12}
   _distanceBetweenCentralPlanetsByX: 100

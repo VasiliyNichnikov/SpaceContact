@@ -18,6 +18,9 @@ namespace Client.Game.Planets
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
             ChangeColorPlanet();
         }
+        
+        public int PlanetId => 
+            _viewModel.PlanetId;
 
         private void ChangeColorPlanet()
         {

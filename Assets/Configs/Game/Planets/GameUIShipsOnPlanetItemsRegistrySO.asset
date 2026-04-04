@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d2f82fba33847559a59ab4353f0f563, type: 3}
+  m_Name: GameUIShipsOnPlanetItemsRegistrySO
+  m_EditorClassIdentifier: Client::Client.Configs.Game.GameUIShipsOnPlanetItemsRegistrySO
+  _shipsInfoOnPlanetItemView: {fileID: 2325413266543537244, guid: 46fad338c5dce4f03af4f965d9684b83, type: 3}

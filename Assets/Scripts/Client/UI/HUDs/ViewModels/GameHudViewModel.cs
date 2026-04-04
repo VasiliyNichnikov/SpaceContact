@@ -29,6 +29,7 @@ namespace Client.UI.HUDs.ViewModels
             _fieldViewManager = fieldViewManager;
             PlayerHandViewModel = CreatePlayerHandViewModel();
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
+            _fieldViewManager.OnInitialized += OpponentChanged;
             _destinyCardController.Changed += OnDestinyCardChanged;
             OpponentChanged();
         }
@@ -47,6 +48,7 @@ namespace Client.UI.HUDs.ViewModels
         {
             TopViewModel.Dispose();
             _destinyCardController.Changed -= OnDestinyCardChanged;
+            _fieldViewManager.OnInitialized -= OpponentChanged;
             _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
         }
 

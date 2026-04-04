@@ -5,6 +5,7 @@ using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
 using Client.Helpers;
+using Client.UI;
 using Client.UI.Dialogs.Game.PlayerChoice.ViewModels;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Loaders;
@@ -36,6 +37,9 @@ namespace App.Game
         [SerializeField]
         private GameConfigs _gameConfigs = null!;
         
+        [SerializeField]
+        private Camera _mainCamera = null!;
+        
         protected override void Configure(IContainerBuilder builder)
         {
             var netManager = FindFirstObjectByType<NetworkManager>();
@@ -43,6 +47,7 @@ namespace App.Game
             // Components
             builder.RegisterComponent(_networkGameController).AsImplementedInterfaces();
             builder.RegisterInstance(_gameNetworkRegistrySo);
+            builder.RegisterInstance(_mainCamera);
             
             // Singletons
             builder.Register<PhaseRegistry>(Lifetime.Singleton).AsSelf();
@@ -62,6 +67,7 @@ namespace App.Game
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameFieldViewManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GamePlanetInfoPresenter>(Lifetime.Singleton).AsSelf();
             
             // Game State Machine
             builder.Register<GameStateMachine>(Lifetime.Singleton).AsImplementedInterfaces().AsSelf();
@@ -71,6 +77,7 @@ namespace App.Game
             builder.Register<PlayerPlanetsFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<SpaceCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameShipsOnPlanetInfoViewFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
             builder.Register<GameFieldPlanetsViewProvider>(Lifetime.Singleton).AsSelf();

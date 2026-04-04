@@ -24,6 +24,7 @@ namespace App.Game.Services
         private readonly GameStateMachine _gameStateMachine;
         private readonly GameServerCoreLoader _gameServerCoreLoader;
         private readonly GamePlayersLoader _gamePlayersLoader;
+        private readonly IObjectResolver _resolver;
 
         public GameStartupService(
             NetworkManager networkManager,
@@ -33,7 +34,7 @@ namespace App.Game.Services
             IServerStateMachineNetwork serverStateMachineNetwork,
             GameNetLoader gameNetLoader,
             ContainerRegistrationService containerRegistrationService,
-            IObjectResolver gameResolver,
+            IObjectResolver resolver,
             GameStateMachine gameStateMachine,
             GameServerCoreLoader gameServerCoreLoader,
             GamePlayersLoader gamePlayersLoader)
@@ -48,6 +49,7 @@ namespace App.Game.Services
             _gameStateMachine = gameStateMachine;
             _gameServerCoreLoader = gameServerCoreLoader;
             _gamePlayersLoader = gamePlayersLoader;
+            _resolver = resolver;
             
             if (_networkManager.SceneManager != null)
             {
@@ -55,14 +57,18 @@ namespace App.Game.Services
             }
             
             _gameNetLoader.OnGameIsReady += GameReady;
-            _containerRegistrationService.Register(ContainerType.Game, gameResolver);
+            _containerRegistrationService.Register(ContainerType.Game, resolver);
         }
         
         void ITickable.Tick() => 
             _gameStateMachine.Update();
         
-        void IStartable.Start() => 
+        void IStartable.Start()
+        {
+            // Если не сделать - код не придет в исполнение
+            _resolver.Resolve<GamePlanetInfoPresenter>();
             _dialogsManager.CloseOpenedDialogs();
+        }
         
         void IDisposable.Dispose()
         {

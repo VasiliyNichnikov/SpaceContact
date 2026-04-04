@@ -24,6 +24,9 @@ namespace Client.Configs.Game
         [SerializeField]
         private GameUIComponentsRegistrySO _uiComponentsRegistrySO = null!;
         
+        [SerializeField]
+        private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO;
+        
         public void Build(IContainerBuilder builder)
         {
             builder.RegisterInstance(_rulesOfPlanetsConfig.BuildData());
@@ -32,6 +35,7 @@ namespace Client.Configs.Game
             builder.RegisterInstance(_cosmicPrefabStore);
             builder.RegisterInstance(_handDisplayConfig.BuildData());
             builder.RegisterInstance(_uiComponentsRegistrySO);
+            builder.RegisterInstance(_uiShipsOnPlanetItemsRegistrySO);
         }
     }
 }
