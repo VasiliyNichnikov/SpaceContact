@@ -1,5 +1,5 @@
 {
-    "name": "GeneralUtils",
+    "name": "CoreConvertor",
     "rootNamespace": "",
     "references": [
         "GUID:f17862d2f70a59441b796979866a1a1c"

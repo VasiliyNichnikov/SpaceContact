@@ -118,7 +118,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Client::Client.UI.Dialogs.Lobby.LobbyDialog
   _animation: {fileID: 0}
   _playersContainer: {fileID: 1397004862961022888}
-  _lobbyPlayerView: {fileID: 5606058976915879634, guid: d8c4a86a733e3c74d83dc6fba07b848d, type: 3}
+  _slotView: {fileID: 7045615259525748268, guid: 138dde4bd0ba347b1bd9ff1c40e74850, type: 3}
   _startGameButtonGameObject: {fileID: 9189835969515659247}
 --- !u!1 &3481948069861706413
 GameObject:

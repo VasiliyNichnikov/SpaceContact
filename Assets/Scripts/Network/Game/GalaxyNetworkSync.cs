@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Core.Game;
 using Core.Game.Dto.Requests;
 using Core.Game.Dto.States;
+using GeneralUtils;
 using Logs;
 using Network.Infrastructure;
 using Network.Requests;
-using Network.Utils;
 using Unity.Netcode;
 using VContainer;
 

@@ -9,12 +9,12 @@ using Client.UI;
 using Client.UI.Dialogs;
 using Client.UI.Dialogs.Lobby;
 using Core;
-using Core.Lobby;
-using Core.Player;
+using Core.User;
 using Network;
 using Network.Configs;
 using Network.Infrastructure;
 using Network.Requests;
+using Network.User;
 using ServiceLayer;
 using Unity.Netcode;
 using UnityEngine;
@@ -67,16 +67,21 @@ namespace App
             // Singletons
             builder.Register<JsonNetworkSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<NetworkAutoInjector>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<PlayersRegistry>(Lifetime.Singleton).AsSelf();
             builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ContainerRegistrationService>(Lifetime.Singleton).AsSelf();
-            builder.Register<LobbyColorProvider>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ProjectNetLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<CoreNetworkContext>(Lifetime.Singleton).AsSelf();
+            builder.Register<UserServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<ServerUsersRepository>(Lifetime.Singleton).AsSelf();
+            builder.Register<ClientUsersRepository>(Lifetime.Singleton).AsSelf();
+            builder.Register<UsersColorController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+            builder.Register<UsersSeatsController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
             
             // Factories
             builder.Register<DialogsFactory>(Lifetime.Singleton);
+            builder.Register<ServerUserFactory>(Lifetime.Singleton);
+            builder.Register<ClientUserFactory>(Lifetime.Singleton);
             
             // Services
             builder.Register<LobbyService>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -87,6 +92,7 @@ namespace App
             // Requests
             builder.Register<NetworkRequestRouter>(Lifetime.Singleton).AsSelf();
             builder.Register<NetworkService>(Lifetime.Singleton).AsImplementedInterfaces();
+            RegisterHandlerRequests(builder);
         }
 
         private static void RegisterViewModels(IContainerBuilder builder)
@@ -97,6 +103,20 @@ namespace App
         private static void RegisterViewModel<T>(IContainerBuilder builder)
         {
             builder.Register<T>(Lifetime.Transient);
+        }
+
+        private static void RegisterHandlerRequests(IContainerBuilder builder)
+        {
+            RegisterHandlerRequest<ChangeUserNameNetworkRequestHandler>(builder);
+            RegisterHandlerRequest<ChangeUserColorIdNetworkRequestHandler>(builder);
+            RegisterHandlerRequest<GetUserStateNetworkRequestHandler>(builder);
+            RegisterHandlerRequest<ChangeUserNumberSeatNetworkRequestHandler>(builder);
+        }
+
+        private static void RegisterHandlerRequest<TRequest>(IContainerBuilder builder)
+            where TRequest : INetworkRequestHandler
+        {
+            builder.Register<TRequest>(Lifetime.Singleton).As<INetworkRequestHandler>();
         }
     }
 }

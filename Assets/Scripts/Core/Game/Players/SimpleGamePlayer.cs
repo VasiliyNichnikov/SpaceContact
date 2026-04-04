@@ -4,7 +4,7 @@ using Core.EngineData;
 using Core.Game.Hands;
 using Core.Game.Planets;
 using Core.Game.Players.Visitors;
-using Core.Player;
+using Core.User;
 
 namespace Core.Game.Players
 {
@@ -12,10 +12,12 @@ namespace Core.Game.Players
     {
         private readonly GamePlayerHiddenHandController _handController = new();
         
-        public SimpleGamePlayer(IPlayerManager core)
+        public SimpleGamePlayer(
+            IUser user, 
+            Color playerColor)
         {
-            PlayerId = core.ClientId;
-            Color = core.Color;
+            PlayerId = user.ClientId;
+            Color = playerColor;
         }
         
         public ulong PlayerId { get; }

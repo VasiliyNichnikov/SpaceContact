@@ -6,7 +6,7 @@ using Core.Game.Dto.States.Cards;
 using Core.Game.Hands;
 using Core.Game.Planets;
 using Core.Game.Players.Visitors;
-using Core.Player;
+using Core.User;
 
 namespace Core.Game.Players
 {
@@ -14,11 +14,14 @@ namespace Core.Game.Players
     {
         private readonly GamePlayerHandController _handController;
         
-        public ServerGamePlayer(IPlayerManager playerCore, SpaceCardFactory spaceCardFactory)
+        public ServerGamePlayer(
+            IUser user, 
+            SpaceCardFactory spaceCardFactory,
+            Color playerColor)
         {
-            PlayerId = playerCore.ClientId;
-            Color = playerCore.Color;
-            IsOwner = playerCore.IsCurrentPlayer;
+            PlayerId = user.ClientId;
+            Color = playerColor;
+            IsOwner = user.IsCurrentPlayer;
             _handController = new GamePlayerHandController(spaceCardFactory);
         }
         

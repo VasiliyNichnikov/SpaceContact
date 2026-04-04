@@ -11,9 +11,9 @@ namespace Client.UI.Dialogs.Lobby
     {
         [SerializeField]
         private RectTransform _playersContainer = null!;
-        
+
         [SerializeField]
-        private LobbyPlayerView _lobbyPlayerView = null!;
+        private LobbySlotView _slotView = null!;
         
         [SerializeField]
         private GameObject _startGameButtonGameObject = null!;
@@ -40,7 +40,7 @@ namespace Client.UI.Dialogs.Lobby
 
         private void RefreshPlayersBlocks()
         {
-            var viewModels = _viewModel.Players.ToList();
+            var viewModels = _viewModel.Slots.ToList();
 
             if (viewModels.Count == 0)
             {
@@ -49,7 +49,7 @@ namespace Client.UI.Dialogs.Lobby
             
             UIUtils.CreateRequiredNumberOfItems(
                 _playersContainer,
-                _lobbyPlayerView,
+                _slotView,
                 viewModels,
                 (view, viewModel) => { view.Init(viewModel); });
         }

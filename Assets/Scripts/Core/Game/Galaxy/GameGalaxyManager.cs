@@ -6,13 +6,13 @@ using Core.Game.Dto.States;
 using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Players.Visitors;
-using Core.Player;
+using Core.User;
 
 namespace Core.Game.Galaxy
 {
     public class GameGalaxyManager : IGalaxyManagerNetwork
     {
-        private readonly PlayersRegistry _playersRegistry;
+        private readonly ClientUsersRepository _usersRepository;
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         private readonly RulesOfPlanetsData _rulesOfPlanets;
         
@@ -20,11 +20,11 @@ namespace Core.Game.Galaxy
         private readonly Dictionary<int, Planet> _planetById = new();
         
         public GameGalaxyManager(
-            PlayersRegistry playersRegistry,
+            ClientUsersRepository usersRepository,
             GamePlayersRegistry gamePlayersRegistry,
             RulesOfPlanetsData rulesOfPlanets)
         {
-            _playersRegistry = playersRegistry;
+            _usersRepository = usersRepository;
             _gamePlayersRegistry = gamePlayersRegistry;
             InitPlanetsAndShips(rulesOfPlanets);
         }
@@ -67,8 +67,8 @@ namespace Core.Game.Galaxy
             var shipId = 0;
             var planetId = 0;
 
-            var sortedPlayers = _playersRegistry
-                .Players
+            var sortedPlayers = _usersRepository
+                .Users
                 .OrderBy(p => p.ClientId);
             
             var shipsByPlayer = new Dictionary<ulong, List<SpaceShip>>();

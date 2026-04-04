@@ -4,5 +4,10 @@ namespace Network.Requests
     {
         GetGalaxyState,
         GetPlayerHandState,
+        GetUserState,
+        
+        PostChangeUserName,
+        PostChangeUserColorId,
+        PostChangeUserSeatNumber,
     }
 }

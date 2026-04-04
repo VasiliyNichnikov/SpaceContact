@@ -11,13 +11,16 @@ namespace Client.Configs.Menu
         [SerializeField] 
         private Color[] _colorsOfPlayers = null!;
 
+        [SerializeField, Range(1, 8)]
+        private int _maxNumberOfPlayers;
+        
         public LobbySettingsData BuildData()
         {
             var coreColors = _colorsOfPlayers
                 .Select(ColorConvertor.FromUnityColor)
                 .ToArray();
             
-            return new LobbySettingsData(coreColors);
+            return new LobbySettingsData(coreColors, _maxNumberOfPlayers);
         }
     }
 }

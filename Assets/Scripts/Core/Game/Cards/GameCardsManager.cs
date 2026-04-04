@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Game.Dto.Rules.Cards;
 using Core.Game.Dto.States.Cards;
-using Core.Player;
+using Core.User;
 using Logs;
 
 namespace Core.Game.Cards
@@ -19,11 +19,11 @@ namespace Core.Game.Cards
         
         private DestinyCardStateData? _currentDestinyCard;
         
-        public GameCardsManager(CardsData data, PlayersRegistry registry)
+        public GameCardsManager(CardsData data, ClientUsersRepository usersRepository)
         {
             _data = data;
             _collectedSpaceCards = CreateCollectedSpaceCards(_data);
-            _collectedDestinyCards = CreateCollectedDestinyCards(_data, registry);
+            _collectedDestinyCards = CreateCollectedDestinyCards(_data, usersRepository);
         }
 
         PlayerHandStateData IGameCardsManager.CreatePlayerHand()
@@ -100,7 +100,7 @@ namespace Core.Game.Cards
             return new Queue<SpaceCardStateData>(cards);
         }
 
-        private static Queue<DestinyCardStateData> CreateCollectedDestinyCards(CardsData data, PlayersRegistry registry)
+        private static Queue<DestinyCardStateData> CreateCollectedDestinyCards(CardsData data, ClientUsersRepository usersRepository)
         {
             var cards = new List<DestinyCardStateData>();
             var generationData = data.DestinyCardsGeneration;
@@ -111,10 +111,10 @@ namespace Core.Game.Cards
                 cards.Add(jokerCard);
             }, generationData.NumberOfJokers);
 
-            var playersCount = registry.Players.Count;
+            var playersCount = usersRepository.Users.Count;
             var numberOfColorCards = generationData.GetNumberOfColorCards(playersCount);
 
-            foreach (var player in registry.Players)
+            foreach (var player in usersRepository.Users)
             {
                 CallMethodMultipleTimes(() =>
                 {

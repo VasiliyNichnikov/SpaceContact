@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Player;
+using Core.User;
 using Logs;
 using Network.Configs;
 using Unity.Netcode;
@@ -15,7 +15,7 @@ namespace Network.Game
         private readonly NetworkManager _networkManager;
         private readonly IObjectResolver _objectResolver;
         private readonly GameNetworkRegistrySO _gameNetworkRegistrySO;
-        private readonly PlayersRegistry _playersRegistry;
+        private readonly ClientUsersRepository _usersRepository;
 
         private GalaxyNetworkSync? _galaxyNetworkSync;
         private DestinyCardNetworkSync? _destinyCardNetworkSync;
@@ -25,12 +25,12 @@ namespace Network.Game
             NetworkManager networkManager,
             IObjectResolver objectResolver,
             GameNetworkRegistrySO gameNetworkRegistrySO,
-            PlayersRegistry playersRegistry)
+            ClientUsersRepository usersRepository)
         {
             _networkManager = networkManager;
             _objectResolver = objectResolver;
             _gameNetworkRegistrySO = gameNetworkRegistrySO;
-            _playersRegistry = playersRegistry;
+            _usersRepository = usersRepository;
         }
 
         public event Action? OnGameIsReady;
@@ -89,9 +89,9 @@ namespace Network.Game
         
         private void LoadPlayersNetwork()
         {
-            var players = _playersRegistry.Players;
+            var users = _usersRepository.Users;
 
-            foreach (var player in players)
+            foreach (var player in users)
             {
                 var gamePlayerPrefab = _gameNetworkRegistrySO.GamePlayerNetworkSync;
                 var gamePlayerInstance = _objectResolver.Instantiate(gamePlayerPrefab, null);

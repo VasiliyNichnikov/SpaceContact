@@ -1,26 +1,36 @@
 using System;
-using Core.Lobby;
-using Core.Player;
+using System.Threading.Tasks;
+using Core.User;
 using CoreConvertor;
+using GeneralUtils;
 using Reactivity;
 using UnityEngine;
 using Logger = Logs.Logger;
 
 namespace Client.UI.Dialogs.Lobby.ViewModels
 {
-    public class LobbyPlayerViewModel : IDisposable
+    public class LobbyPlayerViewModel : ILobbySlotViewModel, IDisposable
     {
         private readonly ReactivityProperty<string> _name = new();
         private readonly ReactivityProperty<Color> _color = new();
+
+        private readonly IUsersColorProvider _colorProvider;
+        private readonly IUserServerInteraction _userServerInteraction;
+        private readonly IUser _user;
+
+        private bool _isWaitingResponse;
         
-        private readonly IPlayerManager _player;
-        
-        public LobbyPlayerViewModel(IPlayerManager player, ILobbyColorProvider colorProvider)
+        public LobbyPlayerViewModel(
+            IUser user, 
+            IUsersColorProvider colorProvider,
+            IUserServerInteraction userServerInteraction)
         {
-            _player = player;
-            ColorSelectionPanelViewModel = new LobbyColorSelectionPanelViewModel(player.SetColor, colorProvider);
-            _player.OnPlayerInfoUpdated += PlayerInfoUpdated;
-            PlayerInfoUpdated();
+            _user = user;
+            _colorProvider = colorProvider;
+            _userServerInteraction = userServerInteraction;
+            ColorSelectionPanelViewModel = new LobbyColorSelectionPanelViewModel(ChangeColor, colorProvider);
+            _user.Changed += UserInfoUpdated;
+            UserInfoUpdated();
         }
         
         public IReactivityProperty<string> Name => 
@@ -30,10 +40,10 @@ namespace Client.UI.Dialogs.Lobby.ViewModels
             _color;
 
         public bool IsMe => 
-            _player.IsCurrentPlayer;
+            _user.IsCurrentPlayer;
         
         public bool IsOwnerLobby => 
-            _player.IsOwnerLobby;
+            _user.IsOwnerLobby;
         
         public LobbyColorSelectionPanelViewModel ColorSelectionPanelViewModel { get; }
 
@@ -47,12 +57,17 @@ namespace Client.UI.Dialogs.Lobby.ViewModels
 
         public void ChangeNameClickHandler(string newName)
         {
-            if (string.Equals(newName, _player.Name, StringComparison.Ordinal))
+            if (_isWaitingResponse)
             {
                 return;
             }
             
-            _player.SetName(newName);
+            if (string.Equals(newName, _user.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+            
+            ChangeNameAsync(newName).FireAndForget();
         }
 
         public void ToLeaveButtonClick()
@@ -63,13 +78,50 @@ namespace Client.UI.Dialogs.Lobby.ViewModels
         public void Dispose()
         {
             ColorSelectionPanelViewModel.Dispose();
-            _player.OnPlayerInfoUpdated -= PlayerInfoUpdated;
+            _user.Changed -= UserInfoUpdated;
         }
 
-        private void PlayerInfoUpdated()
+        private void UserInfoUpdated()
         {
-            _name.Value = _player.Name;
-            _color.Value = ColorConvertor.FromCoreColor(_player.Color);
+            _name.Value = _user.Name;
+            var color = _colorProvider.GetColor(_user.ColorId);
+            _color.Value = ColorConvertor.FromCoreColor(color);
+        }
+
+        private void ChangeColor(int colorId)
+        {
+            if (_isWaitingResponse)
+            {
+                return;
+            }
+            
+            ChangeColorAsync(colorId).FireAndForget();
+        }
+
+        private async Task ChangeColorAsync(int colorId)
+        {
+            if (_isWaitingResponse)
+            {
+                Logger.Error("LobbyPlayerViewModel.ChangeColorAsync: wait for a response from the server.");
+                return;
+            }
+            
+            _isWaitingResponse = true;
+            await _userServerInteraction.ChangeMyColorAsync(colorId);
+            _isWaitingResponse = false;
+        }
+        
+        private async Task ChangeNameAsync(string newName)
+        {
+            if (_isWaitingResponse)
+            {
+                Logger.Error("LobbyPlayerViewModel.ChangeNameAsync: wait for a response from the server.");
+                return;
+            }
+            
+            _isWaitingResponse = true;
+            await _userServerInteraction.ChangeMyNameAsync(newName);
+            _isWaitingResponse = false;
         }
     }
 }
