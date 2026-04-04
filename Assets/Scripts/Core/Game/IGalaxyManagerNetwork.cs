@@ -7,6 +7,8 @@ namespace Core.Game
     {
         event Action? OnStateChanged;
 
+        void Init();
+
         void ServerGalaxyLoaded();
         
         void ApplyStateData(GalaxyStateData data);

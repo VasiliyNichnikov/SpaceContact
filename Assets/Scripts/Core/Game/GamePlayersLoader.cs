@@ -1,10 +1,11 @@
+using System.Linq;
 using Core.Game.Cards;
 using Core.Game.Players;
 using Core.User;
 
 namespace Core.Game
 {
-    public class GamePlayersLoader
+    public sealed class GamePlayersLoader
     {
         private readonly CoreNetworkContext _networkContext;
         private readonly ClientUsersRepository _usersRepository;
@@ -33,29 +34,33 @@ namespace Core.Game
         
         private void LoadPlayers()
         {
-            foreach (var playerCore in _usersRepository.Users)
+            var sortedUsersBySeatNumber = _usersRepository.Users.OrderBy(user => user.SeatNumber);
+
+            var order = 0;
+            
+            foreach (var user in sortedUsersBySeatNumber)
             {
-                var gamePlayer = CreateGamePlayer(playerCore);
-                _gamePlayersRegistry.AddPlayer(gamePlayer, playerCore.IsCurrentPlayer);
+                var gamePlayer = CreateGamePlayer(user, order++);
+                _gamePlayersRegistry.AddPlayer(gamePlayer, user.IsCurrentPlayer);
             }
         }
 
-        private IGamePlayer CreateGamePlayer(IUser user)
+        private IGamePlayer CreateGamePlayer(IUser user, int order)
         {
             IGamePlayer player;
             var playerColor = _usersColorProvider.GetColor(user.ColorId);
             
             if (_networkContext.IsServer)
             {
-                player = new ServerGamePlayer(user, _spaceCardFactory, playerColor);
+                player = new ServerGamePlayer(user, _spaceCardFactory, playerColor, order);
             }
             else if (user.IsCurrentPlayer)
             {
-                player = new OwnerGamePlayer(user, _spaceCardFactory, playerColor);
+                player = new SelfGamePlayer(user, _spaceCardFactory, playerColor, order);
             }
             else
             {
-                player = new SimpleGamePlayer(user, playerColor);
+                player = new PublicGamePlayer(user, playerColor, order);
             }
             
             return player;

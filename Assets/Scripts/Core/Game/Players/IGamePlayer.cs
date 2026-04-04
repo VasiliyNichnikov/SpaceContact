@@ -13,6 +13,11 @@ namespace Core.Game.Players
     {
         ulong PlayerId { get; }
         
+        /// <summary>
+        /// Порядок хода
+        /// </summary>
+        int Order { get; }
+        
         Color Color { get; }
         
         bool IsOwner { get; }

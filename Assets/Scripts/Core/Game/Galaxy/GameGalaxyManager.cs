@@ -6,13 +6,11 @@ using Core.Game.Dto.States;
 using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Players.Visitors;
-using Core.User;
 
 namespace Core.Game.Galaxy
 {
     public class GameGalaxyManager : IGalaxyManagerNetwork
     {
-        private readonly ClientUsersRepository _usersRepository;
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         private readonly RulesOfPlanetsData _rulesOfPlanets;
         
@@ -20,16 +18,19 @@ namespace Core.Game.Galaxy
         private readonly Dictionary<int, Planet> _planetById = new();
         
         public GameGalaxyManager(
-            ClientUsersRepository usersRepository,
             GamePlayersRegistry gamePlayersRegistry,
             RulesOfPlanetsData rulesOfPlanets)
         {
-            _usersRepository = usersRepository;
             _gamePlayersRegistry = gamePlayersRegistry;
-            InitPlanetsAndShips(rulesOfPlanets);
+            _rulesOfPlanets = rulesOfPlanets;
         }
         
         public event Action? OnStateChanged;
+
+        void IGalaxyManagerNetwork.Init()
+        {
+            InitPlanetsAndShips(_rulesOfPlanets);
+        }
 
         public void ServerGalaxyLoaded() => 
             UpdatePlayersPlanets();
@@ -67,9 +68,9 @@ namespace Core.Game.Galaxy
             var shipId = 0;
             var planetId = 0;
 
-            var sortedPlayers = _usersRepository
-                .Users
-                .OrderBy(p => p.ClientId);
+            var sortedPlayers = _gamePlayersRegistry
+                .Players
+                .OrderBy(p => p.Order);
             
             var shipsByPlayer = new Dictionary<ulong, List<SpaceShip>>();
             
@@ -77,15 +78,15 @@ namespace Core.Game.Galaxy
             {
                 for (var i = 0; i < rules.NumberOfShipsOnPlanet; i++)
                 {
-                    var createdShip = new SpaceShip(shipId, player.ClientId);
+                    var createdShip = new SpaceShip(shipId, player.PlayerId);
                     
-                    if (shipsByPlayer.TryGetValue(player.ClientId, out var ships))
+                    if (shipsByPlayer.TryGetValue(player.PlayerId, out var ships))
                     {
                         ships.Add(createdShip);
                     }
                     else
                     {
-                        shipsByPlayer.Add(player.ClientId, new List<SpaceShip> { createdShip });
+                        shipsByPlayer.Add(player.PlayerId, new List<SpaceShip> { createdShip });
                     }
                     
                     shipId++;
@@ -93,8 +94,8 @@ namespace Core.Game.Galaxy
                 
                 for (var i = 0; i < rules.NumberOfPlanetsPlayer; i++)
                 {
-                    var shipsOnPlanet = shipsByPlayer[player.ClientId];
-                    var createdPlanet = CreatePlanet(planetId, player.ClientId, shipsOnPlanet);
+                    var shipsOnPlanet = shipsByPlayer[player.PlayerId];
+                    var createdPlanet = CreatePlanet(planetId, player.PlayerId, shipsOnPlanet);
                     _planetById[planetId] = createdPlanet;
                     planetId++;
                 }

@@ -12,10 +12,10 @@ namespace Core.Game.Players.Visitors
         public void Visit(ServerGamePlayer player) => 
             player.UpdateHandState(_handStateData);
 
-        public void Visit(OwnerGamePlayer player) => 
+        public void Visit(SelfGamePlayer player) => 
             player.UpdateHandState(_handStateData);
 
-        public void Visit(SimpleGamePlayer player) => 
+        public void Visit(PublicGamePlayer player) => 
             player.SetNumberOfCards(_handStateData.NumberOfCards);
     }
 }

@@ -4,8 +4,8 @@ namespace Core.Game.Players.Visitors
     {
         void Visit(ServerGamePlayer player);
         
-        void Visit(OwnerGamePlayer player);
+        void Visit(SelfGamePlayer player);
         
-        void Visit(SimpleGamePlayer player);
+        void Visit(PublicGamePlayer player);
     }
 }

@@ -17,16 +17,20 @@ namespace Core.Game.Players
         public ServerGamePlayer(
             IUser user, 
             SpaceCardFactory spaceCardFactory,
-            Color playerColor)
+            Color playerColor,
+            int order)
         {
             PlayerId = user.ClientId;
             Color = playerColor;
             IsOwner = user.IsCurrentPlayer;
+            Order = order;
             _handController = new GamePlayerHandController(spaceCardFactory);
         }
         
         public ulong PlayerId { get; }
         
+        public int Order { get; }
+
         public Color Color { get; }
         
         public bool IsOwner { get; }

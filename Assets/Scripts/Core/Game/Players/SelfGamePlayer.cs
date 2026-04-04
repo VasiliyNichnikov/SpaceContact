@@ -10,23 +10,27 @@ using Core.User;
 
 namespace Core.Game.Players
 {
-    public class OwnerGamePlayer : IGamePlayer
+    public class SelfGamePlayer : IGamePlayer
     {
         private readonly GamePlayerHandController _handController;
         
-        public OwnerGamePlayer(
+        public SelfGamePlayer(
             IUser user, 
             SpaceCardFactory spaceCardFactory,
-            Color playerColor)
+            Color playerColor,
+            int order)
         {
             PlayerId = user.ClientId;
             IsOwner = user.IsCurrentPlayer;
             Color = playerColor;
+            Order = order;
             _handController = new GamePlayerHandController(spaceCardFactory);
         }
         
         public ulong PlayerId { get; }
         
+        public int Order { get; }
+
         public Color Color { get; }
 
         public bool IsOwner { get; }

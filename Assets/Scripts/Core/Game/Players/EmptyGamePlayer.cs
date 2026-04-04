@@ -21,6 +21,8 @@ namespace Core.Game.Players
         
         public ulong PlayerId => ulong.MinValue;
         
+        public int Order => int.MaxValue;
+
         public Color Color => default;
         
         public bool IsOwner => false;

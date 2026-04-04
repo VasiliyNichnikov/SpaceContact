@@ -8,20 +8,24 @@ using Core.User;
 
 namespace Core.Game.Players
 {
-    public class SimpleGamePlayer : IGamePlayer
+    public class PublicGamePlayer : IGamePlayer
     {
         private readonly GamePlayerHiddenHandController _handController = new();
         
-        public SimpleGamePlayer(
+        public PublicGamePlayer(
             IUser user, 
-            Color playerColor)
+            Color playerColor,
+            int order)
         {
             PlayerId = user.ClientId;
             Color = playerColor;
+            Order = order;
         }
         
         public ulong PlayerId { get; }
         
+        public int Order { get; }
+
         public Color Color { get; }
         
         public bool IsOwner => false;

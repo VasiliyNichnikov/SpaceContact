@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Core.Game.Dto.Rules.Cards;
 using Core.Game.Dto.States.Cards;
-using Core.User;
+using Core.Game.Players;
 using Logs;
 
 namespace Core.Game.Cards
@@ -12,18 +12,25 @@ namespace Core.Game.Cards
         private static readonly Random _random = new();
 
         private readonly CardsData _data;
-        private readonly Queue<SpaceCardStateData> _collectedSpaceCards;
-        private readonly Queue<DestinyCardStateData> _collectedDestinyCards;
+        private readonly GamePlayersRegistry _playersRegistry;
+        
+        private readonly Queue<SpaceCardStateData> _collectedSpaceCards = new();
+        private readonly Queue<DestinyCardStateData> _collectedDestinyCards = new();
 
         private List<DestinyCardStateData>? _discardDestinyCards; 
         
         private DestinyCardStateData? _currentDestinyCard;
         
-        public GameCardsManager(CardsData data, ClientUsersRepository usersRepository)
+        public GameCardsManager(CardsData data, GamePlayersRegistry playersRegistry)
         {
             _data = data;
-            _collectedSpaceCards = CreateCollectedSpaceCards(_data);
-            _collectedDestinyCards = CreateCollectedDestinyCards(_data, usersRepository);
+            _playersRegistry = playersRegistry;
+        }
+
+        void IGameCardsManager.Init()
+        {
+            CollectSpaceCards(_collectedSpaceCards, _data);
+            CollectDestinyCards(_collectedDestinyCards, _data, _playersRegistry.Players);
         }
 
         PlayerHandStateData IGameCardsManager.CreatePlayerHand()
@@ -66,7 +73,7 @@ namespace Core.Game.Cards
             return _currentDestinyCard.Value;
         }
 
-        private static Queue<SpaceCardStateData> CreateCollectedSpaceCards(CardsData data)
+        private static void CollectSpaceCards(Queue<SpaceCardStateData> deck, CardsData data)
         {
             var cards = new List<SpaceCardStateData>();
             var decks = data.Decks;
@@ -97,10 +104,13 @@ namespace Core.Game.Cards
             
             Shuffle(cards);
 
-            return new Queue<SpaceCardStateData>(cards);
+            foreach (var card in cards)
+            {
+                deck.Enqueue(card);
+            }
         }
 
-        private static Queue<DestinyCardStateData> CreateCollectedDestinyCards(CardsData data, ClientUsersRepository usersRepository)
+        private static void CollectDestinyCards(Queue<DestinyCardStateData> deck, CardsData data, IReadOnlyCollection<IGamePlayer> players)
         {
             var cards = new List<DestinyCardStateData>();
             var generationData = data.DestinyCardsGeneration;
@@ -111,14 +121,14 @@ namespace Core.Game.Cards
                 cards.Add(jokerCard);
             }, generationData.NumberOfJokers);
 
-            var playersCount = usersRepository.Users.Count;
+            var playersCount = players.Count;
             var numberOfColorCards = generationData.GetNumberOfColorCards(playersCount);
 
-            foreach (var player in usersRepository.Users)
+            foreach (var player in players)
             {
                 CallMethodMultipleTimes(() =>
                 {
-                    var damageStateCard = DestinyCardStateData.ColorCard(player.ClientId);
+                    var damageStateCard = DestinyCardStateData.ColorCard(player.PlayerId);
                     cards.Add(damageStateCard);
                 }, numberOfColorCards);
             }
@@ -126,8 +136,11 @@ namespace Core.Game.Cards
             // Еще надо добавить специфичные карты
             
             Shuffle(cards);
-            
-            return new Queue<DestinyCardStateData>(cards);
+
+            foreach (var card in cards)
+            {
+                deck.Enqueue(card);
+            }
         }
         
         private static void CallMethodMultipleTimes(Action action, int count)

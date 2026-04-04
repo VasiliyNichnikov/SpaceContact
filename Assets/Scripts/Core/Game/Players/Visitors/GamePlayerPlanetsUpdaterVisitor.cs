@@ -17,13 +17,13 @@ namespace Core.Game.Players.Visitors
             player.LoadStartingPlanets(planets);
         }
 
-        public void Visit(OwnerGamePlayer player)
+        public void Visit(SelfGamePlayer player)
         {
             var planets = GetPlayerPlanets(player.PlayerId);
             player.LoadStartingPlanets(planets);
         }
 
-        public void Visit(SimpleGamePlayer player)
+        public void Visit(PublicGamePlayer player)
         {
             var planets = GetPlayerPlanets(player.PlayerId);
             player.LoadStartingPlanets(planets);
