@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Client.UI.Dialogs.Game.Hand.ViewModels;
 using Reactivity;
 
@@ -13,5 +14,7 @@ namespace Client.UI.HUDs.ViewModels
         IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel { get; }
         
         IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel { get; }
+        
+        IReadOnlyCollection<GamePlayerProfileViewModel> PlayerProfilesViewModels { get; }
     }
 }

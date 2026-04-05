@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Client.Game.Field;
 using Client.UI.Dialogs.Game.Hand.ViewModels;
 using Core.Game.Cards;
@@ -16,6 +18,7 @@ namespace Client.UI.HUDs.ViewModels
         private readonly GamePlayersRegistry _registry;
         private readonly IGameClientDestinyCardController _destinyCardController;
         private readonly IGameFieldViewManager _fieldViewManager;
+        private readonly List<GamePlayerProfileViewModel> _playerProfilesViewModels;
         
         public GameHudViewModel(
             GamePlayersRegistry registry, 
@@ -31,6 +34,7 @@ namespace Client.UI.HUDs.ViewModels
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
             _destinyCardController.Changed += OnDestinyCardChanged;
+            _playerProfilesViewModels = CreatePlayerProfilesViewModels();
             OpponentChanged();
         }
 
@@ -44,12 +48,22 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel => 
             _playerBlockViewModel;
 
+        public IReadOnlyCollection<GamePlayerProfileViewModel> PlayerProfilesViewModels => 
+            _playerProfilesViewModels;
+
         public void Dispose()
         {
             TopViewModel.Dispose();
             _destinyCardController.Changed -= OnDestinyCardChanged;
             _fieldViewManager.OnInitialized -= OpponentChanged;
             _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
+
+            foreach (var playerProfileViewModel in _playerProfilesViewModels)
+            {
+                playerProfileViewModel.Dispose();
+            }
+            
+            _playerProfilesViewModels.Clear();
         }
 
         private IGamePlayerHandViewModel CreatePlayerHandViewModel()
@@ -87,6 +101,11 @@ namespace Client.UI.HUDs.ViewModels
             }
             
             _destinyCardViewModel.Value = new GameDestinyCardViewModel(activeDestinyCard);
+        }
+
+        private List<GamePlayerProfileViewModel> CreatePlayerProfilesViewModels()
+        {
+            return _registry.Players.Select(player => new GamePlayerProfileViewModel(player)).ToList();
         }
     }
 }
