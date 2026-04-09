@@ -1,4 +1,5 @@
 using Network.Game;
+using Network.Game.Mutation;
 using UnityEngine;
 
 namespace Network.Configs
@@ -10,18 +11,24 @@ namespace Network.Configs
         private GalaxyNetworkSync _galaxyNetworkSync = null!;
         
         [SerializeField]
-        private GamePlayerNetworkSync _gamePlayerNetworkSync = null!;
+        private GamePlayerNetworkSync _playerNetworkSync = null!;
         
         [SerializeField]
-        private DestinyCardNetworkSync _destinyCardNetworkSync = null!;
+        private GameStatesNetworkSync _statesNetworkSync = null!;
+        
+        [SerializeField]
+        private GameEventRpcRelayNetwork _eventRpcRelayNetwork = null!;
         
         public GalaxyNetworkSync GalaxyNetworkSync => 
             _galaxyNetworkSync;
         
-        public GamePlayerNetworkSync GamePlayerNetworkSync => 
-            _gamePlayerNetworkSync;
+        public GamePlayerNetworkSync PlayerNetworkSync => 
+            _playerNetworkSync;
         
-        public DestinyCardNetworkSync DestinyCardNetworkSync =>
-            _destinyCardNetworkSync;
+        public GameStatesNetworkSync StatesNetworkSync =>
+            _statesNetworkSync;
+        
+        public GameEventRpcRelayNetwork EventRpcRelayNetwork =>
+            _eventRpcRelayNetwork;
     }
 }

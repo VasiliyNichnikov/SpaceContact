@@ -1,17 +1,17 @@
-using Core.Game.Cards;
+using Core.Game.Phases.Server;
 using Logs;
 
 namespace Core.Game.Phases
 {
     public class GameDestinyPhase : BasePhase
     {
-        private readonly IGameServerDestinyCardController? _serverDestinyCardController;
+        private readonly IGameServerDestinyPhaseResolver? _serverDestinyPhaseResolver;
         
         public GameDestinyPhase(
-            IGameServerDestinyCardController? serverDestinyCardController, 
+            IGameServerDestinyPhaseResolver? serverDestinyPhaseResolver, 
             GameStateMachine stateMachine) : base(stateMachine)
         {
-            _serverDestinyCardController = serverDestinyCardController;
+            _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
         }
 
         public override GamePhaseType Type => 
@@ -20,7 +20,7 @@ namespace Core.Game.Phases
         public override void Enter()
         {
             Logger.Warning("GameDestinyPhase.Enter");
-            _serverDestinyCardController?.Init();
+            _serverDestinyPhaseResolver?.ChooseDestiny();
         }
 
         public override void Accept(IPhaseVisitor visitor) => 

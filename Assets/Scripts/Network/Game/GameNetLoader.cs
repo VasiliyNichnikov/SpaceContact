@@ -1,26 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Core.User;
 using Logs;
 using Network.Configs;
+using Network.Game.Mutation;
 using Unity.Netcode;
 using VContainer;
 using VContainer.Unity;
 
 namespace Network.Game
 {
-    public class GameNetLoader : IDisposable
+    public sealed class GameNetLoader : IDisposable
     {
         private readonly NetworkManager _networkManager;
         private readonly IObjectResolver _objectResolver;
         private readonly GameNetworkRegistrySO _gameNetworkRegistrySO;
         private readonly ClientUsersRepository _usersRepository;
-
-        private GalaxyNetworkSync? _galaxyNetworkSync;
-        private DestinyCardNetworkSync? _destinyCardNetworkSync;
-        private readonly List<GamePlayerNetworkSync> _players = new();
-
+        private readonly Dictionary<ulong, IPrefabInitializerOnClients?> _initializers = new();
+        
         public GameNetLoader(
             NetworkManager networkManager,
             IObjectResolver objectResolver,
@@ -46,27 +43,28 @@ namespace Network.Game
             
             LoadGalaxyNetwork();
             LoadPlayersNetwork();
-            LoadDestinyCardNetwork();
+            LoadGameStatesNetwork();
+            LoadEventRpcRelayNetwork();
         }
         
         public void Dispose()
         {
-            var notLoadedPlayers = _players.Where(p => !p.Initializer.IsLoaded);
-
-            foreach (var player in notLoadedPlayers)
+            if (_initializers.Count == 0)
             {
-                player.Initializer.OnLoaded -= HandleSinglePlayerLoaded;
+                return;
             }
 
-            if (_galaxyNetworkSync != null && !_galaxyNetworkSync.Initializer.IsLoaded)
+            foreach (var initializer in _initializers.Values)
             {
-                _galaxyNetworkSync.Initializer.OnLoaded -= HandleGalaxyLoaded;
-            }
+                if (initializer == null)
+                {
+                    continue;
+                }
 
-            if (_destinyCardNetworkSync != null && !_destinyCardNetworkSync.Initializer.IsLoaded)
-            {
-                _destinyCardNetworkSync.Initializer.OnLoaded -= HandleDestinyCardLoaded;
+                initializer.OnLoaded -= CheckGameComponentsLoaded;
             }
+            
+            _initializers.Clear();
         }
 
         private void LoadGalaxyNetwork()
@@ -74,17 +72,26 @@ namespace Network.Game
             var galaxyPrefab = _gameNetworkRegistrySO.GalaxyNetworkSync;
             var galaxyInstance = _objectResolver.Instantiate(galaxyPrefab, null);
             galaxyInstance.NetworkObject.Spawn(destroyWithScene: true);
-            _galaxyNetworkSync = galaxyInstance;
-            galaxyInstance.Initializer.OnLoaded += HandleGalaxyLoaded;
+            AddToInitializer(galaxyInstance.NetworkObjectId, galaxyInstance.Initializer);
         }
 
-        private void LoadDestinyCardNetwork()
+        private void LoadGameStatesNetwork()
         {
-            var destinyCardPrefab = _gameNetworkRegistrySO.DestinyCardNetworkSync;
-            var destinyCardInstance = _objectResolver.Instantiate(destinyCardPrefab, null);
-            destinyCardInstance.NetworkObject.Spawn(destroyWithScene: true);
-            _destinyCardNetworkSync = destinyCardInstance;
-            destinyCardInstance.Initializer.OnLoaded += HandleDestinyCardLoaded;
+            var gameStatesPrefab = _gameNetworkRegistrySO.StatesNetworkSync;
+            var gameStatesInstance = _objectResolver.Instantiate(gameStatesPrefab, null);
+            gameStatesInstance.NetworkObject.Spawn(destroyWithScene: true);
+            AddToInitializer(gameStatesInstance.NetworkObjectId, gameStatesInstance.Initializer);
+        }
+
+        private void LoadEventRpcRelayNetwork()
+        {
+            var eventRpcRelayPrefab = _gameNetworkRegistrySO.EventRpcRelayNetwork;
+            var eventRpcRelayInstance = _objectResolver.Instantiate(eventRpcRelayPrefab, null);
+            eventRpcRelayInstance.NetworkObject.Spawn(destroyWithScene: true);
+            AddToInitializer(eventRpcRelayInstance.NetworkObjectId, eventRpcRelayInstance.Initializer);
+            
+            var eventBroadcaster = _objectResolver.Resolve<GameServerEventBroadcaster>();
+            eventBroadcaster.Bind(eventRpcRelayInstance);
         }
         
         private void LoadPlayersNetwork()
@@ -93,40 +100,38 @@ namespace Network.Game
 
             foreach (var player in users)
             {
-                var gamePlayerPrefab = _gameNetworkRegistrySO.GamePlayerNetworkSync;
+                var gamePlayerPrefab = _gameNetworkRegistrySO.PlayerNetworkSync;
                 var gamePlayerInstance = _objectResolver.Instantiate(gamePlayerPrefab, null);
                 gamePlayerInstance.NetworkObject.SpawnAsPlayerObject(player.ClientId, destroyWithScene: true);
-                _players.Add(gamePlayerInstance);
-                gamePlayerInstance.Initializer.OnLoaded += HandleSinglePlayerLoaded;
+                AddToInitializer(gamePlayerInstance.NetworkObjectId, gamePlayerInstance.Initializer);
             }
         }
-
-        private void HandleSinglePlayerLoaded(ulong loadedPrefabId)
-        {
-            var gamePlayer = _players.First(p => p.NetworkObjectId == loadedPrefabId);
-            gamePlayer.Initializer.OnLoaded -= HandleSinglePlayerLoaded;
-            CheckGameFullyLoaded();
-        }
-
-        private void HandleDestinyCardLoaded(ulong loadedPrefabId)
-        {
-            _destinyCardNetworkSync!.Initializer.OnLoaded -= HandleDestinyCardLoaded;
-            CheckGameFullyLoaded();
-        }
         
-        private void HandleGalaxyLoaded(ulong loadedPrefabId)
+        private void AddToInitializer(ulong networkObjectId, IPrefabInitializerOnClients initializer)
         {
-            _galaxyNetworkSync!.Initializer.OnLoaded -= HandleGalaxyLoaded;
-            CheckGameFullyLoaded();
+            if (_initializers.ContainsKey(networkObjectId))
+            {
+                Logger.Error($"{nameof(GameNetLoader)}.{nameof(AddToInitializer)}: already initializer for {networkObjectId}.");
+                return;
+            }
+            
+            initializer.OnLoaded += CheckGameComponentsLoaded;
+            _initializers.Add(networkObjectId, initializer);
         }
-        
-        private void CheckGameFullyLoaded()
-        {
-            var areAllPlayersLoaded = _players.All(p => p.Initializer.IsLoaded);
-            var isGalaxyLoaded = _galaxyNetworkSync != null && _galaxyNetworkSync.Initializer.IsLoaded;
-            var isDestinyCardLoaded = _destinyCardNetworkSync != null;
 
-            if (areAllPlayersLoaded && isGalaxyLoaded && isDestinyCardLoaded)
+        private void CheckGameComponentsLoaded(ulong loadedPrefabId)
+        {
+            if (_initializers.TryGetValue(loadedPrefabId, out var initializer) && initializer != null)
+            {
+                initializer.OnLoaded -= CheckGameComponentsLoaded;
+                _initializers.Remove(loadedPrefabId);
+            }
+            else
+            {
+                Logger.Error($"{nameof(GameNetLoader)}.{nameof(CheckGameComponentsLoaded)}: initializer for {loadedPrefabId} not found.");
+            }
+            
+            if (_initializers.Count == 0)
             {
                 OnGameIsReady?.Invoke();
             }

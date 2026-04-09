@@ -1,3 +1,4 @@
+using Core.Game.Encounter;
 using Logs;
 
 namespace Core.Game.Phases
@@ -6,14 +7,17 @@ namespace Core.Game.Phases
     {
         private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         private readonly IServerStateMachineNetwork? _serverStateMachine;
+        private readonly IGameServerEncounterManager? _serverEncounterManager;
         
         public GameInitializationPhase(
             GameStateMachine stateMachine, 
             GamePlayersPhaseTracker playersPhaseTracker,
+            IGameServerEncounterManager? serverEncounterManager,
             IServerStateMachineNetwork? serverStateMachine) : base(stateMachine)
         {
             _playersPhaseTracker = playersPhaseTracker;
             _serverStateMachine = serverStateMachine;
+            _serverEncounterManager = serverEncounterManager;
             _playersPhaseTracker.PlayerPhaseChanged += OnPlayerPhaseChanged;
         }
 
@@ -23,6 +27,7 @@ namespace Core.Game.Phases
         public override void Enter()
         {
             Logger.Warning("GameInitializationPhase.Enter");
+            _serverEncounterManager?.StartEncounter();
         }
 
         public override void Exit()

@@ -12,24 +12,17 @@ using VContainer;
 
 namespace Network.Game
 {
-    public class GalaxyNetworkSync : NetworkBehaviour
+    public sealed class GalaxyNetworkSync : BaseNetworkSync
     {
         private readonly NetworkVariable<ByteData> _galaxyState = new(
             new ByteData(),
             NetworkVariableReadPermission.Everyone,
             NetworkVariableWritePermission.Server);
-
-        /// <summary>
-        /// Only Server
-        /// </summary>
-        private readonly PrefabInitializerOnClients _initializer = new();
-
+        
         private IGalaxyManagerNetwork _netGalaxy = null!;
 
         private INetworkSerializer _serializer = null!;
         private INetworkService _networkService = null!;
-
-        public IPrefabInitializerOnClients Initializer => _initializer;
 
         [Inject]
         private void Construct(
@@ -41,16 +34,13 @@ namespace Network.Game
             _serializer = serializer;
             _networkService = networkService;
         }
-
-        public override void OnNetworkSpawn()
+        
+        protected override void OnNetworkSpawnInternal()
         {
-            _initializer.SetPrefabId(NetworkObjectId);
-
             if (IsServer)
             {
                 _netGalaxy.OnStateChanged += SendGalaxyState;
                 _netGalaxy.ServerGalaxyLoaded();
-                ReportLoadedServerRpc();
             }
             else
             {
@@ -117,18 +107,6 @@ namespace Network.Game
             }
 
             _netGalaxy.ApplyStateData(state);
-            ReportLoadedServerRpc();
-        }
-
-        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void ReportLoadedServerRpc(RpcParams rpcParams = default)
-        {
-            if (!IsServer)
-            {
-                return;
-            }
-
-            _initializer.LoadOnClient(rpcParams.Receive.SenderClientId);
         }
     }
 }

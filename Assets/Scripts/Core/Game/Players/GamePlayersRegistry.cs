@@ -36,6 +36,9 @@ namespace Core.Game.Players
             return null;
         }
         
+        public bool ContainsPlayer(ulong playerId) => 
+            _playerByClientId.ContainsKey(playerId);
+        
         public IGamePlayer GetPlayerById(ulong playerId)
         {
             if (_playerByClientId.TryGetValue(playerId, out var player))

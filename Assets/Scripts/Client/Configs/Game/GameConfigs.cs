@@ -25,7 +25,7 @@ namespace Client.Configs.Game
         private GameUIComponentsRegistrySO _uiComponentsRegistrySO = null!;
         
         [SerializeField]
-        private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO;
+        private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO = null!;
         
         public void Build(IContainerBuilder builder)
         {

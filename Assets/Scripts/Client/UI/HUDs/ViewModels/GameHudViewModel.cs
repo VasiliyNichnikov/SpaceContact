@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Client.Game.Field;
 using Client.UI.Dialogs.Game.Hand.ViewModels;
-using Core.Game.Cards;
 using Core.Game.Hands;
+using Core.Game.Phases.Client;
 using Core.Game.Players;
 using Logs;
 using Reactivity;
@@ -16,24 +16,24 @@ namespace Client.UI.HUDs.ViewModels
         private readonly ReactivityProperty<GamePlayerBlockViewModel> _playerBlockViewModel = new();
         
         private readonly GamePlayersRegistry _registry;
-        private readonly IGameClientDestinyCardController _destinyCardController;
+        private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameFieldViewManager _fieldViewManager;
         private readonly List<GamePlayerProfileViewModel> _playerProfilesViewModels;
         
         public GameHudViewModel(
             GamePlayersRegistry registry, 
             IGameHudTopViewModel topViewModel,
-            IGameClientDestinyCardController destinyCardController,
+            IGameClientDestinyPhaseResolver destinyPhaseResolver,
             IGameFieldViewManager fieldViewManager)
         {
             _registry = registry;
             TopViewModel = topViewModel;
-            _destinyCardController = destinyCardController;
+            _destinyPhaseResolver = destinyPhaseResolver;
             _fieldViewManager = fieldViewManager;
             PlayerHandViewModel = CreatePlayerHandViewModel();
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
-            _destinyCardController.Changed += OnDestinyCardChanged;
+            _destinyPhaseResolver.Changed += OnDestinyCardChanged;
             _playerProfilesViewModels = CreatePlayerProfilesViewModels();
             OpponentChanged();
         }
@@ -54,7 +54,7 @@ namespace Client.UI.HUDs.ViewModels
         public void Dispose()
         {
             TopViewModel.Dispose();
-            _destinyCardController.Changed -= OnDestinyCardChanged;
+            _destinyPhaseResolver.Changed -= OnDestinyCardChanged;
             _fieldViewManager.OnInitialized -= OpponentChanged;
             _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
 
@@ -91,7 +91,7 @@ namespace Client.UI.HUDs.ViewModels
         
         private void OnDestinyCardChanged()
         {
-            var activeDestinyCard = _destinyCardController.Card;
+            var activeDestinyCard = _destinyPhaseResolver.Card;
 
             if (activeDestinyCard == null)
             {

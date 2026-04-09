@@ -11,12 +11,18 @@ using Client.UI.HUDs.ViewModels;
 using Client.UI.Loaders;
 using Core.Game;
 using Core.Game.Cards;
+using Core.Game.Encounter;
 using Core.Game.Factory;
 using Core.Game.Galaxy;
+using Core.Game.Mutation;
 using Core.Game.Phases;
+using Core.Game.Phases.Client;
+using Core.Game.Phases.Server;
 using Core.Game.Players;
+using Core.Game.Rules;
 using Network.Configs;
 using Network.Game;
+using Network.Game.Mutation;
 using Network.Infrastructure;
 using Unity.Netcode;
 using UnityEngine;
@@ -61,6 +67,8 @@ namespace App.Game
             builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersPhaseTracker>(Lifetime.Singleton).AsSelf();
             builder.Register<PhasesHelper>(Lifetime.Singleton).AsSelf();
+            builder.Register<ClientEventsDispatcher>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
             
             // Managers
             builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -78,6 +86,7 @@ namespace App.Game
             builder.Register<SpaceCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<GameShipsOnPlanetInfoViewFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameEventFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
             builder.Register<GameFieldPlanetsViewProvider>(Lifetime.Singleton).AsSelf();
@@ -93,6 +102,9 @@ namespace App.Game
             
             // Depended network
             RegisterElementsDependedNetwork(builder, netManager.IsServer);
+            
+            // Register Game Rules
+            RegisterGameRules(builder);
             
             // Entry Point
             builder.RegisterEntryPoint<GameStartupService>();
@@ -123,12 +135,30 @@ namespace App.Game
 
         private static void RegisterElementsDependedNetwork(IContainerBuilder builder, bool isServer)
         {
-            builder.Register<GameClientDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameClientDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameClientEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             if (isServer)
             {
-                builder.Register<GameServerDestinyCardController>(Lifetime.Singleton).AsImplementedInterfaces();
+                builder.Register<GameServerEventsFactory>(Lifetime.Singleton).AsSelf();
+                builder.Register<GameServerDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
+                builder.Register<GameServerEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
+                builder.Register<GameServerEventBroadcaster>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+                builder.Register<GameServerSimpleEncounterState>(Lifetime.Singleton).AsSelf();
             }
+        }
+
+        private static void RegisterGameRules(IContainerBuilder builder)
+        {
+            builder.Register<GameRulesChecker>(Lifetime.Singleton);
+            
+            RegisterGameRule<GameCanBeAttackerRule>(builder);
+            RegisterGameRule<GameCanBeDefenderRule>(builder);
+        }
+        
+        private static void RegisterGameRule<TRule>(IContainerBuilder builder) where TRule : IGameRule
+        {
+            builder.Register<TRule>(Lifetime.Singleton).As<IGameRule>();
         }
     }
 }
