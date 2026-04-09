@@ -23,7 +23,7 @@ namespace App.Game.Factory
                 return phase;
             }
             
-            if (phase is IPhaseWithContext<IPhasePayload> phaseWithContext)
+            if (phase is IGamePhaseWithContext phaseWithContext)
             {
                 phaseWithContext.SetContext(payload);
             }

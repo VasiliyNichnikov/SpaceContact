@@ -10,6 +10,6 @@ namespace Core.Game.Phases.Client
         
         IDestinyCard? Card { get; }
         
-        void UpdateState(DestinyCardStateData state);
+        void UpdateState(DestinyCardData state);
     }
 }

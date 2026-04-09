@@ -13,7 +13,7 @@ namespace Core.Game.Cards
             _playersRegistry = playersRegistry;
         }
         
-        public IDestinyCard Create(DestinyCardStateData stateData)
+        public IDestinyCard Create(DestinyCardData stateData)
         {
             if (stateData.IsColorCard)
             {

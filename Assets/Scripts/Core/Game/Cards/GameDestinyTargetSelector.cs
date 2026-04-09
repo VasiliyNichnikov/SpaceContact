@@ -17,7 +17,7 @@ namespace Core.Game.Cards
         /// Если равен Null, значит игроку самому надо выбрать защитника
         /// Или мы поймали ошибку
         /// </summary>
-        public ulong? GetTarget(DestinyCardStateData card)
+        public ulong? GetTarget(DestinyCardData card)
         {
             if (card.IsJoker)
             {

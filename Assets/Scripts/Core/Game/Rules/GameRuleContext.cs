@@ -13,5 +13,8 @@ namespace Core.Game.Rules
 
             return context;
         }
+        
+        public static GameRuleContext Empty => 
+            new();
     }
 }

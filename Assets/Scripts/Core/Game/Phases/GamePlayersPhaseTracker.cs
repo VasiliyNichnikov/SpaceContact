@@ -9,8 +9,6 @@ namespace Core.Game.Phases
     public sealed class GamePlayersPhaseTracker
     {
         private Dictionary<ulong, int>? _currentPhaseIdByPlayerId;
-
-        public event Action<ulong>? PlayerPhaseChanged; 
         
         public void Init(IReadOnlyCollection<IGamePlayer> players) =>
             _currentPhaseIdByPlayerId = CreatePhaseByPlayerId(players);
@@ -19,12 +17,9 @@ namespace Core.Game.Phases
             _currentPhaseIdByPlayerId != null && 
             _currentPhaseIdByPlayerId.Values.All(phaseId => GamePhaseConvertor.ToPhaseType(phaseId) == phaseType);
 
-        public GamePhaseType GetPlayerPhase(ulong playerId)
-        {
-            var phaseId = _currentPhaseIdByPlayerId.GetValueOrDefault(playerId, PhaseIds.InvalidPhaseId);
-            
-            return GamePhaseConvertor.ToPhaseType(phaseId);
-        }
+        public bool AreAllPlayersInPhase(int phaseId) =>
+            _currentPhaseIdByPlayerId != null &&
+            _currentPhaseIdByPlayerId.Values.All(p => p == phaseId);
 
         public void ChangePhase(ulong playerId, int phaseId)
         {
@@ -45,7 +40,6 @@ namespace Core.Game.Phases
             }
             
             _currentPhaseIdByPlayerId[playerId] = phaseId;
-            PlayerPhaseChanged?.Invoke(playerId);
             Logger.Log($"GamePlayerPhaseTracker.ChangePhase: Player {playerId} change phase to {phaseId}.");
         }
 

@@ -154,6 +154,7 @@ namespace App.Game
             
             RegisterGameRule<GameCanBeAttackerRule>(builder);
             RegisterGameRule<GameCanBeDefenderRule>(builder);
+            RegisterGameRule<GameCanApplyDestinyCardRule>(builder);
         }
         
         private static void RegisterGameRule<TRule>(IContainerBuilder builder) where TRule : IGameRule

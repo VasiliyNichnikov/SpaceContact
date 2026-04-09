@@ -43,7 +43,6 @@ namespace Network.Game
             
             LoadGalaxyNetwork();
             LoadPlayersNetwork();
-            LoadGameStatesNetwork();
             LoadEventRpcRelayNetwork();
         }
         
@@ -73,14 +72,6 @@ namespace Network.Game
             var galaxyInstance = _objectResolver.Instantiate(galaxyPrefab, null);
             galaxyInstance.NetworkObject.Spawn(destroyWithScene: true);
             AddToInitializer(galaxyInstance.NetworkObjectId, galaxyInstance.Initializer);
-        }
-
-        private void LoadGameStatesNetwork()
-        {
-            var gameStatesPrefab = _gameNetworkRegistrySO.StatesNetworkSync;
-            var gameStatesInstance = _objectResolver.Instantiate(gameStatesPrefab, null);
-            gameStatesInstance.NetworkObject.Spawn(destroyWithScene: true);
-            AddToInitializer(gameStatesInstance.NetworkObjectId, gameStatesInstance.Initializer);
         }
 
         private void LoadEventRpcRelayNetwork()

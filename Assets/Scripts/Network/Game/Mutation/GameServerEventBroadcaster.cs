@@ -118,6 +118,7 @@ namespace Network.Game.Mutation
         {
             var state = new GameEventStateData
             {
+                HasAggressorSelectedEvent = true,
                 AggressorSelectedEvent = new GameAggressorSelectedEventStateData
                 {
                     AggressorPlayerId = serverEvent.AggressorPlayerId,
@@ -132,9 +133,25 @@ namespace Network.Game.Mutation
         {
             var state = new GameEventStateData
             {
+                HasDefenderSelectedEvent = true,
                 DefenderSelectedEvent = new GameDefenderSelectedEventStateData
                 {
                     DefenderPlayerId = serverEvent.DefenderPlayerId,
+                    Metadata = CreateGameEventMetadata(serverEvent)
+                }
+            };
+
+            return state;
+        }
+
+        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerDestinyCardChangedEvent serverEvent)
+        {
+            var state = new GameEventStateData
+            {
+                HasDestinyCardChangedEvent = true,
+                DestinyCardChangedEvent = new GameDestinyCardChangedEventStateData
+                {
+                    DestinyCard = serverEvent.DestinyCardData,
                     Metadata = CreateGameEventMetadata(serverEvent)
                 }
             };

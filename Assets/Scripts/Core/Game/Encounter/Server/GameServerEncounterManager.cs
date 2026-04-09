@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Core.Game.Dto.States;
 using Core.Game.Mutation;
@@ -14,7 +13,7 @@ namespace Core.Game.Encounter
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameRulesChecker _rulesChecker;
         private readonly GameServerEventsFactory _serverEventsFactory;
-        private readonly GameServerSimpleEncounterState _simpleEncounterState;
+        private readonly GameServerSimpleEncounterState _encounterState;
         
         private int? _currentAggressorIndex;
         
@@ -23,22 +22,20 @@ namespace Core.Game.Encounter
             GamePlayersRegistry playersRegistry,
             GameRulesChecker rulesChecker,
             GameServerEventsFactory serverEventsFactory,
-            GameServerSimpleEncounterState simpleEncounterState)
+            GameServerSimpleEncounterState encounterState)
         {
             _broadcaster = broadcaster;
             _playersRegistry = playersRegistry;
             _rulesChecker = rulesChecker;
             _serverEventsFactory = serverEventsFactory;
-            _simpleEncounterState = simpleEncounterState;
+            _encounterState = encounterState;
         }
-        
-        public event Action? Started;
 
         public ulong? AggressorPlayerId => 
-            _simpleEncounterState.AggressorPlayerId;
+            _encounterState.AggressorPlayerId;
         
         public ulong? DefenderPlayerId => 
-            _simpleEncounterState.DefenderPlayerId;
+            _encounterState.DefenderPlayerId;
         
         public void StartEncounter()
         {
@@ -72,9 +69,7 @@ namespace Core.Game.Encounter
                 return;
             }
             
-            _simpleEncounterState.SetAggressorPlayerId(selectedAggressorPlayerId);
-            
-            Started?.Invoke();
+            _encounterState.SetAggressorPlayerId(selectedAggressorPlayerId);
         }
         
         public void SetDefenderPlayerId(ulong playerId)
@@ -88,7 +83,7 @@ namespace Core.Game.Encounter
                 return;
             }
          
-            _simpleEncounterState.SetDefenderPlayerId(playerId);
+            _encounterState.SetDefenderPlayerId(playerId);
             var selectedDefenderEvent = _serverEventsFactory.CreateDefenderSelectedEvent(playerId);
             _broadcaster.SendEvent(selectedDefenderEvent, RecipientType.AllClients);
         }

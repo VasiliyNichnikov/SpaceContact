@@ -3,7 +3,7 @@ using System;
 namespace Core.Game.Dto.States.Cards
 {
     [Serializable]
-    public struct DestinyCardStateData
+    public struct DestinyCardData
     {
         private const int ErrorIntValue = int.MinValue;
         private const ulong ErrorLongValue = ulong.MinValue;
@@ -18,7 +18,7 @@ namespace Core.Game.Dto.States.Cards
         
         public int? SpecificCardId;
 
-        private DestinyCardStateData(
+        private DestinyCardData(
             bool isJoker,
             bool isColorCard,
             ulong selectedPlayerId,
@@ -32,9 +32,9 @@ namespace Core.Game.Dto.States.Cards
             SpecificCardId = specificCardId;
         }
         
-        public static DestinyCardStateData JokerCard()
+        public static DestinyCardData JokerCard()
         {
-            return new DestinyCardStateData(
+            return new DestinyCardData(
                 true, 
                 false, 
                 ErrorLongValue, 
@@ -42,9 +42,9 @@ namespace Core.Game.Dto.States.Cards
                 ErrorIntValue);
         }
         
-        public static DestinyCardStateData ColorCard(ulong selectedPlayerId)
+        public static DestinyCardData ColorCard(ulong selectedPlayerId)
         {
-            return new DestinyCardStateData(
+            return new DestinyCardData(
                 false, 
                 true, 
                 selectedPlayerId, 
@@ -52,9 +52,9 @@ namespace Core.Game.Dto.States.Cards
                 ErrorIntValue);
         }
         
-        public static DestinyCardStateData SpecificCard(int specificCardId)
+        public static DestinyCardData SpecificCard(int specificCardId)
         {
-            return new DestinyCardStateData(
+            return new DestinyCardData(
                 false, 
                 false, 
                 ErrorLongValue, 

@@ -14,23 +14,27 @@ namespace App.Game.Factory
             var playersPhaseTracker = resolver.Resolve<GamePlayersPhaseTracker>();
             IServerStateMachineNetwork? stateMachineNetwork = null;
             IGameServerEncounterManager? encounterManager = null;
+            IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
 
             if (isServer)
             {
                 stateMachineNetwork = resolver.Resolve<IServerStateMachineNetwork>();
                 encounterManager = resolver.Resolve<IGameServerEncounterManager>();
+                destinyPhaseResolver = resolver.Resolve<IGameServerDestinyPhaseResolver>();
             }
             
             return new GameInitializationPhase(
                 stateMachine, 
                 playersPhaseTracker, 
                 encounterManager,
+                destinyPhaseResolver,
                 stateMachineNetwork);
         }
         
         public static GameDestinyPhase CreateDestinyPhase(IObjectResolver resolver, bool isServer)
         {
             var stateMachine = resolver.Resolve<GameStateMachine>();
+            var clientEncounterManager = resolver.Resolve<IGameClientEncounterManager>();
             IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
 
             if (isServer)
@@ -38,7 +42,10 @@ namespace App.Game.Factory
                 destinyPhaseResolver = resolver.Resolve<IGameServerDestinyPhaseResolver>();
             }
             
-            return new GameDestinyPhase(destinyPhaseResolver, stateMachine);
+            return new GameDestinyPhase(
+                clientEncounterManager,
+                destinyPhaseResolver,
+                stateMachine);
         }
     }
 }

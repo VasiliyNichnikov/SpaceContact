@@ -27,7 +27,8 @@ namespace Network.Game
         private PhaseRegistry _phaseRegistry = null!;
         private INetworkSerializer _serializer = null!;
         private GamePlayersPhaseTracker _tracker = null!;
-
+        
+        private Action? _pendingTransition;
         private CachePhase? _cachePhase;
         
         [Inject]
@@ -65,8 +66,13 @@ namespace Network.Game
             {
                 return;
             }
+
+            if (_pendingTransition != null)
+            {
+                Logger.Error($"{nameof(NetworkGameController)}.{nameof(ReportPlayerStateChangedRpc)}: the transition has already started.");
+                return;
+            }
             
-            _stateMachine.TransitionTo(typeof(TPhase), payload);
             var phaseId = _phaseRegistry.GetId<TPhase>();
 
             var dataBytes = payload != null
@@ -75,6 +81,7 @@ namespace Network.Game
 
             _cachePhase = new CachePhase(phaseId, dataBytes);
             _tracker.ChangePhase(NetworkManager.LocalClientId, phaseId);
+            _pendingTransition = () => _stateMachine.TransitionTo(typeof(TPhase), payload);
             SetPhaseClientRpc(phaseId, dataBytes);
         }
 
@@ -87,7 +94,7 @@ namespace Network.Game
 
             var rcpParams = new ClientRpcParams
             {
-                Send = new ClientRpcSendParams()
+                Send = new ClientRpcSendParams
                 {
                     TargetClientIds = new[] { clientId }
                 }
@@ -134,8 +141,29 @@ namespace Network.Game
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void ReportPlayerStateChangedRpc(int phaseId, RpcParams rpcParams = default)
         {
+            if (!IsServer)
+            {
+                return;
+            }
+            
             var playerId = rpcParams.Receive.SenderClientId;
             _tracker.ChangePhase(playerId, phaseId);
+
+            if (!_tracker.AreAllPlayersInPhase(phaseId))
+            {
+                return;
+            }
+            
+            if (_pendingTransition == null)
+            {
+                Logger.Error($"{nameof(NetworkGameController)}.{nameof(ReportPlayerStateChangedRpc)}: no pending transition.");
+                    
+                return;
+            }
+            
+            var pendingTransitionAction = _pendingTransition;
+            _pendingTransition = null;
+            pendingTransitionAction.Invoke();
         }
     }
 }

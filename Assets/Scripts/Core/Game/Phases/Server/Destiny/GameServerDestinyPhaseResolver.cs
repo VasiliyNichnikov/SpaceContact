@@ -1,8 +1,7 @@
-using System;
 using Core.Game.Cards;
 using Core.Game.Dto.States.Cards;
 using Core.Game.Encounter;
-using Logs;
+using Core.Game.Mutation;
 
 namespace Core.Game.Phases.Server
 {
@@ -11,40 +10,37 @@ namespace Core.Game.Phases.Server
         private readonly IGameCardsManager _cardsManager;
         private readonly IGameServerEncounterManager _encounterManager;
         private readonly GameDestinyTargetSelector _targetSelector;
-        
-        private DestinyCardStateData? _currentDestinyCardState;
+        private readonly IServerEventBroadcaster _broadcaster;
+        private readonly GameServerEventsFactory _eventsFactory;
         
         public GameServerDestinyPhaseResolver(
             IGameServerEncounterManager encounterManager, 
             IGameCardsManager cardsManager,
-            GameDestinyTargetSelector targetSelector)
+            GameDestinyTargetSelector targetSelector,
+            IServerEventBroadcaster broadcaster,
+            GameServerEventsFactory eventsFactory)
         {
             _encounterManager = encounterManager;
             _cardsManager = cardsManager;
             _targetSelector = targetSelector;
+            _broadcaster = broadcaster;
+            _eventsFactory = eventsFactory;
         }
         
-        public event Action? Changed;
-
         public void ChooseDestiny()
         {
-            _currentDestinyCardState = _cardsManager.OpenNextDestinyCard();
-            TrySetDefenderPlayerImmediately(_currentDestinyCardState.Value);
-            Changed?.Invoke();
+            var destinyCardData = _cardsManager.OpenNextDestinyCard();
+            SendDestinyCardDataToClients(destinyCardData);
+            TrySetDefenderPlayerImmediately(destinyCardData);
         }
-
-        public DestinyCardStateData ToState()
+        
+        private void SendDestinyCardDataToClients(DestinyCardData data)
         {
-            if (_currentDestinyCardState == null)
-            {
-                Logger.Error($"{nameof(GameServerDestinyPhaseResolver)}.{nameof(ToState)}: No current Destiny Card State.");
-                return default;
-            }
-
-            return _currentDestinyCardState.Value;
+            var destinyCardChangedEvent = _eventsFactory.CreateDestinyCardChangedEvent(data);
+            _broadcaster.SendEvent(destinyCardChangedEvent, RecipientType.AllClients);
         }
 
-        private void TrySetDefenderPlayerImmediately(DestinyCardStateData card)
+        private void TrySetDefenderPlayerImmediately(DestinyCardData card)
         {
             var defenderId = _targetSelector.GetTarget(card);
 

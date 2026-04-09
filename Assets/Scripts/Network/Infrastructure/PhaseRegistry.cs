@@ -21,7 +21,7 @@ namespace Network.Infrastructure
             foreach (var @interface in phaseType.GetInterfaces())
             {
                 if (@interface.IsGenericType 
-                    && @interface.GetGenericTypeDefinition() == typeof(IPhaseWithContext<>))
+                    && @interface.GetGenericTypeDefinition() == typeof(IGamePhaseWithContext<>))
                 {
                     _phaseToDataType.Add(typeof(TPhase), @interface.GenericTypeArguments[0]);
                     break;

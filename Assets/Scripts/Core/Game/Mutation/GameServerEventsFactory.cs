@@ -1,3 +1,4 @@
+using Core.Game.Dto.States.Cards;
 using Core.Game.Mutation.Events;
 
 namespace Core.Game.Mutation
@@ -20,6 +21,14 @@ namespace Core.Game.Mutation
             var defenderSelectedEvent = new GameServerDefenderSelectedEvent(eventId, defenderId);
             
             return defenderSelectedEvent;
+        }
+
+        public GameServerDestinyCardChangedEvent CreateDestinyCardChangedEvent(DestinyCardData destinyCardData)
+        {
+            var eventId = GetCurrentEventId();
+            var destinyCardChangedEvent = new GameServerDestinyCardChangedEvent(eventId, destinyCardData);
+            
+            return destinyCardChangedEvent;
         }
         
         private int GetCurrentEventId()

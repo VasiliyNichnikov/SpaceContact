@@ -5,5 +5,6 @@ namespace Core.Game.Mutation
         None,
         AggressorSelected,
         DefenderSelected,
+        DestinyCardChanged,
     }
 }

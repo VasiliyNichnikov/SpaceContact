@@ -17,7 +17,7 @@ namespace Core.Game.Phases.Client
         
         public IDestinyCard? Card { get; private set; }
         
-        public void UpdateState(DestinyCardStateData state)
+        public void UpdateState(DestinyCardData state)
         {
             Card = _destinyCardFactory.Create(state);
             Changed?.Invoke();

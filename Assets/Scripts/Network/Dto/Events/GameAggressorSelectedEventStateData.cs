@@ -3,7 +3,7 @@ using System;
 namespace Network.Dto
 {
     [Serializable]
-    public class GameAggressorSelectedEventStateData
+    public struct GameAggressorSelectedEventStateData
     {
         public ulong AggressorPlayerId;
         

@@ -7,7 +7,7 @@ using Logs;
 
 namespace Core.Game.Cards
 {
-    public class GameCardsManager : IGameCardsManager
+    public sealed class GameCardsManager : IGameCardsManager
     {
         private static readonly Random _random = new();
 
@@ -15,11 +15,11 @@ namespace Core.Game.Cards
         private readonly GamePlayersRegistry _playersRegistry;
         
         private readonly Queue<SpaceCardStateData> _collectedSpaceCards = new();
-        private readonly Queue<DestinyCardStateData> _collectedDestinyCards = new();
+        private readonly Queue<DestinyCardData> _collectedDestinyCards = new();
 
-        private List<DestinyCardStateData>? _discardDestinyCards; 
+        private List<DestinyCardData>? _discardDestinyCards; 
         
-        private DestinyCardStateData? _currentDestinyCard;
+        private DestinyCardData? _currentDestinyCard;
         
         public GameCardsManager(CardsData data, GamePlayersRegistry playersRegistry)
         {
@@ -52,11 +52,11 @@ namespace Core.Game.Cards
             return handState;
         }
 
-        DestinyCardStateData IGameCardsManager.OpenNextDestinyCard()
+        DestinyCardData IGameCardsManager.OpenNextDestinyCard()
         {
             if (_currentDestinyCard != null)
             {
-                _discardDestinyCards ??= new List<DestinyCardStateData>();
+                _discardDestinyCards ??= new List<DestinyCardData>();
                 _discardDestinyCards.Add(_currentDestinyCard.Value);
             }
 
@@ -110,14 +110,14 @@ namespace Core.Game.Cards
             }
         }
 
-        private static void CollectDestinyCards(Queue<DestinyCardStateData> deck, CardsData data, IReadOnlyCollection<IGamePlayer> players)
+        private static void CollectDestinyCards(Queue<DestinyCardData> deck, CardsData data, IReadOnlyCollection<IGamePlayer> players)
         {
-            var cards = new List<DestinyCardStateData>();
+            var cards = new List<DestinyCardData>();
             var generationData = data.DestinyCardsGeneration;
 
             CallMethodMultipleTimes(() =>
             {
-                var jokerCard = DestinyCardStateData.JokerCard();
+                var jokerCard = DestinyCardData.JokerCard();
                 cards.Add(jokerCard);
             }, generationData.NumberOfJokers);
 
@@ -128,7 +128,7 @@ namespace Core.Game.Cards
             {
                 CallMethodMultipleTimes(() =>
                 {
-                    var damageStateCard = DestinyCardStateData.ColorCard(player.PlayerId);
+                    var damageStateCard = DestinyCardData.ColorCard(player.PlayerId);
                     cards.Add(damageStateCard);
                 }, numberOfColorCards);
             }

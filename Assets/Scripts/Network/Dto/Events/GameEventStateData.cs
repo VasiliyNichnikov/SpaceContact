@@ -3,10 +3,18 @@ using System;
 namespace Network.Dto
 {
     [Serializable]
-    public class GameEventStateData
+    public struct GameEventStateData
     {
-        public GameDefenderSelectedEventStateData? DefenderSelectedEvent;
+        public bool HasDefenderSelectedEvent;
         
-        public GameAggressorSelectedEventStateData? AggressorSelectedEvent;
+        public GameDefenderSelectedEventStateData DefenderSelectedEvent;
+        
+        public bool HasAggressorSelectedEvent;
+        
+        public GameAggressorSelectedEventStateData AggressorSelectedEvent;
+        
+        public bool HasDestinyCardChangedEvent;
+        
+        public GameDestinyCardChangedEventStateData DestinyCardChangedEvent;
     }
 }

@@ -8,6 +8,6 @@ namespace Core.Game.Cards
         
         PlayerHandStateData CreatePlayerHand();
         
-        DestinyCardStateData OpenNextDestinyCard();
+        DestinyCardData OpenNextDestinyCard();
     }
 }
