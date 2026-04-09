@@ -41,7 +41,6 @@ namespace Network.Game
                 return;
             }
             
-            LoadGalaxyNetwork();
             LoadPlayersNetwork();
             LoadEventRpcRelayNetwork();
         }
@@ -64,14 +63,6 @@ namespace Network.Game
             }
             
             _initializers.Clear();
-        }
-
-        private void LoadGalaxyNetwork()
-        {
-            var galaxyPrefab = _gameNetworkRegistrySO.GalaxyNetworkSync;
-            var galaxyInstance = _objectResolver.Instantiate(galaxyPrefab, null);
-            galaxyInstance.NetworkObject.Spawn(destroyWithScene: true);
-            AddToInitializer(galaxyInstance.NetworkObjectId, galaxyInstance.Initializer);
         }
 
         private void LoadEventRpcRelayNetwork()

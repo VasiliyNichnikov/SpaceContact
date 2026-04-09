@@ -14,6 +14,7 @@ using Core.Game.Cards;
 using Core.Game.Encounter;
 using Core.Game.Factory;
 using Core.Game.Galaxy;
+using Core.Game.Galaxy.Server;
 using Core.Game.Mutation;
 using Core.Game.Phases;
 using Core.Game.Phases.Client;
@@ -61,17 +62,14 @@ namespace App.Game
             builder.Register<GamePhaseController>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameNetLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersRegistry>(Lifetime.Singleton).AsSelf();
-            builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GameUILoader>(Lifetime.Singleton).AsSelf();
-            builder.Register<GameRequestsRegisterService>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersPhaseTracker>(Lifetime.Singleton).AsSelf();
             builder.Register<PhasesHelper>(Lifetime.Singleton).AsSelf();
             builder.Register<ClientEventsDispatcher>(Lifetime.Singleton).AsSelf();
             builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
             
             // Managers
-            builder.Register<GameGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameFieldViewManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -137,14 +135,18 @@ namespace App.Game
         {
             builder.Register<GameClientDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameClientGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             
             if (isServer)
             {
+                builder.Register<GameServerRequestsRegisterService>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
                 builder.Register<GameServerEventsFactory>(Lifetime.Singleton).AsSelf();
                 builder.Register<GameServerDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerEventBroadcaster>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
                 builder.Register<GameServerSimpleEncounterState>(Lifetime.Singleton).AsSelf();
+                builder.Register<GameServerGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
+                builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
             }
         }
 

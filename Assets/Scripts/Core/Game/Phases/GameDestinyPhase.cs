@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Core.Game.Dto.Payload;
 using Core.Game.Encounter;
 using Core.Game.Phases.Server;
@@ -22,18 +23,20 @@ namespace Core.Game.Phases
         public override GamePhaseType Type => 
             GamePhaseType.Destiny;
 
-        public override void Enter()
+        public override Task Enter()
         {
             if (Context == null)
             {
                 Logger.Error($"{nameof(GameDestinyPhase)}.{nameof(Enter)}: context is null.");
                 
-                return;
+                return Task.CompletedTask;
             }
             
             Logger.Warning("GameDestinyPhase.Enter");
             _clientEncounterManager.UpdateState(Context.EncounterState);
             _serverDestinyPhaseResolver?.ChooseDestiny();
+            
+            return Task.CompletedTask;
         }
 
         public override void Accept(IPhaseVisitor visitor) => 

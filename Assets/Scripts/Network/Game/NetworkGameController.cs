@@ -1,6 +1,7 @@
 ﻿using System;
 using Core.Game;
 using Core.Game.Phases;
+using GeneralUtils;
 using Logs;
 using Network.Infrastructure;
 using Unity.Netcode;
@@ -81,7 +82,7 @@ namespace Network.Game
 
             _cachePhase = new CachePhase(phaseId, dataBytes);
             _tracker.ChangePhase(NetworkManager.LocalClientId, phaseId);
-            _pendingTransition = () => _stateMachine.TransitionTo(typeof(TPhase), payload);
+            _pendingTransition = () => _stateMachine.TransitionTo(typeof(TPhase), payload).FireAndForget();
             SetPhaseClientRpc(phaseId, dataBytes);
         }
 
@@ -129,7 +130,7 @@ namespace Network.Game
                     }
                 }
                 
-                _stateMachine.TransitionTo(phaseType, payload);
+                _stateMachine.TransitionTo(phaseType, payload).FireAndForget();
                 ReportPlayerStateChangedRpc(phaseId);
             }
             catch (Exception e)

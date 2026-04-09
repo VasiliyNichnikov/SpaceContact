@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Core.Game.Planets
@@ -10,7 +9,5 @@ namespace Core.Game.Planets
         ulong OwnerId { get; }
         
         IReadOnlyCollection<ISpaceShip> Ships { get; }
-        
-        event Action? OnShipsChanged;
     }
 }

@@ -1,5 +1,6 @@
 using Core.Game;
 using Core.Game.Encounter;
+using Core.Game.Galaxy;
 using Core.Game.Phases;
 using Core.Game.Phases.Server;
 using VContainer;
@@ -12,6 +13,8 @@ namespace App.Game.Factory
         {
             var stateMachine = resolver.Resolve<GameStateMachine>();
             var playersPhaseTracker = resolver.Resolve<GamePlayersPhaseTracker>();
+            var serverInteraction = resolver.Resolve<IGamePhaseServerInteraction>();
+            var clientGalaxyManager = resolver.Resolve<IGameClientGalaxyManager>();
             IServerStateMachineNetwork? stateMachineNetwork = null;
             IGameServerEncounterManager? encounterManager = null;
             IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
@@ -25,7 +28,9 @@ namespace App.Game.Factory
             
             return new GameInitializationPhase(
                 stateMachine, 
-                playersPhaseTracker, 
+                playersPhaseTracker,
+                clientGalaxyManager,
+                serverInteraction,
                 encounterManager,
                 destinyPhaseResolver,
                 stateMachineNetwork);

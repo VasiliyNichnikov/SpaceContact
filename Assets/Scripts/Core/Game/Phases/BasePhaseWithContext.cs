@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace Core.Game.Phases
 {
     public abstract class BasePhaseWithContext<TContext> : IGamePhaseWithContext<TContext> where TContext : IPhasePayload
@@ -18,10 +20,8 @@ namespace Core.Game.Phases
 
         public abstract GamePhaseType Type { get; }
         
-        public virtual void Enter()
-        {
-            // nothing
-        }
+        public virtual Task Enter() => 
+            Task.CompletedTask;
 
         public virtual void Exit()
         {

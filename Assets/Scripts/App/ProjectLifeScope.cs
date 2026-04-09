@@ -12,6 +12,7 @@ using Core;
 using Core.User;
 using Network;
 using Network.Configs;
+using Network.Game.Phases;
 using Network.Infrastructure;
 using Network.Requests;
 using Network.User;
@@ -73,6 +74,7 @@ namespace App
             builder.Register<ProjectNetLoader>(Lifetime.Singleton).AsSelf();
             builder.Register<CoreNetworkContext>(Lifetime.Singleton).AsSelf();
             builder.Register<UserServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GamePhaseServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<ServerUsersRepository>(Lifetime.Singleton).AsSelf();
             builder.Register<ClientUsersRepository>(Lifetime.Singleton).AsSelf();
             builder.Register<UsersColorController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();

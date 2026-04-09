@@ -1,10 +1,12 @@
-﻿namespace Core.Game.Phases
+﻿using System.Threading.Tasks;
+
+namespace Core.Game.Phases
 {
     public interface IGamePhase
     {
         GamePhaseType Type { get; }
         
-        void Enter();
+        Task Enter();
 
         void Exit();
         

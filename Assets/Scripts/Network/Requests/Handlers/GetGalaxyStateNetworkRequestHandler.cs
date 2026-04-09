@@ -1,25 +1,25 @@
-using Core.Game;
 using Core.Game.Dto.Requests;
 using Core.Game.Dto.States;
+using Core.Game.Galaxy.Server;
 using Network.Infrastructure;
 
 namespace Network.Requests
 {
     public class GetGalaxyStateNetworkRequestHandler : NetworkRequestHandler<GalaxyStateRequestDto, GalaxyStateData>
     {
-        private readonly IGalaxyManagerNetwork _galaxyManagerNetwork;
+        private readonly IGameServerGalaxyManager _serverGalaxyManager;
         
         public GetGalaxyStateNetworkRequestHandler(
             INetworkSerializer serializer, 
-            IGalaxyManagerNetwork galaxyManagerNetwork) : base(serializer)
+            IGameServerGalaxyManager serverGalaxyManager) : base(serializer)
         {
-            _galaxyManagerNetwork = galaxyManagerNetwork;
+            _serverGalaxyManager = serverGalaxyManager;
         }
 
         public override NetworkRequestType Type => 
             NetworkRequestType.GetGalaxyState;
         
         protected override GalaxyStateData ProcessRequest(GalaxyStateRequestDto request) => 
-            _galaxyManagerNetwork.GetState();
+            _serverGalaxyManager.ToState();
     }
 }

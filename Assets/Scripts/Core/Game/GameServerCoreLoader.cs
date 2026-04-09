@@ -1,4 +1,5 @@
 using Core.Game.Cards;
+using Core.Game.Galaxy.Server;
 using Core.Game.Phases;
 using Core.Game.Players;
 using Core.Game.Players.Visitors;
@@ -11,13 +12,13 @@ namespace Core.Game
     public class GameServerCoreLoader
     {
         private readonly IGameCardsManager _cardsManager;
-        private readonly IGalaxyManagerNetwork _galaxyManager;
+        private readonly IGameServerGalaxyManager _galaxyManager;
         private readonly GamePlayersRegistry _registry;
         private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         
         public GameServerCoreLoader(
             IGameCardsManager cardsManager,
-            IGalaxyManagerNetwork galaxyManager,
+            IGameServerGalaxyManager galaxyManager,
             GamePlayersRegistry registry,
             GamePlayersPhaseTracker playersPhaseTracker)
         {

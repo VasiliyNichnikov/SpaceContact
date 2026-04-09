@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Core.Game.Factory;
 using Core.Game.Phases;
 
@@ -17,15 +18,15 @@ namespace Core.Game
         
         public event Action? OnPhaseChanged;
 
-        public void TransitionTo<T>(IPhasePayload? payload) where T : IGamePhase => 
+        public Task TransitionTo<T>(IPhasePayload? payload) where T : IGamePhase => 
             TransitionTo(typeof(T), payload);
 
-        public void TransitionTo(Type phaseType, IPhasePayload? payload)
+        public async Task TransitionTo(Type phaseType, IPhasePayload? payload)
         {
             CurrentPhase?.Exit();
 
             CurrentPhase = _phaseFactory.Create(phaseType, payload);
-            CurrentPhase.Enter();
+            await CurrentPhase.Enter();
             
             OnPhaseChanged?.Invoke();
         }

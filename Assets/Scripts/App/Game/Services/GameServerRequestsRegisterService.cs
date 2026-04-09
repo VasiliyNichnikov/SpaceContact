@@ -1,33 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Core.Game;
+using Core.Game.Galaxy.Server;
 using Core.Game.Players;
 using Network.Infrastructure;
 using Network.Requests;
 
 namespace App.Game.Services
 {
-    public class GameRequestsRegisterService : IDisposable
+    public class GameServerRequestsRegisterService : IDisposable
     {
         private readonly NetworkRequestRouter _router;
         private readonly INetworkSerializer _networkSerializer;
         
-        private readonly IGalaxyManagerNetwork _galaxyManagerNetwork;
+        private readonly IGameServerGalaxyManager _serverGalaxyManager;
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         
         private readonly ReadOnlyCollection<INetworkRequestHandler> _handlers;
 
-        public GameRequestsRegisterService(
+        public GameServerRequestsRegisterService(
             NetworkRequestRouter router, 
             INetworkSerializer networkSerializer,
             
-            IGalaxyManagerNetwork galaxyManagerNetwork,
+            IGameServerGalaxyManager serverGalaxyManager,
             GamePlayersRegistry gamePlayersRegistry)
         {
             _router = router;
             _networkSerializer = networkSerializer;
-            _galaxyManagerNetwork = galaxyManagerNetwork;
+            _serverGalaxyManager = serverGalaxyManager;
             _gamePlayersRegistry = gamePlayersRegistry;
             
             _handlers = CreateHandlers();
@@ -41,7 +41,7 @@ namespace App.Game.Services
         
         private ReadOnlyCollection<INetworkRequestHandler> CreateHandlers()
         {
-            var galaxyStateHandler = new GetGalaxyStateNetworkRequestHandler(_networkSerializer, _galaxyManagerNetwork);
+            var galaxyStateHandler = new GetGalaxyStateNetworkRequestHandler(_networkSerializer, _serverGalaxyManager);
             var playerHandStateHandler = new GetPlayerHandStateNetworkRequestHandler(_networkSerializer, _gamePlayersRegistry);
 
             var allStates = new List<INetworkRequestHandler>
