@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Game.Players;
@@ -24,7 +23,7 @@ namespace Core.Game.Cards
         {
             foreach (var player in _playersRegistry.Players)
             {
-                var handState = await _serverInteraction.CreatePlayerHand(player.PlayerId, ct);
+                var handState = await _serverInteraction.CreatePlayerHandAsync(player.PlayerId, ct);
 
                 if (handState == null)
                 {

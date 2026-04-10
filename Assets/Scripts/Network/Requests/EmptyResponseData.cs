@@ -6,6 +6,11 @@ namespace Network.Requests
     public class EmptyResponseData
     {
         private static EmptyResponseData? _instance;
+
+        private EmptyResponseData()
+        {
+            // nothing
+        }
         
         public static EmptyResponseData Instance => _instance ??= new EmptyResponseData();
     }

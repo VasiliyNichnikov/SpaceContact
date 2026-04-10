@@ -5,5 +5,6 @@ namespace Core.Game.Rules
         CanBeAggressor,
         CanBeDefender,
         CanApplyDestinyCard,
+        CanSkipDestinyCard,
     }
 }

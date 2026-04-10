@@ -6,6 +6,8 @@ namespace Core.Game.Cards
 {
     public interface IGamePlayerHandServerInteraction
     {
-        Task<PlayerHandStateData?> CreatePlayerHand(ulong playerId, CancellationToken ct);
+        Task<PlayerHandStateData?> CreatePlayerHandAsync(ulong playerId, CancellationToken ct);
+        
+        Task<bool> TrySkipCardAsync(CancellationToken ct);
     }
 }

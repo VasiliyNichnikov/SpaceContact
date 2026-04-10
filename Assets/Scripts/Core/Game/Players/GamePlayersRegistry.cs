@@ -18,11 +18,15 @@ namespace Core.Game.Players
 
         private ulong? _ownerPlayerId;
 
-        public IGamePlayer? GetOwnerWithError()
+        public IGamePlayer? GetOwnerWithError(bool silently = false)
         {
             if (_ownerPlayerId == null)
             {
-                Logger.Error("GamePlayersRegistry.GetOwnerWithError: ownerPlayerId is null.");
+                if (!silently)
+                {
+                    Logger.Error($"{nameof(GamePlayersRegistry)}.{nameof(GetOwnerWithError)}: ownerPlayerId is null.");   
+                }
+                
                 return null;
             }
 
@@ -30,8 +34,11 @@ namespace Core.Game.Players
             {
                 return player;
             }
-            
-            Logger.Error($"GamePlayersRegistry.GetOwnerWithError: player with id {_ownerPlayerId} not found.");
+
+            if (!silently)
+            {
+                Logger.Error($"{nameof(GamePlayersRegistry)}.{nameof(GetOwnerWithError)}: player with id {_ownerPlayerId} not found.");
+            }
             
             return null;
         }

@@ -3,16 +3,19 @@ using Core.Game.Players;
 
 namespace Core.Game.Cards
 {
-    public class DefaultPlayerColorDestinyCard : IDestinyCard
+    public class GamePlayerColorDestinyCard : IDestinyCard
     {
-        public DefaultPlayerColorDestinyCard(IGamePlayer targetPlayer)
+        public GamePlayerColorDestinyCard(IGamePlayer targetPlayer)
         {
             Description = $"Target: {targetPlayer.PlayerName}";
             BackgroundColor = targetPlayer.Color;
+            TargetPlayerId = targetPlayer.PlayerId;
         }
         
         public string Description { get; }
         
         public Color BackgroundColor { get; }
+        
+        public ulong? TargetPlayerId { get; }
     }
 }

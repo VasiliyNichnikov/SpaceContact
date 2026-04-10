@@ -15,9 +15,6 @@ namespace Core.Game.Mutation.Events
         public int EventId { get; }
         
         public DestinyCardData DestinyCardData { get; }
-
-        public GameEventType EventType => 
-            GameEventType.DestinyCardChanged;
         
         public TState ToState<TState>(IGameEventToStateMapper<TState> mapper) => 
             mapper.Visit(this);

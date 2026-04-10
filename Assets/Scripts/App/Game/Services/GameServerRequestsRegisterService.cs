@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Core.Game.Cards;
 using Core.Game.Galaxy.Server;
+using Core.Game.Phases.Server;
 using Core.Game.Players;
+using Core.Game.Rules;
 using Network.Infrastructure;
 using Network.Requests;
 
@@ -16,6 +18,8 @@ namespace App.Game.Services
         
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
         private readonly IGameServerCardsManager _serverCardsManager;
+        private readonly IGameServerDestinyPhaseResolver _serverDestinyPhaseResolver;
+        
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         
         private readonly ReadOnlyCollection<INetworkRequestHandler> _handlers;
@@ -26,13 +30,15 @@ namespace App.Game.Services
             
             IGameServerGalaxyManager serverGalaxyManager,
             IGameServerCardsManager serverCardsManager,
+            IGameServerDestinyPhaseResolver serverDestinyPhaseResolver,
             GamePlayersRegistry gamePlayersRegistry)
         {
             _router = router;
             _networkSerializer = networkSerializer;
+            _gamePlayersRegistry = gamePlayersRegistry;
             _serverGalaxyManager = serverGalaxyManager;
             _serverCardsManager = serverCardsManager;
-            _gamePlayersRegistry = gamePlayersRegistry;
+            _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
             
             _handlers = CreateHandlers();
         }
@@ -50,11 +56,15 @@ namespace App.Game.Services
                 _networkSerializer,
                 _serverCardsManager,
                 _gamePlayersRegistry);
-
+            var skipDestinyCardHandler = new SkipDestinyCardNetworkRequestHandler(
+                _networkSerializer,
+                _serverDestinyPhaseResolver);
+            
             var allStates = new List<INetworkRequestHandler>
             {
                 galaxyStateHandler,
                 playerHandStateHandler,
+                skipDestinyCardHandler,
             };
 
             return allStates.AsReadOnly();

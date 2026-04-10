@@ -13,10 +13,23 @@ namespace Client.UI.HUDs
         [SerializeField]
         private Image _background = null!;
         
-        public void Refresh(IGameDestinyCardViewModel viewModel)
+        [SerializeField]
+        private GameObject _skipDestinyButtonGameObject = null!;
+
+        private IGameDestinyCardViewModel _viewModel = null!;
+        
+        public void Init(IGameDestinyCardViewModel viewModel)
         {
+            _viewModel = viewModel;
             _background.color = viewModel.BackgroundColor;
             _descriptionText.SetText(viewModel.Description);
+            _skipDestinyButtonGameObject.SetActive(viewModel.IsSkipButtonVisible);
         }
+
+        /// <summary>
+        /// Called from Unity
+        /// </summary>
+        public void OnSkipButtonClick() => 
+            _viewModel.OnSkipButtonClickHandler();
     }
 }

@@ -5,6 +5,8 @@ using Client.UI.Dialogs.Game.Hand.ViewModels;
 using Core.Game.Hands;
 using Core.Game.Phases.Client;
 using Core.Game.Players;
+using Core.Game.Rules;
+using GeneralUtils;
 using Logs;
 using Reactivity;
 
@@ -19,17 +21,20 @@ namespace Client.UI.HUDs.ViewModels
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameFieldViewManager _fieldViewManager;
         private readonly List<GamePlayerProfileViewModel> _playerProfilesViewModels;
+        private readonly GameRulesChecker _rulesChecker;
         
         public GameHudViewModel(
             GamePlayersRegistry registry, 
             IGameHudTopViewModel topViewModel,
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameFieldViewManager fieldViewManager)
+            IGameFieldViewManager fieldViewManager,
+            GameRulesChecker rulesChecker)
         {
             _registry = registry;
             TopViewModel = topViewModel;
             _destinyPhaseResolver = destinyPhaseResolver;
             _fieldViewManager = fieldViewManager;
+            _rulesChecker = rulesChecker;
             PlayerHandViewModel = CreatePlayerHandViewModel();
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
@@ -100,12 +105,25 @@ namespace Client.UI.HUDs.ViewModels
                 return;
             }
             
-            _destinyCardViewModel.Value = new GameDestinyCardViewModel(activeDestinyCard);
+            _destinyCardViewModel.Value = new GameDestinyCardViewModel(
+                activeDestinyCard,
+                _rulesChecker,
+                SkipDestinyCard);
         }
 
         private List<GamePlayerProfileViewModel> CreatePlayerProfilesViewModels()
         {
             return _registry.Players.Select(player => new GamePlayerProfileViewModel(player)).ToList();
+        }
+
+        private void SkipDestinyCard()
+        {
+            if (_destinyPhaseResolver.IsWaitingServer)
+            {
+                return;
+            }
+            
+            _destinyPhaseResolver.SkipDestinyAsync().FireAndForget();
         }
     }
 }

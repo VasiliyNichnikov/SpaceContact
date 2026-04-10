@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Core.Game.Cards;
 using Core.Game.Dto.Requests;
 using Core.Game.Dto.States.Cards;
+using Network.Dto.Requests;
 using Network.Requests;
 
 namespace Network.Game.Hands
@@ -16,7 +17,7 @@ namespace Network.Game.Hands
             _networkService = networkService;
         }
 
-        public Task<PlayerHandStateData?> CreatePlayerHand(ulong playerId, CancellationToken ct)
+        public Task<PlayerHandStateData?> CreatePlayerHandAsync(ulong playerId, CancellationToken ct)
         {
             var request = new PlayerHandStateRequestDto
             {
@@ -27,6 +28,13 @@ namespace Network.Game.Hands
                 request,
                 NetworkRequestType.CollectPlayerHandState,
                 ct);
+        }
+
+        public Task<bool> TrySkipCardAsync(CancellationToken ct)
+        {
+            var request = new GameSkipDestinyCardRequestDto();
+
+            return _networkService.UpdateDataAsync(request, NetworkRequestType.SkipDestinyCardRequest, ct);
         }
     }
 }

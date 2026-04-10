@@ -17,5 +17,7 @@ namespace Core.Game.Cards
             "Card is not supported.";
 
         public Color BackgroundColor => Color.FromHex("#FF0000");
+
+        public ulong? TargetPlayerId => null;
     }
 }

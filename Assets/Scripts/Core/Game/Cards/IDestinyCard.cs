@@ -10,5 +10,10 @@ namespace Core.Game.Cards
         string Description { get; }
         
         Color BackgroundColor { get; }
+        
+        /// <summary>
+        /// Null - если джокер
+        /// </summary>
+        ulong? TargetPlayerId { get; }
     }
 }

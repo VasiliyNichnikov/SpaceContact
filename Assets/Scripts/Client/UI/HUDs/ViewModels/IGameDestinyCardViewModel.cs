@@ -7,5 +7,9 @@ namespace Client.UI.HUDs.ViewModels
         Color BackgroundColor { get; }
         
         string Description { get; }
+        
+        bool IsSkipButtonVisible { get; }
+
+        void OnSkipButtonClickHandler();
     }
 }

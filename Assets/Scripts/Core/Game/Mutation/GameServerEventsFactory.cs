@@ -34,7 +34,7 @@ namespace Core.Game.Mutation
         private int GetCurrentEventId()
         {
             var lastEventId = _lastEventId;
-            lastEventId++;
+            _lastEventId++;
             return lastEventId;
         }
     }

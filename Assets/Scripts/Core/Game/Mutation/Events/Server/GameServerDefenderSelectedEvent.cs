@@ -14,9 +14,6 @@ namespace Core.Game.Mutation.Events
         
         public int EventId { get; }
 
-        public GameEventType EventType => 
-            GameEventType.DefenderSelected;
-
         public TState ToState<TState>(IGameEventToStateMapper<TState> mapper) => 
             mapper.Visit(this);
     }

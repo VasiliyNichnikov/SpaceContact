@@ -4,7 +4,7 @@ using Logs;
 
 namespace Core.Game.Cards
 {
-    public class DestinyCardFactory
+    public sealed class DestinyCardFactory
     {
         private readonly GamePlayersRegistry _playersRegistry;
         
@@ -17,11 +17,12 @@ namespace Core.Game.Cards
         {
             if (stateData.IsColorCard)
             {
-                var gamePlayer = _playersRegistry.GetPlayerById(stateData.SelectedPlayerId);
-                return new DefaultPlayerColorDestinyCard(gamePlayer);
+                var targetPlayer = _playersRegistry.GetPlayerById(stateData.SelectedPlayerId);
+                
+                return new GamePlayerColorDestinyCard(targetPlayer);
             }
 
-            Logger.Warning("DestinyCardFactory.Create: card is not supported.");
+            Logger.Warning($"{nameof(DestinyCardFactory)}.{nameof(Create)}: card is not supported.");
             return ErrorDestinyCard.Instance;
         }
     }
