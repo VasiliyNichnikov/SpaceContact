@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Game.Cards;
 using Core.Game.Dto.Payload;
 using Core.Game.Encounter;
 using Core.Game.Galaxy;
@@ -13,6 +14,7 @@ namespace Core.Game.Phases
         private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         private readonly IGamePhaseServerInteraction _serverInteraction;
         private readonly IGameClientGalaxyManager _clientGalaxyManager;
+        private readonly IGameClientPlayerCardsDeckService _clientPlayerCardsDeckService;
         
         private readonly IServerStateMachineNetwork? _serverStateMachine;
         private readonly IGameServerDestinyPhaseResolver? _serverDestinyPhaseResolver;
@@ -24,6 +26,7 @@ namespace Core.Game.Phases
             GameStateMachine stateMachine, 
             GamePlayersPhaseTracker playersPhaseTracker,
             IGameClientGalaxyManager clientGalaxyManager,
+            IGameClientPlayerCardsDeckService clientPlayerCardsDeckService,
             IGamePhaseServerInteraction serverInteraction,
             
             IGameServerEncounterManager? serverEncounterManager,
@@ -32,6 +35,7 @@ namespace Core.Game.Phases
         {
             _playersPhaseTracker = playersPhaseTracker;
             _clientGalaxyManager = clientGalaxyManager;
+            _clientPlayerCardsDeckService = clientPlayerCardsDeckService;
             _serverInteraction = serverInteraction;
             _serverStateMachine = serverStateMachine;
             _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
@@ -61,7 +65,14 @@ namespace Core.Game.Phases
         {
             var galaxyState = await _serverInteraction.GetGalaxyStateAsync(_cts.Token);
             
-            if (galaxyState == null || _cts.IsCancellationRequested)
+            if (galaxyState == null || _cts.Token.IsCancellationRequested)
+            {
+                return;
+            }
+
+            await _clientPlayerCardsDeckService.InitPlayersHands(_cts.Token);
+
+            if (_cts.Token.IsCancellationRequested)
             {
                 return;
             }

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3698819989377972465}
   - component: {fileID: 1814226487867341834}
   - component: {fileID: 8243791153709289901}
-  - component: {fileID: -8752086981839945405}
   m_Layer: 0
   m_Name: '[GamePlayerNetwork]'
   m_TagString: Untagged
@@ -86,16 +85,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ServiceLayer::ServiceLayer.TargetContainer
   _containerType: 1
---- !u!114 &-8752086981839945405
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5183203635446548203}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 285805800a2445bea21810529d302f4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Network::Network.Game.CardsNetworkSync
-  ShowTopMostFoldoutHeaderGroup: 1

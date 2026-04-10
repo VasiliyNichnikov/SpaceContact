@@ -2,7 +2,7 @@ using Core.Game.Dto.States.Cards;
 
 namespace Core.Game.Cards
 {
-    public interface IGameCardsManager
+    public interface IGameServerCardsManager
     {
         void Init();
         

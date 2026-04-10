@@ -23,7 +23,9 @@ using Core.Game.Players;
 using Core.Game.Rules;
 using Network.Configs;
 using Network.Game;
+using Network.Game.Hands;
 using Network.Game.Mutation;
+using Network.Game.Phases;
 using Network.Infrastructure;
 using Unity.Netcode;
 using UnityEngine;
@@ -71,7 +73,6 @@ namespace App.Game
             
             // Managers
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
-            builder.Register<GameCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameFieldViewManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GamePlanetInfoPresenter>(Lifetime.Singleton).AsSelf();
             
@@ -88,6 +89,10 @@ namespace App.Game
             
             // Creators
             builder.Register<GameFieldPlanetsViewProvider>(Lifetime.Singleton).AsSelf();
+            
+            // Server Interactions
+            builder.Register<GamePhaseServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GamePlayerHandServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Phases
             RegisterPhases(builder, netManager.IsServer);
@@ -136,6 +141,7 @@ namespace App.Game
             builder.Register<GameClientDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameClientPlayerCardsDeckService>(Lifetime.Singleton).AsImplementedInterfaces();
             
             if (isServer)
             {
@@ -147,6 +153,7 @@ namespace App.Game
                 builder.Register<GameServerSimpleEncounterState>(Lifetime.Singleton).AsSelf();
                 builder.Register<GameServerGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
+                builder.Register<GameServerCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
             }
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Core.Game.Cards;
 using Core.Game.Galaxy.Server;
 using Core.Game.Players;
 using Network.Infrastructure;
@@ -8,12 +9,13 @@ using Network.Requests;
 
 namespace App.Game.Services
 {
-    public class GameServerRequestsRegisterService : IDisposable
+    public sealed class GameServerRequestsRegisterService : IDisposable
     {
         private readonly NetworkRequestRouter _router;
         private readonly INetworkSerializer _networkSerializer;
         
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
+        private readonly IGameServerCardsManager _serverCardsManager;
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         
         private readonly ReadOnlyCollection<INetworkRequestHandler> _handlers;
@@ -23,11 +25,13 @@ namespace App.Game.Services
             INetworkSerializer networkSerializer,
             
             IGameServerGalaxyManager serverGalaxyManager,
+            IGameServerCardsManager serverCardsManager,
             GamePlayersRegistry gamePlayersRegistry)
         {
             _router = router;
             _networkSerializer = networkSerializer;
             _serverGalaxyManager = serverGalaxyManager;
+            _serverCardsManager = serverCardsManager;
             _gamePlayersRegistry = gamePlayersRegistry;
             
             _handlers = CreateHandlers();
@@ -42,7 +46,10 @@ namespace App.Game.Services
         private ReadOnlyCollection<INetworkRequestHandler> CreateHandlers()
         {
             var galaxyStateHandler = new GetGalaxyStateNetworkRequestHandler(_networkSerializer, _serverGalaxyManager);
-            var playerHandStateHandler = new GetPlayerHandStateNetworkRequestHandler(_networkSerializer, _gamePlayersRegistry);
+            var playerHandStateHandler = new CollectPlayerHandStateNetworkRequestHandler(
+                _networkSerializer,
+                _serverCardsManager,
+                _gamePlayersRegistry);
 
             var allStates = new List<INetworkRequestHandler>
             {

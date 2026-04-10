@@ -4,6 +4,6 @@ namespace Network.Requests
     {
         NetworkRequestType Type { get; }
         
-        byte[] Handle(byte[] requestBytes);
+        byte[] Handle(byte[] requestBytes, ulong senderId);
     }
 }

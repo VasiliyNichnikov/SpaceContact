@@ -30,11 +30,11 @@ namespace Network.Requests
             }
         }
 
-        public byte[] Route(NetworkRequestType requestType, byte[] payload)
+        public byte[] Route(NetworkRequestType requestType, byte[] payload, ulong senderId)
         {
             if (_handlers.TryGetValue(requestType, out var handler))
             {
-                return handler.Handle(payload);
+                return handler.Handle(payload, senderId);
             }
             
             Logger.Error($"NetworkRequestRouter.Route: Not handler register for {requestType}.");

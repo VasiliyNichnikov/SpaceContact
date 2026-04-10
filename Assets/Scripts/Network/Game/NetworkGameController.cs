@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Core.Game;
 using Core.Game.Phases;
 using GeneralUtils;
@@ -101,12 +102,12 @@ namespace Network.Game
                 }
             };
             
-            Logger.Log($"NetworkGameController.OnClientConnected: syncing phase {_cachePhase.Value.StateId} to new client {clientId}.");
+            Logger.Log($"{nameof(NetworkGameController)}.{nameof(OnClientConnected)}: syncing phase {_cachePhase.Value.StateId} to new client {clientId}.");
             SetPhaseClientRpc(_cachePhase.Value.StateId, _cachePhase.Value.Payload, rcpParams);
         }
         
         [ClientRpc]
-        private void SetPhaseClientRpc(byte phaseId, byte[]? dataBytes, ClientRpcParams rpcParams = default)
+        private void SetPhaseClientRpc(byte phaseId, byte[]? dataBytes, ClientRpcParams _ = default)
         {
             if (IsServer)
             {
@@ -126,17 +127,22 @@ namespace Network.Game
 
                     if (payload == null && objectRaw != null!)
                     {
-                        Logger.Error("NetworkGameController.SetPhaseClientRpc: invalid data conversion.");
+                        Logger.Error($"{nameof(NetworkGameController)}.{nameof(SetPhaseClientRpc)}: invalid data conversion.");
                     }
                 }
                 
-                _stateMachine.TransitionTo(phaseType, payload).FireAndForget();
-                ReportPlayerStateChangedRpc(phaseId);
+                TransitionToStateAsync(phaseId, phaseType, payload).FireAndForget();
             }
             catch (Exception e)
             {
                 Logger.Error($"NetworkGameController.SetPhaseClientRpc: during data transfer: {e.Message}.");
             }
+        }
+
+        private async Task TransitionToStateAsync(byte phaseId, Type phaseType, IPhasePayload? payload)
+        {
+            await _stateMachine.TransitionTo(phaseType, payload);
+            ReportPlayerStateChangedRpc(phaseId);
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

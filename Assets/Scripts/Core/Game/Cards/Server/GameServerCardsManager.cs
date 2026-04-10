@@ -7,7 +7,7 @@ using Logs;
 
 namespace Core.Game.Cards
 {
-    public sealed class GameCardsManager : IGameCardsManager
+    public sealed class GameServerCardsManager : IGameServerCardsManager
     {
         private static readonly Random _random = new();
 
@@ -21,19 +21,19 @@ namespace Core.Game.Cards
         
         private DestinyCardData? _currentDestinyCard;
         
-        public GameCardsManager(CardsData data, GamePlayersRegistry playersRegistry)
+        public GameServerCardsManager(CardsData data, GamePlayersRegistry playersRegistry)
         {
             _data = data;
             _playersRegistry = playersRegistry;
         }
 
-        void IGameCardsManager.Init()
+        void IGameServerCardsManager.Init()
         {
             CollectSpaceCards(_collectedSpaceCards, _data);
             CollectDestinyCards(_collectedDestinyCards, _data, _playersRegistry.Players);
         }
 
-        PlayerHandStateData IGameCardsManager.CreatePlayerHand()
+        PlayerHandStateData IGameServerCardsManager.CreatePlayerHand()
         {
             var playerHand = new List<SpaceCardStateData>(_data.PlayerStartingNumberOfSpaceCards);
                 
@@ -52,7 +52,7 @@ namespace Core.Game.Cards
             return handState;
         }
 
-        DestinyCardData IGameCardsManager.OpenNextDestinyCard()
+        DestinyCardData IGameServerCardsManager.OpenNextDestinyCard()
         {
             if (_currentDestinyCard != null)
             {

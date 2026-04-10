@@ -2,7 +2,6 @@ using Core.Game.Cards;
 using Core.Game.Galaxy.Server;
 using Core.Game.Phases;
 using Core.Game.Players;
-using Core.Game.Players.Visitors;
 
 namespace Core.Game
 {
@@ -11,13 +10,13 @@ namespace Core.Game
     /// </summary>
     public class GameServerCoreLoader
     {
-        private readonly IGameCardsManager _cardsManager;
+        private readonly IGameServerCardsManager _cardsManager;
         private readonly IGameServerGalaxyManager _galaxyManager;
         private readonly GamePlayersRegistry _registry;
         private readonly GamePlayersPhaseTracker _playersPhaseTracker;
         
         public GameServerCoreLoader(
-            IGameCardsManager cardsManager,
+            IGameServerCardsManager cardsManager,
             IGameServerGalaxyManager galaxyManager,
             GamePlayersRegistry registry,
             GamePlayersPhaseTracker playersPhaseTracker)
@@ -33,15 +32,6 @@ namespace Core.Game
             // Сначала надо инициализировать карты
             _cardsManager.Init();
             _galaxyManager.Init();
-            
-            // Затем создаем руки
-            foreach (var player in _registry.Players)
-            {
-                var handState = _cardsManager.CreatePlayerHand();
-                var handDistributionVisitor = new GamePlayerHandDistributionVisitor(handState);
-                player.Apply(handDistributionVisitor);
-            }
-            
             _playersPhaseTracker.Init(_registry.Players);
         }
     }

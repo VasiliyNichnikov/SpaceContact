@@ -17,10 +17,10 @@ namespace Network.Requests
         
         public abstract NetworkRequestType Type { get; }
         
-        public byte[] Handle(byte[] requestBytes)
+        public byte[] Handle(byte[] requestBytes, ulong senderId)
         {
             var request = _serializer.Deserialize<TRequest>(requestBytes);
-            var response = ProcessRequest(request);
+            var response = ProcessRequest(request, senderId);
 
             if (response == null)
             {
@@ -32,6 +32,6 @@ namespace Network.Requests
             return _serializer.Serialize(response);
         }
         
-        protected abstract TResponse? ProcessRequest(TRequest request);
+        protected abstract TResponse? ProcessRequest(TRequest request, ulong senderId);
     }
 }

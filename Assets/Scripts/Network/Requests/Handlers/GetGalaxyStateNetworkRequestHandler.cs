@@ -19,7 +19,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.GetGalaxyState;
         
-        protected override GalaxyStateData ProcessRequest(GalaxyStateRequestDto request) => 
+        protected override GalaxyStateData ProcessRequest(GalaxyStateRequestDto request, ulong senderId) => 
             _serverGalaxyManager.ToState();
     }
 }

@@ -20,7 +20,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.GetUserState;
         
-        protected override UserStateData? ProcessRequest(UserStateRequestDto request)
+        protected override UserStateData? ProcessRequest(UserStateRequestDto request, ulong senderId)
         {
             if (!_serverUsersRepository.ContainsUser(request.UserId))
             {

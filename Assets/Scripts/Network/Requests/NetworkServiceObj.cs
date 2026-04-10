@@ -65,7 +65,7 @@ namespace Network.Requests
         private void RequestServerRpc(ulong requestId, NetworkRequestType requestType, byte[] requestBytes, RpcParams rpcParams = default)
         {
             var clientId = rpcParams.Receive.SenderClientId;
-            var responseBytes = _router.Route(requestType, requestBytes);
+            var responseBytes = _router.Route(requestType, requestBytes, clientId);
             var clientParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } }

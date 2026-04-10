@@ -7,7 +7,7 @@ namespace Core.Game.Phases.Server
 {
     public class GameServerDestinyPhaseResolver : IGameServerDestinyPhaseResolver
     {
-        private readonly IGameCardsManager _cardsManager;
+        private readonly IGameServerCardsManager _cardsManager;
         private readonly IGameServerEncounterManager _encounterManager;
         private readonly GameDestinyTargetSelector _targetSelector;
         private readonly IServerEventBroadcaster _broadcaster;
@@ -15,7 +15,7 @@ namespace Core.Game.Phases.Server
         
         public GameServerDestinyPhaseResolver(
             IGameServerEncounterManager encounterManager, 
-            IGameCardsManager cardsManager,
+            IGameServerCardsManager cardsManager,
             GameDestinyTargetSelector targetSelector,
             IServerEventBroadcaster broadcaster,
             GameServerEventsFactory eventsFactory)

@@ -19,7 +19,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.PostChangeUserName;
         
-        protected override EmptyResponseData? ProcessRequest(ChangeUserNameRequestDto request)
+        protected override EmptyResponseData? ProcessRequest(ChangeUserNameRequestDto request, ulong senderId)
         {
             if (!_serverUsersRepository.ContainsUser(request.UserId))
             {

@@ -1,4 +1,5 @@
 using Core.Game;
+using Core.Game.Cards;
 using Core.Game.Encounter;
 using Core.Game.Galaxy;
 using Core.Game.Phases;
@@ -15,6 +16,7 @@ namespace App.Game.Factory
             var playersPhaseTracker = resolver.Resolve<GamePlayersPhaseTracker>();
             var serverInteraction = resolver.Resolve<IGamePhaseServerInteraction>();
             var clientGalaxyManager = resolver.Resolve<IGameClientGalaxyManager>();
+            var clientPlayerCardsDeckService = resolver.Resolve<IGameClientPlayerCardsDeckService>();
             IServerStateMachineNetwork? stateMachineNetwork = null;
             IGameServerEncounterManager? encounterManager = null;
             IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
@@ -30,6 +32,7 @@ namespace App.Game.Factory
                 stateMachine, 
                 playersPhaseTracker,
                 clientGalaxyManager,
+                clientPlayerCardsDeckService,
                 serverInteraction,
                 encounterManager,
                 destinyPhaseResolver,

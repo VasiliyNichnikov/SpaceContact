@@ -6,7 +6,5 @@ namespace Core.Game.Dto.Requests
     public class PlayerHandStateRequestDto
     {
         public ulong PlayerId;
-
-        public bool OnlyNumberCardsInHand;
     }
 }

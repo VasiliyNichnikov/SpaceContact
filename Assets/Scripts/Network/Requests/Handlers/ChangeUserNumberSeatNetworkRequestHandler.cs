@@ -19,7 +19,7 @@ namespace Network.Requests
         public override NetworkRequestType Type =>
             NetworkRequestType.PostChangeUserSeatNumber;
         
-        protected override EmptyResponseData? ProcessRequest(ChangeUserSeatNumberRequestDto request)
+        protected override EmptyResponseData? ProcessRequest(ChangeUserSeatNumberRequestDto request, ulong senderId)
         {
             if (!_serverUsersRepository.ContainsUser(request.UserId))
             {

@@ -19,7 +19,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.PostChangeUserColorId;
         
-        protected override EmptyResponseData? ProcessRequest(ChangeUserColorRequestDto request)
+        protected override EmptyResponseData? ProcessRequest(ChangeUserColorRequestDto request, ulong senderId)
         {
             if (!_serverUsersRepository.ContainsUser(request.UserId))
             {
