@@ -10,6 +10,7 @@ namespace Core.Game.Encounter
         
         private IGamePlayer? _aggressorPlayer;
         private IGamePlayer? _defenderPlayer;
+        private int? _planetIdToAttack;
         
         public GameClientEncounterManager(GamePlayersRegistry playersRegistry)
         {
@@ -21,12 +22,17 @@ namespace Core.Game.Encounter
         public event Action? AggressorChanged;
         
         public event Action? DefenderChanged;
+        
+        public event Action? PlanetChanged;
 
         IGamePlayer? IGameClientEncounterManager.AggressorPlayer => 
             _aggressorPlayer;
 
         IGamePlayer? IGameClientEncounterManager.DefenderPlayer => 
             _defenderPlayer;
+
+        int? IGameClientEncounterManager.PlanetIdToAttack => 
+            _planetIdToAttack;
 
         void IGameClientEncounterEvents.SetAggressorEvent(ulong aggressorPlayerId)
         {
@@ -39,7 +45,13 @@ namespace Core.Game.Encounter
             _defenderPlayer = _playersRegistry.GetPlayerById(defenderPlayerId);
             DefenderChanged?.Invoke();
         }
-        
+
+        void IGameClientEncounterEvents.SetPlanetIdToAttack(int planetId)
+        {
+            _planetIdToAttack = planetId;
+            PlanetChanged?.Invoke();
+        }
+
         public void UpdateState(EncounterStateData state)
         {
             _aggressorPlayer = state.HasAggressorPlayerId 

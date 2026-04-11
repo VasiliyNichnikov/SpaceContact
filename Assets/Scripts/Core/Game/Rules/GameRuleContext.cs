@@ -26,6 +26,17 @@ namespace Core.Game.Rules
             
             return context;
         }
+
+        public static GameRuleContext CheckPlanetToAttack(ulong initiatedByPlayerId, int planetToAttackId)
+        {
+            var context = new GameRuleContext
+            {
+                SelectedPlayerId = initiatedByPlayerId,
+                SelectedPlanetId = planetToAttackId
+            };
+            
+            return context;
+        }
         
         public static GameRuleContext Empty => 
             new();

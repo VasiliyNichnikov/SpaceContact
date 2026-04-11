@@ -9,6 +9,8 @@ namespace Client.Game.Planets
 {
     public class GameShipsOnPlanetInfoView : MonoBehaviour, IGameShipsOnPlanetInfoVisitor
     {
+        private readonly Queue<GameObject> _createdItems = new();
+        
         [SerializeField] 
         private RectTransform _rectTransform = null!;
         
@@ -17,7 +19,6 @@ namespace Client.Game.Planets
         
         private GameShipsOnPlanetInfoViewModel _viewModel = null!;
         private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO = null!;
-        private Queue<GameObject> _createdItems = new();
         
         [Inject]
         private void Constructor(GameUIShipsOnPlanetItemsRegistrySO uiShipsOnPlanetItemsRegistrySO)
@@ -29,6 +30,7 @@ namespace Client.Game.Planets
         {
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.InfoViewModels, RefreshItems);
+            gameObject.Subscribe(_viewModel.IsPlanetInfoVisible, gameObject.SetActive);
         }
         
         public RectTransform RectTransform => 

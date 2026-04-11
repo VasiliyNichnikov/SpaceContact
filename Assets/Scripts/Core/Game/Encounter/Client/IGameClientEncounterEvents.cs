@@ -5,5 +5,7 @@ namespace Core.Game.Encounter
         void SetAggressorEvent(ulong aggressorPlayerId);
         
         void SetDefenderEvent(ulong defenderPlayerId);
+
+        void SetPlanetIdToAttack(int planetId);
     }
 }

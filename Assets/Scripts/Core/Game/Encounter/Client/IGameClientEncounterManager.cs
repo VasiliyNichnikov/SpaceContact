@@ -12,9 +12,13 @@ namespace Core.Game.Encounter
         
         event Action? DefenderChanged;
         
+        event Action? PlanetChanged;
+        
         IGamePlayer? AggressorPlayer { get; }
         
         IGamePlayer? DefenderPlayer { get; }
+        
+        int? PlanetIdToAttack { get; }
         
         void UpdateState(EncounterStateData state);
     }

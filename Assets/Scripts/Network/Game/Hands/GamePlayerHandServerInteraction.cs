@@ -34,7 +34,10 @@ namespace Network.Game.Hands
         {
             var request = new GameSkipDestinyCardRequestDto();
 
-            return _networkService.UpdateDataAsync(request, NetworkRequestType.SkipDestinyCardRequest, ct);
+            return _networkService.UpdateDataAsync(
+                request, 
+                NetworkRequestType.SkipDestinyCard, 
+                ct);
         }
     }
 }

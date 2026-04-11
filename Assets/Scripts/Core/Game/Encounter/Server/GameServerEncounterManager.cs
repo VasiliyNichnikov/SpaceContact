@@ -31,11 +31,14 @@ namespace Core.Game.Encounter
             _encounterState = encounterState;
         }
 
-        public ulong? AggressorPlayerId => 
+        private ulong? AggressorPlayerId => 
             _encounterState.AggressorPlayerId;
         
-        public ulong? DefenderPlayerId => 
+        private ulong? DefenderPlayerId => 
             _encounterState.DefenderPlayerId;
+
+        private int? SelectedPlanetIdToAttack => 
+            _encounterState.PlanetIdToAttack;
         
         public void StartEncounter()
         {
@@ -88,6 +91,13 @@ namespace Core.Game.Encounter
             _broadcaster.SendEvent(selectedDefenderEvent, RecipientType.AllClients);
         }
 
+        public bool SetPlanetToAttack(ulong initiatedByPlayerId, int planetId)
+        {
+            return DefenderPlayerId == null 
+                ? SetDefenderAndPlanetToAttack(initiatedByPlayerId, planetId) 
+                : SetOnlyPlanetToAttack(initiatedByPlayerId, planetId);
+        }
+
         public EncounterStateData ToState()
         {
             var state = new EncounterStateData();
@@ -103,11 +113,80 @@ namespace Core.Game.Encounter
                 state.HasDefenderPlayerId = true;
                 state.DefenderPlayerId = DefenderPlayerId.Value;
             }
+
+            if (SelectedPlanetIdToAttack != null)
+            {
+                state.HasPlanetToAttack = true;
+                state.PlanetIdToAttack = SelectedPlanetIdToAttack.Value;
+            }
             
-            state.HasPlanetToAttack = false;
             Logger.Warning("GameServerEncounterManager.ToState: state changed.");
 
             return state;
+        }
+
+        private bool SetDefenderAndPlanetToAttack(ulong initiatedByPlayerId, int planetId)
+        {
+            var defenderPlayer = _playersRegistry.Players.FirstOrDefault(player => player.ContainsPlanet(planetId));
+
+            if (defenderPlayer == null)
+            {
+                Logger.Error($"{nameof(GameServerEncounterManager)}.{nameof(SetDefenderAndPlanetToAttack)}: player with planet {planetId} not found.");
+                
+                return false;
+            }
+            
+            if (!_rulesChecker.Check(
+                    GameRuleType.CanBeDefender,
+                    GameRuleContext.CheckPlayer(defenderPlayer.PlayerId)))
+            {
+                Logger.Error($"{nameof(GameServerEncounterManager)}.{nameof(SetDefenderAndPlanetToAttack)}: it is impossible to expose the defender.");
+                
+                return false;
+            }
+            
+            if (!_rulesChecker.Check(
+                    GameRuleType.CanChoosePlanetToAttack,
+                    GameRuleContext.CheckPlanetToAttack(initiatedByPlayerId, planetId)))
+            {
+                Logger.Error($"{nameof(GameServerEncounterManager)}.{nameof(SetDefenderAndPlanetToAttack)}: it is impossible to choose a planet to attack.");
+                
+                return false;
+            }
+            
+            _encounterState.SetDefenderPlayerId(defenderPlayer.PlayerId);
+            _encounterState.SetPlanetIdToAttack(planetId);
+            
+            var planetIdToAttackSelectedEvent = _serverEventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
+            var selectedDefenderEvent = _serverEventsFactory.CreateDefenderSelectedEvent(defenderPlayer.PlayerId);
+            
+            var events = new IServerGameEvent[]
+            {
+                planetIdToAttackSelectedEvent,
+                selectedDefenderEvent
+            };
+            
+            _broadcaster.SendEvent(events, RecipientType.AllClients);
+            return true;
+        }
+        
+        private bool SetOnlyPlanetToAttack(ulong initiatedByPlayerId, int planetId)
+        {
+            if (!_rulesChecker.Check(
+                    GameRuleType.CanChoosePlanetToAttack,
+                    GameRuleContext.CheckPlanetToAttack(initiatedByPlayerId, planetId)))
+            {
+                _encounterState.SetDefenderPlayerId(null);
+                Logger.Error($"{nameof(GameServerEncounterManager)}.{nameof(SetOnlyPlanetToAttack)}: it is impossible to choose a planet to attack.");
+                
+                return false;
+            }
+            
+            _encounterState.SetPlanetIdToAttack(planetId);
+            var planetIdToAttackSelectedEvent = _serverEventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
+            _broadcaster.SendEvent(planetIdToAttackSelectedEvent, RecipientType.AllClients);
+
+            return true;
         }
     }
 }

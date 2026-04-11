@@ -1,5 +1,6 @@
 using Core.Game.Encounter;
 using Core.Game.Phases.Client;
+using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Rules;
 
@@ -10,15 +11,18 @@ namespace Client.Game.Planets.ViewModels
         private readonly GameRulesChecker _rulesChecker;
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameClientEncounterManager _encounterManager;
+        private readonly GamePlanetAttackTargetSelector _attackTargetSelector;
         
         public GameShipsOnPlanetInfoViewModelFactory(
             GameRulesChecker rulesChecker,
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameClientEncounterManager encounterManager)
+            IGameClientEncounterManager encounterManager,
+            GamePlanetAttackTargetSelector attackTargetSelector)
         {
             _rulesChecker = rulesChecker;
             _destinyPhaseResolver = destinyPhaseResolver;
             _encounterManager = encounterManager;
+            _attackTargetSelector = attackTargetSelector;
         }
         
         public GameShipsOnPlanetInfoViewModel Create(
@@ -32,7 +36,8 @@ namespace Client.Game.Planets.ViewModels
                 planetPlayerOwner, 
                 _rulesChecker,
                 _destinyPhaseResolver,
-                _encounterManager);
+                _encounterManager,
+                _attackTargetSelector);
         }
     }
 }

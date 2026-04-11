@@ -20,10 +20,12 @@ using Core.Game.Mutation;
 using Core.Game.Phases;
 using Core.Game.Phases.Client;
 using Core.Game.Phases.Server;
+using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Rules;
 using Network.Configs;
 using Network.Game;
+using Network.Game.Encounter;
 using Network.Game.Hands;
 using Network.Game.Mutation;
 using Network.Game.Phases;
@@ -71,6 +73,7 @@ namespace App.Game
             builder.Register<PhasesHelper>(Lifetime.Singleton).AsSelf();
             builder.Register<ClientEventsDispatcher>(Lifetime.Singleton).AsSelf();
             builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
+            builder.Register<GamePlanetAttackTargetSelector>(Lifetime.Singleton).AsSelf();
             
             // Managers
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -95,6 +98,7 @@ namespace App.Game
             // Server Interactions
             builder.Register<GamePhaseServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GamePlayerHandServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameEncounterServerInteraction>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Phases
             RegisterPhases(builder, netManager.IsServer);
@@ -168,6 +172,7 @@ namespace App.Game
             RegisterGameRule<GameCanApplyDestinyCardRule>(builder);
             RegisterGameRule<GameCanSkipDestinyCardRule>(builder);
             RegisterGameRule<GameCanAggressorAttackToPlanetRule>(builder);
+            RegisterGameRule<GameCanChoosePlanetToAttackRule>(builder);
         }
         
         private static void RegisterGameRule<TRule>(IContainerBuilder builder) where TRule : IGameRule

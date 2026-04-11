@@ -30,6 +30,14 @@ namespace Core.Game.Mutation
             
             return destinyCardChangedEvent;
         }
+
+        public GameServerPlanetToAttackSelectedEvent CreatePlanetIdToAttackSelectedEvent(ulong initiatedByPlayerId, int planetId)
+        {
+            var eventId = GetCurrentEventId();
+            var planetIdToAttackSelectedEvent = new GameServerPlanetToAttackSelectedEvent(eventId, initiatedByPlayerId, planetId);
+
+            return planetIdToAttackSelectedEvent;
+        }
         
         private int GetCurrentEventId()
         {

@@ -159,6 +159,22 @@ namespace Network.Game.Mutation
             return state;
         }
 
+        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerPlanetToAttackSelectedEvent serverEvent)
+        {
+            var state = new GameEventStateData
+            {
+                HasPlanetToAttackSelectedEvent = true,
+                PlanetSelectedEvent = new GamePlanetToAttackSelectedEventStateData
+                {
+                    PlanetId = serverEvent.PlanetId,
+                    InitiatedByPlayerId = serverEvent.InitiatedByPlayerId,
+                    Metadata = CreateGameEventMetadata(serverEvent)
+                }
+            };
+
+            return state;
+        }
+
         private static GameEventMetadata CreateGameEventMetadata(IServerGameEvent gameEvent)
         {
             var createdAtSeconds = Mathf.FloorToInt(Time.realtimeSinceStartup);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Core.Game.Encounter;
 using Core.Game.Phases.Client;
+using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Rules;
 using Reactivity;
@@ -12,6 +13,7 @@ namespace Client.Game.Planets.ViewModels
     public sealed class GameShipsOnPlanetInfoViewModel : IDisposable
     {
         private readonly ReactivityListProperty<IGameShipsOnPlanetInfoItemViewModel> _infoViewModels = new();
+        private readonly ReactivityProperty<bool> _isPlanetInfoVisible = new();
         
         private readonly int _planetId;
         private readonly ulong _ownerClientPlayerId;
@@ -19,6 +21,7 @@ namespace Client.Game.Planets.ViewModels
         private readonly GameRulesChecker _rulesChecker;
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameClientEncounterManager _encounterManager;
+        private readonly GamePlanetAttackTargetSelector _attackTargetSelector;
         
         public GameShipsOnPlanetInfoViewModel(
             int planetId,
@@ -26,7 +29,8 @@ namespace Client.Game.Planets.ViewModels
             IGamePlayer planetPlayerOwner,
             GameRulesChecker rulesChecker,
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameClientEncounterManager encounterManager)
+            IGameClientEncounterManager encounterManager,
+            GamePlanetAttackTargetSelector attackTargetSelector)
         {
             _planetId = planetId;
             _ownerClientPlayerId = ownerClientPlayerId;
@@ -34,23 +38,31 @@ namespace Client.Game.Planets.ViewModels
             _rulesChecker = rulesChecker;
             _destinyPhaseResolver = destinyPhaseResolver;
             _encounterManager = encounterManager;
+            _attackTargetSelector = attackTargetSelector;
             
             _destinyPhaseResolver.Changed += RefreshInfoViewModels;
             _encounterManager.DefenderChanged += RefreshInfoViewModels;
+            _encounterManager.PlanetChanged += RefreshInfoViewModels;
             RefreshInfoViewModels();
         }
 
         public IReactivityReadOnlyCollectionProperty<IGameShipsOnPlanetInfoItemViewModel> InfoViewModels =>
             _infoViewModels;
-        
+
+        public IReactivityProperty<bool> IsPlanetInfoVisible => 
+            _isPlanetInfoVisible;
+
         public void Dispose()
         {
             _destinyPhaseResolver.Changed -= RefreshInfoViewModels;
             _encounterManager.DefenderChanged -= RefreshInfoViewModels;
+            _encounterManager.PlanetChanged -= RefreshInfoViewModels;
         }
 
         private void RefreshInfoViewModels()
         {
+            _isPlanetInfoVisible.Value = _encounterManager.PlanetIdToAttack == null || 
+                                         _encounterManager.PlanetIdToAttack == _planetId;
             _infoViewModels.Value = CreateItemViewModels();
         }
         
@@ -83,7 +95,7 @@ namespace Client.Game.Planets.ViewModels
                 return;
             }
 
-            var viewModel = new GameChoicePlanetToAttackViewModel();
+            var viewModel = new GameChoicePlanetToAttackViewModel(_planetId, _attackTargetSelector);
             items.Add(viewModel);
         }
     }

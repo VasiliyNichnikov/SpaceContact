@@ -29,6 +29,11 @@ namespace Core.Game.Rules
             {
                 return false;
             }
+
+            if (_encounterManager.PlanetIdToAttack != null)
+            {
+                return false;
+            }
             
             var destinyCard = _destinyPhaseResolver.Card;
 

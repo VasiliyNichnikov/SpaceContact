@@ -16,7 +16,7 @@ namespace Network.Requests
         }
 
         public override NetworkRequestType Type => 
-            NetworkRequestType.SkipDestinyCardRequest;
+            NetworkRequestType.SkipDestinyCard;
         
         protected override EmptyResponseData? ProcessRequest(GameSkipDestinyCardRequestDto request, ulong senderId)
         {

@@ -59,6 +59,18 @@ namespace Network.Game.Mutation
                     destinyCardChangedEventData.DestinyCard);
             }
 
+            if (eventData.HasPlanetToAttackSelectedEvent)
+            {
+                var planetSelectedEventData = eventData.PlanetSelectedEvent;
+
+                return new GameClientPlanetToAttackSelectedEvent(
+                    planetSelectedEventData.Metadata.EventId,
+                    _encounterEvents,
+                    _rulesChecker,
+                    planetSelectedEventData.PlanetId,
+                    planetSelectedEventData.InitiatedByPlayerId);
+            }
+
             Logger.Error($"{nameof(GameEventFactory)}.{nameof(Create)}: eventData is not support.");
             return GameClientErrorEvent.Instance;
         }

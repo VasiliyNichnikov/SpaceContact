@@ -16,5 +16,9 @@ namespace Network.Dto
         public bool HasDestinyCardChangedEvent;
         
         public GameDestinyCardChangedEventStateData DestinyCardChangedEvent;
+
+        public bool HasPlanetToAttackSelectedEvent;
+        
+        public GamePlanetToAttackSelectedEventStateData PlanetSelectedEvent;
     }
 }

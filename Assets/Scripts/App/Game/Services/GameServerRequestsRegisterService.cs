@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Core.Game.Cards;
+using Core.Game.Encounter;
 using Core.Game.Galaxy.Server;
 using Core.Game.Phases.Server;
 using Core.Game.Players;
-using Core.Game.Rules;
 using Network.Infrastructure;
 using Network.Requests;
 
@@ -19,6 +19,7 @@ namespace App.Game.Services
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
         private readonly IGameServerCardsManager _serverCardsManager;
         private readonly IGameServerDestinyPhaseResolver _serverDestinyPhaseResolver;
+        private readonly IGameServerEncounterManager _serverEncounterManager;
         
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         
@@ -31,6 +32,7 @@ namespace App.Game.Services
             IGameServerGalaxyManager serverGalaxyManager,
             IGameServerCardsManager serverCardsManager,
             IGameServerDestinyPhaseResolver serverDestinyPhaseResolver,
+            IGameServerEncounterManager serverEncounterManager,
             GamePlayersRegistry gamePlayersRegistry)
         {
             _router = router;
@@ -39,6 +41,7 @@ namespace App.Game.Services
             _serverGalaxyManager = serverGalaxyManager;
             _serverCardsManager = serverCardsManager;
             _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
+            _serverEncounterManager = serverEncounterManager;
             
             _handlers = CreateHandlers();
         }
@@ -59,12 +62,16 @@ namespace App.Game.Services
             var skipDestinyCardHandler = new SkipDestinyCardNetworkRequestHandler(
                 _networkSerializer,
                 _serverDestinyPhaseResolver);
+            var choosePlanetToAttackHandler = new ChoosePlanetToAttackNetworkRequestHandler(
+                _networkSerializer,
+                _serverEncounterManager);
             
             var allStates = new List<INetworkRequestHandler>
             {
                 galaxyStateHandler,
                 playerHandStateHandler,
                 skipDestinyCardHandler,
+                choosePlanetToAttackHandler,
             };
 
             return allStates.AsReadOnly();

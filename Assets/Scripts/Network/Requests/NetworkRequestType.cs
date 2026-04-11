@@ -5,7 +5,8 @@ namespace Network.Requests
         GetGalaxyState,
         CollectPlayerHandState,
         GetUserState,
-        SkipDestinyCardRequest,
+        SkipDestinyCard,
+        ChoosePlanetToAttack,
         
         PostChangeUserName,
         PostChangeUserColorId,

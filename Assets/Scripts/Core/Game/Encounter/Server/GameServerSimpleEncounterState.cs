@@ -6,10 +6,15 @@ namespace Core.Game.Encounter
         
         public ulong? DefenderPlayerId { get; private set; }
         
+        public int? PlanetIdToAttack { get; private set; }
+        
         public void SetAggressorPlayerId(ulong? playerId) => 
             AggressorPlayerId = playerId;
         
         public void SetDefenderPlayerId(ulong? playerId) => 
             DefenderPlayerId = playerId;
+
+        public void SetPlanetIdToAttack(int? planetId) => 
+            PlanetIdToAttack = planetId;
     }
 }

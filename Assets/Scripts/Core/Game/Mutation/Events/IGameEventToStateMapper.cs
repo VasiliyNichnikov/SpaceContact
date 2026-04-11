@@ -9,5 +9,7 @@ namespace Core.Game.Mutation
         TResult Visit(GameServerDefenderSelectedEvent serverEvent);
         
         TResult Visit(GameServerDestinyCardChangedEvent serverEvent);
+        
+        TResult Visit(GameServerPlanetToAttackSelectedEvent serverEvent);
     }
 }
