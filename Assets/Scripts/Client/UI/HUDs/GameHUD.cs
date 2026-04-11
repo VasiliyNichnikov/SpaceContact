@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Client.UI.Dialogs.Game.Hand;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Utils;
 using Reactivity;
@@ -13,9 +12,9 @@ namespace Client.UI.HUDs
     {
         [SerializeField]
         private GameHudTopView _topView = null!;
-        
+
         [SerializeField]
-        private GamePlayerHandView _playerHandView = null!;
+        private GameHudBottomView _bottomView = null!;
         
         [SerializeField]
         private GameDestinyCardView _gameDestinyCard = null!;
@@ -29,7 +28,6 @@ namespace Client.UI.HUDs
         [SerializeField]
         private GamePlayerProfileView _gamePlayerProfileViewPrefab = null!;
         
-        private IObjectResolver _resolver = null!;
         private IGameHudViewModel _viewModel = null!;
         
         [Inject]
@@ -39,14 +37,8 @@ namespace Client.UI.HUDs
             gameObject.SubscribeWithoutCall(_viewModel.DestinyCardViewModel, _gameDestinyCard.Init);
             gameObject.Subscribe(_viewModel.OpponentPlayerViewModel, _gameOpponentPlayerBlockView.Refresh);
             _topView.Init(viewModel.TopViewModel);
+            _bottomView.Init(resolver, viewModel.BottomViewModel);
             InitGamePlayerProfiles(viewModel.PlayerProfilesViewModels);
-            _resolver = resolver;
-            _resolver.Inject(_playerHandView);
-        }
-
-        public void Init()
-        {
-            _playerHandView.Init(_viewModel.PlayerHandViewModel);
         }
 
         private void InitGamePlayerProfiles(IReadOnlyCollection<GamePlayerProfileViewModel> viewModels)

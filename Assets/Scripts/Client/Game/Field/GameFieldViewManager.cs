@@ -44,6 +44,7 @@ namespace Client.Game.Field
         {
             var playerPlanetsViewModels = CreatePlanetsViewModelsForPlayer(_fieldManager.CurrentPlayer);
             _planetsViewProvider.InitPlayerPlanets(playerPlanetsViewModels);
+            _planetsViewProvider.HidePlayerPlanets();
             
             _opponents.AddRange(_fieldManager.Opponents);
 

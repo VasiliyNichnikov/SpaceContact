@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Client.Game.Field;
-using Client.UI.Dialogs.Game.Hand.ViewModels;
-using Core.Game.Hands;
 using Core.Game.Phases.Client;
 using Core.Game.Players;
 using Core.Game.Rules;
@@ -26,16 +24,17 @@ namespace Client.UI.HUDs.ViewModels
         public GameHudViewModel(
             GamePlayersRegistry registry, 
             IGameHudTopViewModel topViewModel,
+            IGameHudBottomViewModel bottomViewModel,
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
             IGameFieldViewManager fieldViewManager,
             GameRulesChecker rulesChecker)
         {
             _registry = registry;
             TopViewModel = topViewModel;
+            BottomViewModel = bottomViewModel;
             _destinyPhaseResolver = destinyPhaseResolver;
             _fieldViewManager = fieldViewManager;
             _rulesChecker = rulesChecker;
-            PlayerHandViewModel = CreatePlayerHandViewModel();
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
             _destinyPhaseResolver.Changed += OnDestinyCardChanged;
@@ -45,7 +44,7 @@ namespace Client.UI.HUDs.ViewModels
 
         public IGameHudTopViewModel TopViewModel { get; }
         
-        public IGamePlayerHandViewModel PlayerHandViewModel { get; }
+        public IGameHudBottomViewModel BottomViewModel { get; }
 
         public IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel => 
             _destinyCardViewModel;
@@ -69,16 +68,6 @@ namespace Client.UI.HUDs.ViewModels
             }
             
             _playerProfilesViewModels.Clear();
-        }
-
-        private IGamePlayerHandViewModel CreatePlayerHandViewModel()
-        {
-            var owner = _registry.GetOwnerWithError();
-            var handController = owner == null 
-                ? EmptyGamePlayerHandController.Instance 
-                : owner.HandController;
-
-            return new GamePlayerHandViewModel(handController);
         }
 
         private void OpponentChanged()

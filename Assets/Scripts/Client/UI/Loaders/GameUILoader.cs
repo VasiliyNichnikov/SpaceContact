@@ -32,8 +32,7 @@ namespace Client.UI.Loaders
         private void LoadGameHud()
         {
             var prefab = _hudsRegistrySO.GameHud;
-            var gameHud = _resolver.Instantiate(prefab, _sceneStorage.GuiHolder);
-            gameHud.Init();
+            _resolver.Instantiate(prefab, _sceneStorage.GuiHolder);
         }
 
         private void LoadArrowsHolder()

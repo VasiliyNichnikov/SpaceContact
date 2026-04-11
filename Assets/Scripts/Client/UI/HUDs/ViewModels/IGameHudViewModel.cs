@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Client.UI.Dialogs.Game.Hand.ViewModels;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
@@ -9,7 +8,7 @@ namespace Client.UI.HUDs.ViewModels
     {
         IGameHudTopViewModel TopViewModel { get; }
         
-        IGamePlayerHandViewModel PlayerHandViewModel { get; }
+        IGameHudBottomViewModel BottomViewModel { get; }
         
         IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel { get; }
         

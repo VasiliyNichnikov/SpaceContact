@@ -134,6 +134,7 @@ namespace App.Game
         {
             RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
+            RegisterViewModel<GameHudBottomViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameArrowsHolderViewModel>(builder);
         }
 

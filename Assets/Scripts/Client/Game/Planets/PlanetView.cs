@@ -21,7 +21,13 @@ namespace Client.Game.Planets
         
         public int PlanetId => 
             _viewModel.PlanetId;
+        
+        public void Show() => 
+            gameObject.SetActive(true);
 
+        public void Hide() => 
+            gameObject.SetActive(false);
+        
         private void ChangeColorPlanet()
         {
             var propBlock = new MaterialPropertyBlock();

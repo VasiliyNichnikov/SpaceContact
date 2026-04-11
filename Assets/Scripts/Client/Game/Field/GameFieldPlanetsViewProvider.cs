@@ -72,6 +72,22 @@ namespace Client.Game.Field
             InitLeftEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
             InitRightEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
         }
+        
+        public void ShowPlayerPlanets()
+        {
+            foreach (var planetView in _playerPlanets)
+            {
+                planetView.Show();
+            }
+        }
+
+        public void HidePlayerPlanets()
+        {
+            foreach (var planetView in _playerPlanets)
+            {
+                planetView.Hide();
+            }
+        }
 
         public void InitLeftOpponentPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
