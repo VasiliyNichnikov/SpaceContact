@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Client.UI.HUDs;
+using Client.UI.HUDs.ViewModels;
 using Core.Game.Encounter;
 using Core.Game.Phases.Client;
 using Core.Game.Planets;
@@ -13,7 +15,7 @@ namespace Client.Game.Planets.ViewModels
     public sealed class GameShipsOnPlanetInfoViewModel : IDisposable
     {
         private readonly ReactivityListProperty<IGameShipsOnPlanetInfoItemViewModel> _infoViewModels = new();
-        private readonly ReactivityProperty<bool> _isPlanetInfoVisible = new();
+        private readonly ReactivityProperty<bool> _isVisible = new();
         
         private readonly int _planetId;
         private readonly ulong _ownerClientPlayerId;
@@ -22,6 +24,7 @@ namespace Client.Game.Planets.ViewModels
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameClientEncounterManager _encounterManager;
         private readonly GamePlanetAttackTargetSelector _attackTargetSelector;
+        private readonly IGameCurrentPlayerInfoTabController _infoTabController;
         
         public GameShipsOnPlanetInfoViewModel(
             int planetId,
@@ -30,7 +33,8 @@ namespace Client.Game.Planets.ViewModels
             GameRulesChecker rulesChecker,
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
             IGameClientEncounterManager encounterManager,
-            GamePlanetAttackTargetSelector attackTargetSelector)
+            GamePlanetAttackTargetSelector attackTargetSelector,
+            IGameCurrentPlayerInfoTabController infoTabController)
         {
             _planetId = planetId;
             _ownerClientPlayerId = ownerClientPlayerId;
@@ -39,30 +43,32 @@ namespace Client.Game.Planets.ViewModels
             _destinyPhaseResolver = destinyPhaseResolver;
             _encounterManager = encounterManager;
             _attackTargetSelector = attackTargetSelector;
+            _infoTabController = infoTabController;
             
             _destinyPhaseResolver.Changed += RefreshInfoViewModels;
             _encounterManager.DefenderChanged += RefreshInfoViewModels;
             _encounterManager.PlanetChanged += RefreshInfoViewModels;
+            _infoTabController.Changed += RefreshPlanetInfoVisibility;
             RefreshInfoViewModels();
         }
 
         public IReactivityReadOnlyCollectionProperty<IGameShipsOnPlanetInfoItemViewModel> InfoViewModels =>
             _infoViewModels;
 
-        public IReactivityProperty<bool> IsPlanetInfoVisible => 
-            _isPlanetInfoVisible;
+        public IReactivityProperty<bool> IsVisible => 
+            _isVisible;
 
         public void Dispose()
         {
             _destinyPhaseResolver.Changed -= RefreshInfoViewModels;
             _encounterManager.DefenderChanged -= RefreshInfoViewModels;
             _encounterManager.PlanetChanged -= RefreshInfoViewModels;
+            _infoTabController.Changed -= RefreshPlanetInfoVisibility;
         }
 
         private void RefreshInfoViewModels()
         {
-            _isPlanetInfoVisible.Value = _encounterManager.PlanetIdToAttack == null || 
-                                         _encounterManager.PlanetIdToAttack == _planetId;
+            RefreshPlanetInfoVisibility();
             _infoViewModels.Value = CreateItemViewModels();
         }
         
@@ -97,6 +103,22 @@ namespace Client.Game.Planets.ViewModels
 
             var viewModel = new GameChoicePlanetToAttackViewModel(_planetId, _attackTargetSelector);
             items.Add(viewModel);
+        }
+
+        private void RefreshPlanetInfoVisibility()
+        {
+            var defaultVisibleCondition = _encounterManager.PlanetIdToAttack == null ||
+                                          _encounterManager.PlanetIdToAttack == _planetId;
+            
+            if (_planetPlayerOwner.PlayerId == _ownerClientPlayerId)
+            {
+                _isVisible.Value = _infoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay &&
+                                   defaultVisibleCondition;
+            }
+            else
+            {
+                _isVisible.Value = defaultVisibleCondition;
+            }
         }
     }
 }

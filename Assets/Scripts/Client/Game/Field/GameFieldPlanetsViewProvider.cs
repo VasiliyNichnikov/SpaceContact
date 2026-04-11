@@ -1,15 +1,18 @@
+using System;
 using System.Collections.Generic;
 using Client.Data.Game;
 using Client.Game.Factory;
 using Client.Game.Planets;
 using Client.Game.Planets.ViewModels;
+using Client.UI.HUDs;
+using Client.UI.HUDs.ViewModels;
 using Core.Game;
 using UnityEngine;
 using Logger = Logs.Logger;
 
 namespace Client.Game.Field
 {
-    public sealed class GameFieldPlanetsViewProvider
+    public sealed class GameFieldPlanetsViewProvider : IDisposable
     {
         private enum PositionPlanetsType
         {
@@ -26,6 +29,7 @@ namespace Client.Game.Field
         private readonly PlayerPlanetsFactory _factory;
         private readonly IGameFieldManager _fieldManager;
         private readonly PlanetLayoutSetData _planetLayoutSetData;
+        private readonly IGameCurrentPlayerInfoTabController _currentPlayerInfoTabController;
         
         private Transform? _centerOpponentRootPlanets;
         private readonly List<PlanetView> _centerOpponentPlanets = new();
@@ -34,18 +38,26 @@ namespace Client.Game.Field
         private readonly List<PlanetView> _leftOpponentPlanets = new();
         
         private Transform? _rightOpponentRootPlanets;
-        private readonly List<PlanetView> _rightOpponentPlanets = new();
         
+        private readonly List<PlanetView> _rightOpponentPlanets = new();
         private readonly List<PlanetView> _playerPlanets = new();
         
         public GameFieldPlanetsViewProvider(
             PlayerPlanetsFactory factory,
             IGameFieldManager fieldManager,
-            PlanetLayoutSetData planetLayoutSetData)
+            PlanetLayoutSetData planetLayoutSetData,
+            IGameCurrentPlayerInfoTabController currentPlayerInfoTabController)
         {
             _factory = factory;
             _fieldManager = fieldManager;
             _planetLayoutSetData = planetLayoutSetData;
+            _currentPlayerInfoTabController = currentPlayerInfoTabController;
+            _currentPlayerInfoTabController.Changed += RefreshCurrentPlayerInfoTab;
+        }
+        
+        public void Dispose()
+        {
+            _currentPlayerInfoTabController.Changed -= RefreshCurrentPlayerInfoTab;
         }
         
         public Transform? CenterOpponentRootPlanets => 
@@ -59,6 +71,9 @@ namespace Client.Game.Field
         
         public IReadOnlyCollection<PlanetView> ViewedOpponentPlanets => 
             _centerOpponentPlanets;
+
+        public IReadOnlyCollection<PlanetView> PlayerPlanets =>
+            _playerPlanets;
         
         public float DistanceBetweenCentralPlanetsByX => 
             _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
@@ -71,22 +86,6 @@ namespace Client.Game.Field
             InitCenterOpponentPlanets(numberOfPlanetsOnPlayer);
             InitLeftEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
             InitRightEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
-        }
-        
-        public void ShowPlayerPlanets()
-        {
-            foreach (var planetView in _playerPlanets)
-            {
-                planetView.Show();
-            }
-        }
-
-        public void HidePlayerPlanets()
-        {
-            foreach (var planetView in _playerPlanets)
-            {
-                planetView.Hide();
-            }
         }
 
         public void InitLeftOpponentPlanets(IReadOnlyList<PlanetViewModel> viewModels)
@@ -107,6 +106,34 @@ namespace Client.Game.Field
         public void InitPlayerPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
             InitPlanets(_playerPlanets, viewModels);
+        }
+
+        private void RefreshCurrentPlayerInfoTab()
+        {
+            if (_currentPlayerInfoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay)
+            {
+                ShowPlayerPlanets();
+            }
+            else
+            {
+                HidePlayerPlanets();
+            }
+        }
+        
+        private void ShowPlayerPlanets()
+        {
+            foreach (var planetView in _playerPlanets)
+            {
+                planetView.Show();
+            }
+        }
+
+        private void HidePlayerPlanets()
+        {
+            foreach (var planetView in _playerPlanets)
+            {
+                planetView.Hide();
+            }
         }
 
         private void InitPlanets(IReadOnlyList<PlanetView> views, IReadOnlyList<PlanetViewModel> viewModels)

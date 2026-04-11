@@ -10,7 +10,7 @@ namespace Client.UI.HUDs
         [Serializable]
         private struct SwitchButtonViewData
         {
-            public GameHudBottomSwitchButtonType Type;
+            public GamePlayerInfoTabType Type;
             
             public GameHudBottomSwitchButtonView View;
         }

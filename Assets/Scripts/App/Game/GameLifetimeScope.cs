@@ -8,6 +8,7 @@ using Client.Game.Planets.ViewModels;
 using Client.Helpers;
 using Client.UI;
 using Client.UI.Dialogs.Game.PlayerChoice.ViewModels;
+using Client.UI.HUDs;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Loaders;
 using Core.Game;
@@ -74,6 +75,7 @@ namespace App.Game
             builder.Register<ClientEventsDispatcher>(Lifetime.Singleton).AsSelf();
             builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlanetAttackTargetSelector>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameCurrentPlayerInfoTabController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
             
             // Managers
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();

@@ -24,7 +24,8 @@ namespace Client.UI
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameShipsOnPlanetInfoViewModelFactory _shipsInfoViewModelFactory;
         
-        private readonly List<GameShipsOnPlanetInfoViewModel> _shipsInfoViewModels = new();
+        private readonly List<GameShipsOnPlanetInfoViewModel> _opponentPlanetInfoViewModels = new();
+        private readonly List<GameShipsOnPlanetInfoViewModel> _currentPlayerPlanetInfoViewModels = new();
         
         public GamePlanetInfoPresenter(
             IGameFieldViewManager fieldViewManager,
@@ -42,7 +43,7 @@ namespace Client.UI
             _playersRegistry = playersRegistry;
             _fieldViewManager.OnMovementAnimationStarted += OnAnimationMovementStarted;
             _fieldViewManager.OnMovementAnimationEnded += OnAnimationMovementEnded;
-            _fieldViewManager.OnInitialized += OnAnimationMovementEnded;
+            _fieldViewManager.OnInitialized += DisplayInfoAboutViewedPlanets;
             _mainCamera = mainCamera;
             _shipsInfoViewModelFactory = shipsInfoViewModelFactory;
         }
@@ -51,25 +52,61 @@ namespace Client.UI
         {
             _fieldViewManager.OnMovementAnimationStarted -= OnAnimationMovementStarted;
             _fieldViewManager.OnMovementAnimationEnded -= OnAnimationMovementEnded;
-            _fieldViewManager.OnInitialized -= OnAnimationMovementEnded;
-            DisposeShipsInfoViewModels();
+            _fieldViewManager.OnInitialized -= DisplayInfoAboutViewedPlanets;
+            DisposeShipsInfoViewModels(_opponentPlanetInfoViewModels);
+            DisposeShipsInfoViewModels(_currentPlayerPlanetInfoViewModels);
         }
 
         private void OnAnimationMovementStarted()
         {
             HideUsedPlanetInfoViews();
         }
+
+        private void DisplayInfoAboutViewedPlanets()
+        {
+            DisplayInfoAboutCurrentPlayerPlanets();
+            DisplayInfoAboutOpponentPlanets();
+        }
         
-        private void OnAnimationMovementEnded()
+        private void OnAnimationMovementEnded() => 
+            DisplayInfoAboutOpponentPlanets();
+        
+        private void DisplayInfoAboutOpponentPlanets()
         {
             var opponentGamePlayer = _fieldViewManager.ViewedOpponentPlayer;
 
             if (opponentGamePlayer == null)
             {
-                Logger.Error($"{nameof(GamePlanetInfoPresenter)}.{nameof(OnAnimationMovementEnded)} opponentGamePlayer is null.");
+                Logger.Error($"{nameof(GamePlanetInfoPresenter)}.{nameof(DisplayInfoAboutOpponentPlanets)}: opponentGamePlayer is null.");
                 return;
             }
 
+            DisplayInfoAboutSelectedPlayerPlanets(
+                opponentGamePlayer,
+                _planetsViewProvider.ViewedOpponentPlanets,
+                _opponentPlanetInfoViewModels);
+        }
+        
+        private void DisplayInfoAboutCurrentPlayerPlanets()
+        {
+            var ownerPlayer = _playersRegistry.GetOwnerWithError();
+
+            if (ownerPlayer == null)
+            {
+                return;
+            }
+            
+            DisplayInfoAboutSelectedPlayerPlanets(
+                ownerPlayer, 
+                _planetsViewProvider.PlayerPlanets, 
+                _currentPlayerPlanetInfoViewModels);
+        }
+        
+        private void DisplayInfoAboutSelectedPlayerPlanets(
+            IGamePlayer gamePlayer, 
+            IReadOnlyCollection<PlanetView> planetViews,
+            List<GameShipsOnPlanetInfoViewModel> storagePlanetViewModels)
+        {
             var ownerPlayer = _playersRegistry.GetOwnerWithError();
 
             if (ownerPlayer == null)
@@ -77,9 +114,9 @@ namespace Client.UI
                 return;
             }
 
-            DisposeShipsInfoViewModels();
+            DisposeShipsInfoViewModels(storagePlanetViewModels);
             
-            foreach (var planetView in _planetsViewProvider.ViewedOpponentPlanets)
+            foreach (var planetView in planetViews)
             {
                 var planetInfoView = GetOrCreateInfoView();
                 var anchoredPosition = UIUtils.GetPositionOfObjectFromSceneInUI(
@@ -89,26 +126,26 @@ namespace Client.UI
                 var viewModel = _shipsInfoViewModelFactory.Create(
                     planetView.PlanetId, 
                     ownerPlayer.PlayerId,
-                    opponentGamePlayer);
+                    gamePlayer);
                 planetInfoView.Init(viewModel);
                 planetInfoView.RectTransform.anchoredPosition = anchoredPosition;
-                _shipsInfoViewModels.Add(viewModel);
+                storagePlanetViewModels.Add(viewModel);
             }
         }
 
-        private void DisposeShipsInfoViewModels()
+        private static void DisposeShipsInfoViewModels(List<GameShipsOnPlanetInfoViewModel> viewModels)
         {
-            if (_shipsInfoViewModels.Count == 0)
+            if (viewModels.Count == 0)
             {
                 return;
             }
             
-            foreach (var viewModel in _shipsInfoViewModels)
+            foreach (var viewModel in viewModels)
             {
                 viewModel.Dispose();
             }
             
-            _shipsInfoViewModels.Clear();
+            viewModels.Clear();
         }
 
         private void HideUsedPlanetInfoViews()

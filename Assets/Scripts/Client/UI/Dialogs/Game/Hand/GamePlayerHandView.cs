@@ -32,13 +32,26 @@ namespace Client.UI.Dialogs.Game.Hand
         {
             gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.CardsViewModels, RefreshCards);
+            gameObject.Subscribe(_viewModel.IsVisible, RefreshVisibility);
         }
         
-        public void Show() => 
+        private void Show() => 
             gameObject.SetActive(true);
         
-        public void Hide() => 
+        private void Hide() => 
             gameObject.SetActive(false);
+
+        private void RefreshVisibility(bool isVisible)
+        {
+            if (isVisible)
+            {
+                Show();
+            }
+            else
+            {
+                Hide();
+            }
+        }
         
         private void RefreshCards(IReadOnlyCollection<IGamePlayerSpaceCardViewModel> viewModels)
         {

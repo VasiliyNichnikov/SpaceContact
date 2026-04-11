@@ -8,7 +8,7 @@ namespace Client.UI.HUDs.ViewModels
         private readonly ReactivityProperty<bool> _isSelected = new();
         private readonly Action _onClickHandler;
         
-        public GameHudBottomSwitchButtonViewModel(GameHudBottomSwitchButtonType type, Action onClickHandler)
+        public GameHudBottomSwitchButtonViewModel(GamePlayerInfoTabType type, Action onClickHandler)
         {
             Type = type;
             _onClickHandler = onClickHandler;
@@ -17,7 +17,7 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityProperty<bool> IsSelected => 
             _isSelected;
         
-        public GameHudBottomSwitchButtonType Type { get; }
+        public GamePlayerInfoTabType Type { get; }
 
         public void Select() => 
             _isSelected.Value = true;

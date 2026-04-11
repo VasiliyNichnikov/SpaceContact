@@ -1,20 +1,14 @@
-using System;
 using System.Collections.Generic;
-using Client.Game.Field;
 
 namespace Client.UI.HUDs.ViewModels
 {
     public sealed class GameHudBottomSwitchesViewModel
     {
-        private readonly GameFieldPlanetsViewProvider _planetsViewProvider;
-        private readonly Action<bool> _changeCardsDisplayAction;
+        private readonly GameCurrentPlayerInfoTabController _infoTabController;
         
-        public GameHudBottomSwitchesViewModel(
-            GameFieldPlanetsViewProvider planetsViewProvider, 
-            Action<bool> changeCardsDisplayAction)
+        public GameHudBottomSwitchesViewModel(GameCurrentPlayerInfoTabController infoTabController)
         {
-            _planetsViewProvider = planetsViewProvider;
-            _changeCardsDisplayAction = changeCardsDisplayAction;
+            _infoTabController = infoTabController;
             Buttons = CreateButtons();
             ShowCards();
         }
@@ -23,31 +17,29 @@ namespace Client.UI.HUDs.ViewModels
 
         private IReadOnlyCollection<GameHudBottomSwitchButtonViewModel> CreateButtons()
         {
-            var showCardsButton = new GameHudBottomSwitchButtonViewModel(GameHudBottomSwitchButtonType.CardsDisplay, ShowCards);
-            var showPlanetsButton = new GameHudBottomSwitchButtonViewModel(GameHudBottomSwitchButtonType.PlanetsDisplay, ShowPlanets);
+            var showCardsButton = new GameHudBottomSwitchButtonViewModel(GamePlayerInfoTabType.CardsDisplay, ShowCards);
+            var showPlanetsButton = new GameHudBottomSwitchButtonViewModel(GamePlayerInfoTabType.PlanetsDisplay, ShowPlanets);
 
             return new [] { showCardsButton, showPlanetsButton };
         }
 
         private void ShowCards()
         {
-            _changeCardsDisplayAction.Invoke(true);
-            _planetsViewProvider.HidePlayerPlanets();
-            ShowSelectedButton(GameHudBottomSwitchButtonType.CardsDisplay);
+            _infoTabController.ShowCards();
+            ShowSelectedButton();
         }
 
         private void ShowPlanets()
         {
-            _changeCardsDisplayAction.Invoke(false);
-            _planetsViewProvider.ShowPlayerPlanets();
-            ShowSelectedButton(GameHudBottomSwitchButtonType.PlanetsDisplay);
+            _infoTabController.ShowPlanets();
+            ShowSelectedButton();
         }
 
-        private void ShowSelectedButton(GameHudBottomSwitchButtonType type)
+        private void ShowSelectedButton()
         {
             foreach (var button in Buttons)
             {
-                if (button.Type == type)
+                if (button.Type == _infoTabController.ActiveTab)
                 {
                     button.Select();
                 }

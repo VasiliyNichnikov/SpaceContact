@@ -1,6 +1,6 @@
 namespace Client.UI.HUDs.ViewModels
 {
-    public enum GameHudBottomSwitchButtonType
+    public enum GamePlayerInfoTabType
     {
         PlanetsDisplay,
         CardsDisplay,

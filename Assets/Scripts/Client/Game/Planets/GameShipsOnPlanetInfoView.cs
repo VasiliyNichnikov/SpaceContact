@@ -30,7 +30,7 @@ namespace Client.Game.Planets
         {
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.InfoViewModels, RefreshItems);
-            gameObject.Subscribe(_viewModel.IsPlanetInfoVisible, gameObject.SetActive);
+            gameObject.Subscribe(_viewModel.IsVisible, gameObject.SetActive);
         }
         
         public RectTransform RectTransform => 
