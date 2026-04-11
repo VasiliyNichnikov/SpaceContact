@@ -1,5 +1,5 @@
 using Core.User;
-using Core.User.Dto.Requests;
+using Network.Dto.Requests;
 using Core.User.Dto.States;
 using Logs;
 using Network.Infrastructure;

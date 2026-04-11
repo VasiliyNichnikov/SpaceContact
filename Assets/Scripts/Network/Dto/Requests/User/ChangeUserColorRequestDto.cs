@@ -1,6 +1,6 @@
 using System;
 
-namespace Core.User.Dto.Requests
+namespace Network.Dto.Requests
 {
     [Serializable]
     public class ChangeUserColorRequestDto

@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Game.Cards;
-using Core.Game.Dto.Requests;
 using Core.Game.Dto.States.Cards;
 using Network.Dto.Requests;
 using Network.Requests;
@@ -19,12 +18,12 @@ namespace Network.Game.Hands
 
         public Task<PlayerHandStateData?> CreatePlayerHandAsync(ulong playerId, CancellationToken ct)
         {
-            var request = new PlayerHandStateRequestDto
+            var request = new GamePlayerHandStateRequestDto
             {
                 PlayerId = playerId,
             };
 
-            return _networkService.GetDataAsync<PlayerHandStateRequestDto, PlayerHandStateData>(
+            return _networkService.GetDataAsync<GamePlayerHandStateRequestDto, PlayerHandStateData>(
                 request,
                 NetworkRequestType.CollectPlayerHandState,
                 ct);

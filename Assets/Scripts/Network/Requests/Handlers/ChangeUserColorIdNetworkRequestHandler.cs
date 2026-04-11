@@ -1,6 +1,6 @@
 using Core.User;
-using Core.User.Dto.Requests;
 using Logs;
+using Network.Dto.Requests;
 using Network.Infrastructure;
 
 namespace Network.Requests

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Core.User;
-using Core.User.Dto.Requests;
+using Network.Dto.Requests;
 using Core.User.Dto.States;
 using GeneralUtils;
 using Network.Infrastructure;

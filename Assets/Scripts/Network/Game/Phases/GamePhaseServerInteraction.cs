@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Core.Game.Dto.Requests;
 using Core.Game.Dto.States;
 using Core.Game.Phases;
+using Network.Dto.Requests;
 using Network.Requests;
 
 namespace Network.Game.Phases
@@ -18,8 +18,8 @@ namespace Network.Game.Phases
         
         public Task<GalaxyStateData?> GetGalaxyStateAsync(CancellationToken ct)
         {
-            return _networkService.GetDataAsync<GalaxyStateRequestDto, GalaxyStateData>(
-                new GalaxyStateRequestDto(),
+            return _networkService.GetDataAsync<GameGalaxyStateRequestDto, GalaxyStateData>(
+                new GameGalaxyStateRequestDto(),
                 NetworkRequestType.GetGalaxyState,
                 ct);
         }

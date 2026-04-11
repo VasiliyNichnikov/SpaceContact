@@ -1,9 +1,9 @@
 using System;
 
-namespace Core.Game.Dto.Requests
+namespace Network.Dto.Requests
 {
     [Serializable]
-    public class PlayerHandStateRequestDto
+    public class GamePlayerHandStateRequestDto
     {
         public ulong PlayerId;
     }

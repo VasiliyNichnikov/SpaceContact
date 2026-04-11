@@ -1,11 +1,11 @@
-using Core.Game.Dto.Requests;
 using Core.Game.Dto.States;
 using Core.Game.Galaxy.Server;
+using Network.Dto.Requests;
 using Network.Infrastructure;
 
 namespace Network.Requests
 {
-    public class GetGalaxyStateNetworkRequestHandler : NetworkRequestHandler<GalaxyStateRequestDto, GalaxyStateData>
+    public class GetGalaxyStateNetworkRequestHandler : NetworkRequestHandler<GameGalaxyStateRequestDto, GalaxyStateData>
     {
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
         
@@ -19,7 +19,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.GetGalaxyState;
         
-        protected override GalaxyStateData ProcessRequest(GalaxyStateRequestDto request, ulong senderId) => 
+        protected override GalaxyStateData ProcessRequest(GameGalaxyStateRequestDto request, ulong senderId) => 
             _serverGalaxyManager.ToState();
     }
 }

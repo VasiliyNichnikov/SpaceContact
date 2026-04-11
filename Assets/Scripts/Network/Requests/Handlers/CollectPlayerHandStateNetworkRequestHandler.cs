@@ -1,13 +1,13 @@
 using Core.Game.Cards;
-using Core.Game.Dto.Requests;
 using Core.Game.Dto.States.Cards;
 using Core.Game.Players;
 using Logs;
+using Network.Dto.Requests;
 using Network.Infrastructure;
 
 namespace Network.Requests
 {
-    public sealed class CollectPlayerHandStateNetworkRequestHandler : NetworkRequestHandler<PlayerHandStateRequestDto, PlayerHandStateData>
+    public sealed class CollectPlayerHandStateNetworkRequestHandler : NetworkRequestHandler<GamePlayerHandStateRequestDto, PlayerHandStateData>
     {
         private readonly GamePlayersRegistry _registry;
         private readonly IGameServerCardsManager _serverCardsManager;
@@ -24,7 +24,7 @@ namespace Network.Requests
         public override NetworkRequestType Type => 
             NetworkRequestType.CollectPlayerHandState;
 
-        protected override PlayerHandStateData? ProcessRequest(PlayerHandStateRequestDto request, ulong senderId)
+        protected override PlayerHandStateData? ProcessRequest(GamePlayerHandStateRequestDto request, ulong senderId)
         {
             var player = _registry.GetPlayerById(request.PlayerId);
 

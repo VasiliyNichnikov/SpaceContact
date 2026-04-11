@@ -1,9 +1,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Core.User;
-using Core.User.Dto.Requests;
 using Logs;
 using Network.Requests;
+using Network.Dto.Requests;
 
 namespace Network.User
 {
