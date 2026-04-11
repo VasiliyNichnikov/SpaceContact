@@ -20,7 +20,7 @@ namespace Network.Requests
         
         protected override EmptyResponseData? ProcessRequest(GameSkipDestinyCardRequestDto request, ulong senderId)
         {
-            var isCompleted = _destinyPhaseResolver.SkipDestiny();
+            var isCompleted = _destinyPhaseResolver.SkipDestiny(senderId);
 
             return isCompleted ? EmptyResponseData.Instance : null;
         }

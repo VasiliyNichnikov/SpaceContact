@@ -37,6 +37,8 @@ namespace Core.Game.Players
         public IReadOnlyCollection<IPlanet> Planets => 
             ArraySegment<IPlanet>.Empty;
 
+        public bool ContainsPlanet(int planetId) => false;
+        
         public void Apply(IGamePlayerVisitor visitor)
         {
             // nothing

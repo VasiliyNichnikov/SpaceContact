@@ -39,6 +39,20 @@ namespace Client.Game.Planets
         
         public void Hide() => 
             gameObject.SetActive(false);
+        
+        void IGameShipsOnPlanetInfoVisitor.Visit(GameShipsInfoViewModel viewModel)
+        {
+            var prefab = _uiShipsOnPlanetItemsRegistrySO.ShipsInfoOnPlanetItemView;
+            var createdObject = CreateItemView(prefab);
+            createdObject.Init(viewModel);
+        }
+
+        void IGameShipsOnPlanetInfoVisitor.Visit(GameChoicePlanetToAttackViewModel viewModel)
+        {
+            var prefab = _uiShipsOnPlanetItemsRegistrySO.ChoicePlanetToAttackItemView;
+            var createdObject = CreateItemView(prefab);
+            createdObject.Init(viewModel);
+        }
 
         private void RefreshItems(IReadOnlyCollection<IGameShipsOnPlanetInfoItemViewModel> viewModels)
         {
@@ -54,12 +68,12 @@ namespace Client.Game.Planets
             }
         }
 
-        void IGameShipsOnPlanetInfoVisitor.Visit(GameShipsInfoViewModel viewModel)
+        private TInstance CreateItemView<TInstance>(TInstance prefab) where TInstance : MonoBehaviour
         {
-            var prefab = _uiShipsOnPlanetItemsRegistrySO.ShipsInfoOnPlanetItemView;
             var createdObject = Instantiate(prefab, _itemsContainerRectTransform, false);
-            createdObject.Init(viewModel);
             _createdItems.Enqueue(createdObject.gameObject);
+
+            return createdObject;
         }
     }
 }

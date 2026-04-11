@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.EngineData;
 using Core.Game.Hands;
 using Core.Game.Planets;
@@ -38,6 +39,9 @@ namespace Core.Game.Players
 
         public IReadOnlyCollection<IPlanet> Planets { get; private set; } = 
             ArraySegment<IPlanet>.Empty;
+
+        public bool ContainsPlanet(int planetId) => 
+            Planets.Any(p => p.Id == planetId);
 
         public void Apply(IGamePlayerVisitor visitor) => 
             visitor.Visit(this);

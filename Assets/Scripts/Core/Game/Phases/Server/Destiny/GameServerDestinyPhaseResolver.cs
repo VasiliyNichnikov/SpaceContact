@@ -43,9 +43,11 @@ namespace Core.Game.Phases.Server
             OpenNextDestinyCard();
         }
 
-        public bool SkipDestiny()
+        public bool SkipDestiny(ulong senderId)
         {
-            if(!_rulesChecker.Check(GameRuleType.CanSkipDestinyCard, GameRuleContext.Empty))
+            var context = GameRuleContext.CheckPlayer(senderId);
+            
+            if(!_rulesChecker.Check(GameRuleType.CanSkipDestinyCard, context))
             {
                 Logger.Error($"{nameof(GameServerDestinyPhaseResolver)}.{nameof(ChooseDestiny)}: can't apply Destiny card.");
                 return false;

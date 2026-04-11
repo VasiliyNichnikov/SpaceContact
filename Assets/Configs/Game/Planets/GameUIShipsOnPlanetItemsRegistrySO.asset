@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: GameUIShipsOnPlanetItemsRegistrySO
   m_EditorClassIdentifier: Client::Client.Configs.Game.GameUIShipsOnPlanetItemsRegistrySO
   _shipsInfoOnPlanetItemView: {fileID: 2325413266543537244, guid: 46fad338c5dce4f03af4f965d9684b83, type: 3}
+  _choicePlanetToAttackItemView: {fileID: 3049541287354722966, guid: 0226b26b91615461f80bc5f15c9a3fda, type: 3}

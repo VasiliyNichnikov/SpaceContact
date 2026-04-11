@@ -5,6 +5,7 @@ using Client.Game.Field;
 using Client.Game.Planets;
 using Client.Game.Planets.ViewModels;
 using Client.UI.Utils;
+using Core.Game.Players;
 using UnityEngine;
 using Logger = Logs.Logger;
 
@@ -20,22 +21,30 @@ namespace Client.UI
         private readonly GameShipsOnPlanetInfoViewFactory _planetInfoViewFactory;
         private readonly Camera _mainCamera;
         private readonly SceneStorage _sceneStorage;
+        private readonly GamePlayersRegistry _playersRegistry;
+        private readonly GameShipsOnPlanetInfoViewModelFactory _shipsInfoViewModelFactory;
+        
+        private readonly List<GameShipsOnPlanetInfoViewModel> _shipsInfoViewModels = new();
         
         public GamePlanetInfoPresenter(
             IGameFieldViewManager fieldViewManager,
             GameFieldPlanetsViewProvider planetsViewProvider,
             GameShipsOnPlanetInfoViewFactory planetInfoViewFactory,
             SceneStorage sceneStorage,
-            Camera mainCamera)
+            GamePlayersRegistry playersRegistry,
+            Camera mainCamera,
+            GameShipsOnPlanetInfoViewModelFactory shipsInfoViewModelFactory)
         {
             _fieldViewManager = fieldViewManager;
             _planetsViewProvider = planetsViewProvider;
             _planetInfoViewFactory = planetInfoViewFactory;
             _sceneStorage = sceneStorage;
+            _playersRegistry = playersRegistry;
             _fieldViewManager.OnMovementAnimationStarted += OnAnimationMovementStarted;
             _fieldViewManager.OnMovementAnimationEnded += OnAnimationMovementEnded;
             _fieldViewManager.OnInitialized += OnAnimationMovementEnded;
             _mainCamera = mainCamera;
+            _shipsInfoViewModelFactory = shipsInfoViewModelFactory;
         }
 
         public void Dispose()
@@ -43,13 +52,14 @@ namespace Client.UI
             _fieldViewManager.OnMovementAnimationStarted -= OnAnimationMovementStarted;
             _fieldViewManager.OnMovementAnimationEnded -= OnAnimationMovementEnded;
             _fieldViewManager.OnInitialized -= OnAnimationMovementEnded;
+            DisposeShipsInfoViewModels();
         }
 
         private void OnAnimationMovementStarted()
         {
             HideUsedPlanetInfoViews();
         }
-
+        
         private void OnAnimationMovementEnded()
         {
             var opponentGamePlayer = _fieldViewManager.ViewedOpponentPlayer;
@@ -59,6 +69,15 @@ namespace Client.UI
                 Logger.Error($"{nameof(GamePlanetInfoPresenter)}.{nameof(OnAnimationMovementEnded)} opponentGamePlayer is null.");
                 return;
             }
+
+            var ownerPlayer = _playersRegistry.GetOwnerWithError();
+
+            if (ownerPlayer == null)
+            {
+                return;
+            }
+
+            DisposeShipsInfoViewModels();
             
             foreach (var planetView in _planetsViewProvider.ViewedOpponentPlanets)
             {
@@ -67,12 +86,29 @@ namespace Client.UI
                     _mainCamera, 
                     _sceneStorage.MainCanvasRectTransform,
                     planetView.transform.position);
-                var viewModel = new GameShipsOnPlanetInfoViewModel(
+                var viewModel = _shipsInfoViewModelFactory.Create(
                     planetView.PlanetId, 
+                    ownerPlayer.PlayerId,
                     opponentGamePlayer);
                 planetInfoView.Init(viewModel);
                 planetInfoView.RectTransform.anchoredPosition = anchoredPosition;
+                _shipsInfoViewModels.Add(viewModel);
             }
+        }
+
+        private void DisposeShipsInfoViewModels()
+        {
+            if (_shipsInfoViewModels.Count == 0)
+            {
+                return;
+            }
+            
+            foreach (var viewModel in _shipsInfoViewModels)
+            {
+                viewModel.Dispose();
+            }
+            
+            _shipsInfoViewModels.Clear();
         }
 
         private void HideUsedPlanetInfoViews()

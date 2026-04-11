@@ -12,7 +12,7 @@ using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public class GameHudViewModel : IGameHudViewModel
+    public sealed class GameHudViewModel : IGameHudViewModel
     {
         private readonly ReactivityProperty<IGameDestinyCardViewModel> _destinyCardViewModel = new();
         private readonly ReactivityProperty<GamePlayerBlockViewModel> _playerBlockViewModel = new();
@@ -100,12 +100,20 @@ namespace Client.UI.HUDs.ViewModels
 
             if (activeDestinyCard == null)
             {
-                Logger.Error("GameHudViewModel.OnDestinyCardChanged: activeDestinyCard is null.");
+                Logger.Error($"{nameof(GameHudViewModel)}.{nameof(OnDestinyCardChanged)}: activeDestinyCard is null.");
                 
                 return;
             }
             
+            var owner = _registry.GetOwnerWithError();
+
+            if (owner == null)
+            {
+                return;
+            }
+            
             _destinyCardViewModel.Value = new GameDestinyCardViewModel(
+                owner,
                 activeDestinyCard,
                 _rulesChecker,
                 SkipDestinyCard);

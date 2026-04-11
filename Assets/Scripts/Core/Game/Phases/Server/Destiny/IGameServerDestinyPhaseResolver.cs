@@ -4,6 +4,6 @@ namespace Core.Game.Phases.Server
     {
         void ChooseDestiny();
         
-        bool SkipDestiny();
+        bool SkipDestiny(ulong senderId);
     }
 }

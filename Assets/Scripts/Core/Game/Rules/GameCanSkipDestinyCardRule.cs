@@ -1,7 +1,6 @@
 using Core.Game.Cards;
 using Core.Game.Encounter;
 using Core.Game.Phases.Client;
-using Core.Game.Players;
 
 namespace Core.Game.Rules
 {
@@ -9,16 +8,13 @@ namespace Core.Game.Rules
     {
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
         private readonly IGameClientEncounterManager _encounterManager;
-        private readonly GamePlayersRegistry _playersRegistry;
         
         public GameCanSkipDestinyCardRule(
             IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameClientEncounterManager encounterManager,
-            GamePlayersRegistry playersRegistry)
+            IGameClientEncounterManager encounterManager)
         {
             _destinyPhaseResolver = destinyPhaseResolver;
             _encounterManager = encounterManager;
-            _playersRegistry = playersRegistry;
         }
         
         public GameRuleType Type => 
@@ -26,9 +22,7 @@ namespace Core.Game.Rules
         
         public bool Check(GameRuleContext context)
         {
-            var ownerPlayer = _playersRegistry.GetOwnerWithError(silently:true);
-
-            if (ownerPlayer == null)
+            if (context.SelectedPlayerId == null)
             {
                 return false;
             }
@@ -55,7 +49,7 @@ namespace Core.Game.Rules
             }
 
             return targetPlayerId == aggressorPlayer.PlayerId && 
-                   targetPlayerId == ownerPlayer.PlayerId;
+                   targetPlayerId == context.SelectedPlayerId;
         }
     }
 }

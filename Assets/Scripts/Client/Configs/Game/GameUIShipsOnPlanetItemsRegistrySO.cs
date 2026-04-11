@@ -9,7 +9,13 @@ namespace Client.Configs.Game
         [SerializeField] 
         private GameShipsInfoItemView _shipsInfoOnPlanetItemView = null!;
         
+        [SerializeField]
+        private GameChoicePlanetToAttackItemView _choicePlanetToAttackItemView = null!;
+        
         public GameShipsInfoItemView ShipsInfoOnPlanetItemView =>
             _shipsInfoOnPlanetItemView;
+
+        public GameChoicePlanetToAttackItemView ChoicePlanetToAttackItemView => 
+            _choicePlanetToAttackItemView;
     }
 }

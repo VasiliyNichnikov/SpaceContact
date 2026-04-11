@@ -4,6 +4,7 @@ using Client.Configs.Game;
 using Client.Game;
 using Client.Game.Factory;
 using Client.Game.Field;
+using Client.Game.Planets.ViewModels;
 using Client.Helpers;
 using Client.UI;
 using Client.UI.Dialogs.Game.PlayerChoice.ViewModels;
@@ -86,6 +87,7 @@ namespace App.Game
             builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<GameShipsOnPlanetInfoViewFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<GameEventFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameShipsOnPlanetInfoViewModelFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
             builder.Register<GameFieldPlanetsViewProvider>(Lifetime.Singleton).AsSelf();
@@ -165,6 +167,7 @@ namespace App.Game
             RegisterGameRule<GameCanBeDefenderRule>(builder);
             RegisterGameRule<GameCanApplyDestinyCardRule>(builder);
             RegisterGameRule<GameCanSkipDestinyCardRule>(builder);
+            RegisterGameRule<GameCanAggressorAttackToPlanetRule>(builder);
         }
         
         private static void RegisterGameRule<TRule>(IContainerBuilder builder) where TRule : IGameRule

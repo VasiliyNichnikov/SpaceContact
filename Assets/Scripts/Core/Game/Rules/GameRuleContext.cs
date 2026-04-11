@@ -3,6 +3,8 @@ namespace Core.Game.Rules
     public struct GameRuleContext
     {
         public ulong? SelectedPlayerId;
+        
+        public int? SelectedPlanetId;
 
         public static GameRuleContext CheckPlayer(ulong selectedPlayer)
         {
@@ -11,6 +13,17 @@ namespace Core.Game.Rules
                 SelectedPlayerId = selectedPlayer
             };
 
+            return context;
+        }
+
+        public static GameRuleContext CheckPlanet(ulong ownerClientId, int selectedPlanetId)
+        {
+            var context = new GameRuleContext
+            {
+                SelectedPlayerId = ownerClientId,
+                SelectedPlanetId = selectedPlanetId
+            };
+            
             return context;
         }
         

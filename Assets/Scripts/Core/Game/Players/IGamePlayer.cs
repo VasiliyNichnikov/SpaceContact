@@ -28,6 +28,8 @@ namespace Core.Game.Players
         
         IReadOnlyCollection<IPlanet> Planets { get; }
         
+        bool ContainsPlanet(int planetId);
+        
         void Apply(IGamePlayerVisitor visitor);
     }
 }
