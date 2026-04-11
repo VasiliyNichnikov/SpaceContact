@@ -3,6 +3,7 @@ using Client.Configs.Game;
 using Client.Game.Planets.ViewModels;
 using Reactivity;
 using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 
 namespace Client.Game.Planets
@@ -16,6 +17,9 @@ namespace Client.Game.Planets
         
         [SerializeField]
         private RectTransform _itemsContainerRectTransform = null!;
+        
+        [SerializeField]
+        private Image _borderImage = null!;
         
         private GameShipsOnPlanetInfoViewModel _viewModel = null!;
         private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO = null!;
@@ -31,6 +35,7 @@ namespace Client.Game.Planets
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.InfoViewModels, RefreshItems);
             gameObject.Subscribe(_viewModel.IsVisible, gameObject.SetActive);
+            gameObject.Subscribe(_viewModel.BorderColor, color => _borderImage.color = color);
         }
         
         public RectTransform RectTransform => 

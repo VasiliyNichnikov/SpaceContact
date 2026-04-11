@@ -8,14 +8,20 @@ using Core.Game.Phases.Client;
 using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Rules;
+using CoreConvertor;
 using Reactivity;
+using UnityEngine;
 
 namespace Client.Game.Planets.ViewModels
 {
     public sealed class GameShipsOnPlanetInfoViewModel : IDisposable
     {
+        private const string DefaultBorderColorHex = "#7EFF00";
+        private const string PlanetToAttackBorderColorHex = "#FF2900";
+        
         private readonly ReactivityListProperty<IGameShipsOnPlanetInfoItemViewModel> _infoViewModels = new();
         private readonly ReactivityProperty<bool> _isVisible = new();
+        private readonly ReactivityProperty<Color> _borderColor = new();
         
         private readonly int _planetId;
         private readonly ulong _ownerClientPlayerId;
@@ -49,6 +55,8 @@ namespace Client.Game.Planets.ViewModels
             _encounterManager.DefenderChanged += RefreshInfoViewModels;
             _encounterManager.PlanetChanged += RefreshInfoViewModels;
             _infoTabController.Changed += RefreshPlanetInfoVisibility;
+
+            RefreshPlanetInfoVisibility();
             RefreshInfoViewModels();
         }
 
@@ -57,6 +65,9 @@ namespace Client.Game.Planets.ViewModels
 
         public IReactivityProperty<bool> IsVisible => 
             _isVisible;
+
+        public IReactivityProperty<Color> BorderColor => 
+            _borderColor;
 
         public void Dispose()
         {
@@ -68,7 +79,7 @@ namespace Client.Game.Planets.ViewModels
 
         private void RefreshInfoViewModels()
         {
-            RefreshPlanetInfoVisibility();
+            RefreshBorderColor();
             _infoViewModels.Value = CreateItemViewModels();
         }
         
@@ -105,20 +116,25 @@ namespace Client.Game.Planets.ViewModels
             items.Add(viewModel);
         }
 
+        private void RefreshBorderColor()
+        {
+            var isPlanetTarget = (_encounterManager.PlanetIdToAttack == null && _planetPlayerOwner.PlayerId != _ownerClientPlayerId) || 
+                                 _encounterManager.PlanetIdToAttack == _planetId;
+            
+            var colorHex = isPlanetTarget ? PlanetToAttackBorderColorHex : DefaultBorderColorHex;
+            _borderColor.Value = ColorConvertor.FromCoreColor(Core.EngineData.Color.FromHex(colorHex));
+        }
+
         private void RefreshPlanetInfoVisibility()
         {
-            var defaultVisibleCondition = _encounterManager.PlanetIdToAttack == null ||
-                                          _encounterManager.PlanetIdToAttack == _planetId;
-            
-            if (_planetPlayerOwner.PlayerId == _ownerClientPlayerId)
+            if (_planetPlayerOwner.PlayerId != _ownerClientPlayerId)
             {
-                _isVisible.Value = _infoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay &&
-                                   defaultVisibleCondition;
+                _isVisible.Value = true;
+                
+                return;
             }
-            else
-            {
-                _isVisible.Value = defaultVisibleCondition;
-            }
+
+            _isVisible.Value = _infoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay;
         }
     }
 }
