@@ -12,7 +12,7 @@ namespace Client.UI.HUDs.ViewModels
 {
     public sealed class GameHudViewModel : IGameHudViewModel
     {
-        private readonly ReactivityProperty<IGameDestinyCardViewModel> _destinyCardViewModel = new();
+        private readonly ReactivityProperty<IGameDestinyCardViewModel?> _destinyCardViewModel = new();
         private readonly ReactivityProperty<GamePlayerBlockViewModel> _playerBlockViewModel = new();
         
         private readonly GamePlayersRegistry _registry;
@@ -46,7 +46,7 @@ namespace Client.UI.HUDs.ViewModels
         
         public IGameHudBottomViewModel BottomViewModel { get; }
 
-        public IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel => 
+        public IReactivityProperty<IGameDestinyCardViewModel?> DestinyCardViewModel => 
             _destinyCardViewModel;
 
         public IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel => 

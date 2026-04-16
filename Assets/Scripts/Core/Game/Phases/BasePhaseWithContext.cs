@@ -4,11 +4,11 @@ namespace Core.Game.Phases
 {
     public abstract class BasePhaseWithContext<TContext> : IGamePhaseWithContext<TContext> where TContext : IPhasePayload
     {
-        protected readonly GameStateMachine StateMachine;
+        private readonly GamePhaseTimeController _phaseTimeController;
         
-        protected BasePhaseWithContext(GameStateMachine stateMachine)
+        protected BasePhaseWithContext(GamePhaseTimeController phaseTimeController)
         {
-            StateMachine = stateMachine;
+            _phaseTimeController = phaseTimeController;
         }
         
         protected TContext? Context { get; private set; }
@@ -16,10 +16,17 @@ namespace Core.Game.Phases
         public void SetContext(IPhasePayload context)
         {
             Context = (TContext)context;
+            _phaseTimeController.SetEndTimeInSeconds(context.EndPhaseTime);
         }
 
         public abstract GamePhaseType Type { get; }
         
+        public bool IsFinished => 
+            _phaseTimeController.IsFinished;
+        
+        public int RemainingTime => 
+            _phaseTimeController.RemainingTime;
+
         public virtual Task Enter() => 
             Task.CompletedTask;
 

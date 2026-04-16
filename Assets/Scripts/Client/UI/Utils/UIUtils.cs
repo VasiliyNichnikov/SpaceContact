@@ -9,6 +9,8 @@ namespace Client.UI.Utils
     public static class UIUtils
     {
         private const float Half = 0.5f;
+        private const int SecondsInHour = 3600;
+        private const int MinutesInHour = 60;
         
         /// <summary>
         /// Создает необходимое количество элементов и инициализирует
@@ -34,6 +36,22 @@ namespace Client.UI.Utils
             var screenPosition = new Vector2(viewportRelative.x * sizeDelta.x, viewportRelative.y * sizeDelta.y);
 
             return screenPosition;
+        }
+
+        public static string SecondsToTimeFormat(int totalSeconds)
+        {
+            if (totalSeconds < 0)
+            {
+                totalSeconds = 0;
+            }
+
+            int hours = totalSeconds / SecondsInHour;
+            int minutes = (totalSeconds % SecondsInHour) / MinutesInHour;
+            int seconds = totalSeconds % MinutesInHour;
+
+            return hours > 0
+                ? $"{hours:D2}:{minutes:D2}:{seconds:D2}"
+                : $"{minutes:D2}:{seconds:D2}";
         }
         
         public static void CreateRequiredNumberOfItems<TMono>(Transform parent, TMono prefab, int numberOfItems, Action<int, TMono> initializationItem) where TMono: MonoBehaviour

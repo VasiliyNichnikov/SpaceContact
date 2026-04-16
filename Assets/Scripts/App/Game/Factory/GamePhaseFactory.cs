@@ -12,37 +12,41 @@ namespace App.Game.Factory
     {
         public static GameInitializationPhase CreateInitializationPhase(IObjectResolver resolver, bool isServer)
         {
-            var stateMachine = resolver.Resolve<GameStateMachine>();
             var playersPhaseTracker = resolver.Resolve<GamePlayersPhaseTracker>();
             var serverInteraction = resolver.Resolve<IGamePhaseServerInteraction>();
             var clientGalaxyManager = resolver.Resolve<IGameClientGalaxyManager>();
             var clientPlayerCardsDeckService = resolver.Resolve<IGameClientPlayerCardsDeckService>();
-            IServerStateMachineNetwork? stateMachineNetwork = null;
-            IGameServerEncounterManager? encounterManager = null;
-            IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
+            GameServerPhaseTransitioner? transitioner = null;
 
             if (isServer)
             {
-                stateMachineNetwork = resolver.Resolve<IServerStateMachineNetwork>();
-                encounterManager = resolver.Resolve<IGameServerEncounterManager>();
-                destinyPhaseResolver = resolver.Resolve<IGameServerDestinyPhaseResolver>();
+                transitioner = resolver.Resolve<GameServerPhaseTransitioner>();
             }
             
             return new GameInitializationPhase(
-                stateMachine, 
                 playersPhaseTracker,
                 clientGalaxyManager,
                 clientPlayerCardsDeckService,
                 serverInteraction,
-                encounterManager,
-                destinyPhaseResolver,
-                stateMachineNetwork);
+                transitioner);
+        }
+
+        public static GameFirstMovePhase CreateFirstMovePhase(IObjectResolver resolver, bool isServer)
+        {
+            IGameServerEncounterManager? encounterManager = null;
+            
+            if (isServer)
+            {
+                encounterManager = resolver.Resolve<IGameServerEncounterManager>();
+            }
+            
+            return new GameFirstMovePhase(encounterManager);
         }
         
         public static GameDestinyPhase CreateDestinyPhase(IObjectResolver resolver, bool isServer)
         {
-            var stateMachine = resolver.Resolve<GameStateMachine>();
             var clientEncounterManager = resolver.Resolve<IGameClientEncounterManager>();
+            var phaseTimeController = resolver.Resolve<GamePhaseTimeController>();
             IGameServerDestinyPhaseResolver? destinyPhaseResolver = null;
 
             if (isServer)
@@ -53,7 +57,7 @@ namespace App.Game.Factory
             return new GameDestinyPhase(
                 clientEncounterManager,
                 destinyPhaseResolver,
-                stateMachine);
+                phaseTimeController);
         }
     }
 }

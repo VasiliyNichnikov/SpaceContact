@@ -14,7 +14,7 @@ namespace Core.Game.Phases
         public GameDestinyPhase(
             IGameClientEncounterManager clientEncounterManager,
             IGameServerDestinyPhaseResolver? serverDestinyPhaseResolver, 
-            GameStateMachine stateMachine) : base(stateMachine)
+            GamePhaseTimeController phaseTimeController) : base(phaseTimeController)
         {
             _clientEncounterManager = clientEncounterManager;
             _serverDestinyPhaseResolver = serverDestinyPhaseResolver;

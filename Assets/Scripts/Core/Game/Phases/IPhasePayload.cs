@@ -2,6 +2,6 @@
 {
     public interface IPhasePayload
     {
-        // nothing
+        double EndPhaseTime { get; }
     }
 }

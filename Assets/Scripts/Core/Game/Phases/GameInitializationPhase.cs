@@ -1,8 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Game.Cards;
-using Core.Game.Dto.Payload;
-using Core.Game.Encounter;
 using Core.Game.Galaxy;
 using Core.Game.Phases.Server;
 using Logs;
@@ -16,30 +14,23 @@ namespace Core.Game.Phases
         private readonly IGameClientGalaxyManager _clientGalaxyManager;
         private readonly IGameClientPlayerCardsDeckService _clientPlayerCardsDeckService;
         
-        private readonly IServerStateMachineNetwork? _serverStateMachine;
-        private readonly IGameServerDestinyPhaseResolver? _serverDestinyPhaseResolver;
-        private readonly IGameServerEncounterManager? _serverEncounterManager;
+        private readonly GameServerPhaseTransitioner? _transitioner;
 
         private readonly CancellationTokenSource _cts = new();
         
         public GameInitializationPhase(
-            GameStateMachine stateMachine, 
             GamePlayersPhaseTracker playersPhaseTracker,
             IGameClientGalaxyManager clientGalaxyManager,
             IGameClientPlayerCardsDeckService clientPlayerCardsDeckService,
             IGamePhaseServerInteraction serverInteraction,
             
-            IGameServerEncounterManager? serverEncounterManager,
-            IGameServerDestinyPhaseResolver? serverDestinyPhaseResolver,
-            IServerStateMachineNetwork? serverStateMachine) : base(stateMachine)
+            GameServerPhaseTransitioner? transitioner)
         {
             _playersPhaseTracker = playersPhaseTracker;
             _clientGalaxyManager = clientGalaxyManager;
             _clientPlayerCardsDeckService = clientPlayerCardsDeckService;
             _serverInteraction = serverInteraction;
-            _serverStateMachine = serverStateMachine;
-            _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
-            _serverEncounterManager = serverEncounterManager;
+            _transitioner = transitioner;
         }
 
         public override GamePhaseType Type => 
@@ -47,8 +38,8 @@ namespace Core.Game.Phases
 
         public override Task Enter()
         {
-            Logger.Warning("GameInitializationPhase.Enter");
-            _serverEncounterManager?.StartEncounter();
+            Logger.Warning($"{nameof(GameInitializationPhase)}.{nameof(Enter)}");
+            
             return LoadData();
         }
 
@@ -78,13 +69,12 @@ namespace Core.Game.Phases
             }
             
             _clientGalaxyManager.UpdateState(galaxyState);
-            
-            GoToDestinyPhase();
+            OnInitialized();
         }
 
-        private void GoToDestinyPhase()
+        private void OnInitialized()
         {
-            if (_serverStateMachine == null)
+            if (_transitioner == null)
             {
                 return;
             }
@@ -93,19 +83,8 @@ namespace Core.Game.Phases
             {
                 return;
             }
-
-            if (_serverEncounterManager == null || _serverDestinyPhaseResolver == null)
-            {
-                Logger.Error($"{nameof(GameInitializationPhase)}.{nameof(GoToDestinyPhase)}: server data not found.");
-                return;
-            }
             
-            var destinyPayload = new GamePhaseDestinyPayload
-            {
-                EncounterState = _serverEncounterManager.ToState()
-            };
-            
-            _serverStateMachine.ServerTransitionTo<GameDestinyPhase>(destinyPayload);
+            _transitioner.OnInitialized();
         }
     }
 }

@@ -34,11 +34,24 @@ namespace Client.UI.HUDs
         private void Construct(IObjectResolver resolver, IGameHudViewModel viewModel)
         {
             gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
-            gameObject.SubscribeWithoutCall(_viewModel.DestinyCardViewModel, _gameDestinyCard.Init);
+            gameObject.Subscribe(_viewModel.DestinyCardViewModel, InitDestinyCardViewModel);
             gameObject.Subscribe(_viewModel.OpponentPlayerViewModel, _gameOpponentPlayerBlockView.Refresh);
             _topView.Init(viewModel.TopViewModel);
             _bottomView.Init(resolver, viewModel.BottomViewModel);
             InitGamePlayerProfiles(viewModel.PlayerProfilesViewModels);
+        }
+
+        private void InitDestinyCardViewModel(IGameDestinyCardViewModel? viewModel)
+        {
+            if (viewModel == null)
+            {
+                _gameDestinyCard.Hide();
+                
+                return;
+            }
+            
+            _gameDestinyCard.Show();
+            _gameDestinyCard.Init(viewModel);
         }
 
         private void InitGamePlayerProfiles(IReadOnlyCollection<GamePlayerProfileViewModel> viewModels)

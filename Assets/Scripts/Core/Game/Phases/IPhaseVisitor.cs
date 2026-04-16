@@ -4,6 +4,10 @@ namespace Core.Game.Phases
     {
         void Visit(GameInitializationPhase phase);
         
+        void Visit(GameFirstMovePhase phase);
+        
+        void Visit(GameRegroupPhase phase);
+        
         void Visit(GameDestinyPhase phase);
     }
 }

@@ -35,6 +35,16 @@ namespace Client.Game
             _gameUILoader.Load();
         }
 
+        public void Visit(GameFirstMovePhase phase)
+        {
+            // nothing
+        }
+
+        public void Visit(GameRegroupPhase phase)
+        {
+            // nothing
+        }
+
         public void Visit(GameDestinyPhase phase)
         {
             // nothing

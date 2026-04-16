@@ -4,6 +4,7 @@ namespace Core.Game.Phases
     {
         None,
         Initialization,
+        FirstMove,
         Regroup,
         Destiny,
         Launch,

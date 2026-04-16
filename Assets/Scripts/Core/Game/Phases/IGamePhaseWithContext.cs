@@ -2,6 +2,10 @@
 {
     public interface IGamePhaseWithContext : IGamePhase
     {
+        bool IsFinished { get; }
+        
+        int RemainingTime { get; }
+        
         void SetContext(IPhasePayload payload);
     }
     

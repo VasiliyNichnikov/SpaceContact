@@ -62,6 +62,10 @@ namespace Core.Game.Encounter
                 ? _playersRegistry.GetPlayerById(state.DefenderPlayerId)
                 : null;
             
+            _planetIdToAttack = state.HasPlanetToAttack
+                ? state.PlanetIdToAttack
+                : null;
+            
             StateChanged?.Invoke();
         }
     }

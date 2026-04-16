@@ -1,14 +1,11 @@
 using System;
-using Core.Game.Dto.States;
 using Core.Game.Phases;
 
 namespace Core.Game.Dto.Payload
 {
     [Serializable]
-    public class GamePhaseDestinyPayload : IPhasePayload
+    public class GamePhaseRegroupPayload : IPhasePayload
     {
-        public EncounterStateData EncounterState = null!;
-
         public double EndPhaseTime;
 
         double IPhasePayload.EndPhaseTime => 

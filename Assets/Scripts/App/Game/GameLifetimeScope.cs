@@ -24,6 +24,7 @@ using Core.Game.Phases.Server;
 using Core.Game.Planets;
 using Core.Game.Players;
 using Core.Game.Rules;
+using Network;
 using Network.Configs;
 using Network.Game;
 using Network.Game.Encounter;
@@ -76,6 +77,8 @@ namespace App.Game
             builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlanetAttackTargetSelector>(Lifetime.Singleton).AsSelf();
             builder.Register<GameCurrentPlayerInfoTabController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+            builder.Register<GamePhaseTimeController>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameServerTimeNetwork>(Lifetime.Singleton).AsImplementedInterfaces();
             
             // Managers
             builder.Register<GameFieldManager>(Lifetime.Singleton).AsImplementedInterfaces();
@@ -126,6 +129,12 @@ namespace App.Game
             builder.Register<GameInitializationPhase>(
                 resolver => GamePhaseFactory.CreateInitializationPhase(resolver, isServer), 
                 Lifetime.Transient);
+
+            builder.Register<GameFirstMovePhase>(
+                resolver => GamePhaseFactory.CreateFirstMovePhase(resolver, isServer),
+                Lifetime.Transient);
+            
+            builder.Register<GameRegroupPhase>(Lifetime.Transient);
             
             builder.Register<GameDestinyPhase>(
                 resolver => GamePhaseFactory.CreateDestinyPhase(resolver, isServer), 
@@ -138,6 +147,7 @@ namespace App.Game
             RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudBottomViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameArrowsHolderViewModel>(builder);
+            RegisterViewModel<GameHudTimerPhaseViewModel>(builder).AsImplementedInterfaces();
         }
 
         private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)
@@ -163,6 +173,8 @@ namespace App.Game
                 builder.Register<GameServerGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerCoreLoader>(Lifetime.Singleton).AsSelf();
                 builder.Register<GameServerCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
+                builder.Register<GameServerPhasePayloadFactory>(Lifetime.Singleton).AsSelf();
+                builder.Register<GameServerPhaseTransitioner>(Lifetime.Singleton).AsSelf();
             }
         }
 
@@ -170,7 +182,7 @@ namespace App.Game
         {
             builder.Register<GameRulesChecker>(Lifetime.Singleton);
             
-            RegisterGameRule<GameCanBeAttackerRule>(builder);
+            RegisterGameRule<GameCanBeAggressorRule>(builder);
             RegisterGameRule<GameCanBeDefenderRule>(builder);
             RegisterGameRule<GameCanApplyDestinyCardRule>(builder);
             RegisterGameRule<GameCanSkipDestinyCardRule>(builder);

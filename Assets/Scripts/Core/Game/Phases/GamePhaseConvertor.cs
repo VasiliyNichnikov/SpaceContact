@@ -14,6 +14,12 @@ namespace Core.Game.Phases
                 case PhaseIds.GameInitializationPhaseId:
                     return GamePhaseType.Initialization;
                 
+                case PhaseIds.GameFirstMovePhaseId:
+                    return GamePhaseType.FirstMove;
+                
+                case PhaseIds.GameRegroupPhaseId:
+                    return GamePhaseType.Regroup;
+                
                 case PhaseIds.GameRegroupingPhaseId:
                     return GamePhaseType.Regroup;
                 

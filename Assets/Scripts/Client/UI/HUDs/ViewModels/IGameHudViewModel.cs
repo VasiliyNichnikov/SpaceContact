@@ -10,7 +10,7 @@ namespace Client.UI.HUDs.ViewModels
         
         IGameHudBottomViewModel BottomViewModel { get; }
         
-        IReactivityProperty<IGameDestinyCardViewModel> DestinyCardViewModel { get; }
+        IReactivityProperty<IGameDestinyCardViewModel?> DestinyCardViewModel { get; }
         
         IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel { get; }
         

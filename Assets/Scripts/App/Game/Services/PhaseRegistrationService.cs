@@ -13,6 +13,8 @@ namespace App.Game.Services
         public void ConfigureRegistry()
         {
             _phaseRegistry.RegisterPhase<GameInitializationPhase>(PhaseIds.GameInitializationPhaseId);
+            _phaseRegistry.RegisterPhase<GameFirstMovePhase>(PhaseIds.GameFirstMovePhaseId);
+            _phaseRegistry.RegisterPhase<GameRegroupPhase>(PhaseIds.GameRegroupingPhaseId);
             _phaseRegistry.RegisterPhase<GameDestinyPhase>(PhaseIds.GameDestinyPhaseId);
         }
     }

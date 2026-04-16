@@ -1,3 +1,4 @@
+using Client.Attributes;
 using Client.UI.HUDs.ViewModels;
 using TMPro;
 using UnityEngine;
@@ -26,9 +27,13 @@ namespace Client.UI.HUDs
             _skipDestinyButtonGameObject.SetActive(viewModel.IsSkipButtonVisible);
         }
 
-        /// <summary>
-        /// Called from Unity
-        /// </summary>
+        public void Show() => 
+            gameObject.SetActive(true);
+        
+        public void Hide() =>
+            gameObject.SetActive(false);
+        
+        [CalledFromUnity]
         public void OnSkipButtonClick() => 
             _viewModel.OnSkipButtonClickHandler();
     }

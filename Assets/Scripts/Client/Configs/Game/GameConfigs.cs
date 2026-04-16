@@ -27,6 +27,9 @@ namespace Client.Configs.Game
         [SerializeField]
         private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO = null!;
         
+        [SerializeField]
+        private GamePhaseDurationConfig _phaseDurationConfig = null!;
+        
         public void Build(IContainerBuilder builder)
         {
             builder.RegisterInstance(_rulesOfPlanetsConfig.BuildData());
@@ -36,6 +39,7 @@ namespace Client.Configs.Game
             builder.RegisterInstance(_handDisplayConfig.BuildData());
             builder.RegisterInstance(_uiComponentsRegistrySO);
             builder.RegisterInstance(_uiShipsOnPlanetItemsRegistrySO);
+            builder.RegisterInstance(_phaseDurationConfig.BuildData());
         }
     }
 }

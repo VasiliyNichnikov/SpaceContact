@@ -4,13 +4,13 @@ using Core.Game.Players;
 
 namespace Core.Game.Rules
 {
-    public sealed class GameCanBeAttackerRule : IGameRule
+    public sealed class GameCanBeAggressorRule : IGameRule
     {
         private readonly IGameStateMachineReadOnly _stateMachine;
         private readonly IGameClientEncounterManager _encounterManager;
         private readonly GamePlayersRegistry _playersRegistry;
         
-        public GameCanBeAttackerRule(
+        public GameCanBeAggressorRule(
             IGameStateMachineReadOnly stateMachine,
             IGameClientEncounterManager encounterManager,
             GamePlayersRegistry playersRegistry)
@@ -30,7 +30,7 @@ namespace Core.Game.Rules
                 return false;
             }
 
-            if (_stateMachine.CurrentPhase is not { Type: GamePhaseType.Initialization })
+            if (_stateMachine.CurrentPhase is not { Type: GamePhaseType.FirstMove })
             {
                 return false;
             }
