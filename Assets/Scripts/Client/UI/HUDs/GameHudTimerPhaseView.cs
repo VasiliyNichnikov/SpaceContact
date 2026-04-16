@@ -1,4 +1,3 @@
-using System;
 using Client.Attributes;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Utils;
@@ -20,8 +19,8 @@ namespace Client.UI.HUDs
         [Inject]
         private void Constructor(IGameHudTimerPhaseViewModel viewModel)
         {
-            gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
-            gameObject.Subscribe(_viewModel.RemainingTimeInSeconds, SetValueText);
+            gameObject.UpdateViewModelDisposable(ref _viewModel!, viewModel);
+            gameObject.Subscribe(_viewModel!.RemainingTimeInSeconds, SetValueText);
         }
         
         [CalledFromUnity]

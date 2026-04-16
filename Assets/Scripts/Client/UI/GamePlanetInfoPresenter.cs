@@ -42,7 +42,7 @@ namespace Client.UI
             _sceneStorage = sceneStorage;
             _playersRegistry = playersRegistry;
             _fieldViewManager.OnMovementAnimationStarted += OnAnimationMovementStarted;
-            _fieldViewManager.OnMovementAnimationEnded += OnAnimationMovementEnded;
+            _fieldViewManager.OnMovementAnimationEnded += DisplayInfoAboutViewedPlanets;
             _fieldViewManager.OnInitialized += DisplayInfoAboutViewedPlanets;
             _mainCamera = mainCamera;
             _shipsInfoViewModelFactory = shipsInfoViewModelFactory;
@@ -51,7 +51,7 @@ namespace Client.UI
         public void Dispose()
         {
             _fieldViewManager.OnMovementAnimationStarted -= OnAnimationMovementStarted;
-            _fieldViewManager.OnMovementAnimationEnded -= OnAnimationMovementEnded;
+            _fieldViewManager.OnMovementAnimationEnded -= DisplayInfoAboutViewedPlanets;
             _fieldViewManager.OnInitialized -= DisplayInfoAboutViewedPlanets;
             DisposeShipsInfoViewModels(_opponentPlanetInfoViewModels);
             DisposeShipsInfoViewModels(_currentPlayerPlanetInfoViewModels);
@@ -67,9 +67,6 @@ namespace Client.UI
             DisplayInfoAboutCurrentPlayerPlanets();
             DisplayInfoAboutOpponentPlanets();
         }
-        
-        private void OnAnimationMovementEnded() => 
-            DisplayInfoAboutOpponentPlanets();
         
         private void DisplayInfoAboutOpponentPlanets()
         {
