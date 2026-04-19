@@ -21,11 +21,11 @@ namespace Network.Requests
         private void Constructor(
             INetworkSerializer serializer, 
             NetworkRequestRouter router, 
-            INetworkService networkService)
+            NetworkService networkService)
         {
             _serializer = serializer;
             _router = router;
-            ((NetworkService)networkService).Bind(this);
+            networkService.SetServiceObject(this);
         }
         
         public async Task<TResponse?> GetDataAsync<TRequest, TResponse>(
@@ -85,7 +85,7 @@ namespace Network.Requests
             }
             else
             {
-                Logger.Error($"NetworkServiceObj.ResponseClient: Received response for unknown request ID: {requestId}.");
+                Logger.Error($"{nameof(NetworkServiceObj)}.{nameof(ResponseClientRpc)}: Received response for unknown request ID: {requestId}.");
             }
         }
     }

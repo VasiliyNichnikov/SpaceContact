@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Core.Game.Encounter;
 using Core.Game.Mutation;
 using Core.Game.Mutation.Events;
 using Core.Game.Players;
+using GeneralUtils;
 using Network.Dto;
 using UnityEngine;
 using Logger = Logs.Logger;
@@ -15,6 +17,7 @@ namespace Network.Game.Mutation
     {
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameServerSimpleEncounterState _simpleEncounterState;
+        private readonly TaskCompletionSource<bool> _readyTcs = new();
         
         private GameEventRpcRelayNetwork? _relay;
         
@@ -26,51 +29,24 @@ namespace Network.Game.Mutation
             _simpleEncounterState = simpleEncounterState;
         }        
 
-        public void Bind(GameEventRpcRelayNetwork relay)
+        public void SetRelayObject(GameEventRpcRelayNetwork relay)
         {
             _relay = relay;
+            _readyTcs.SetResult(true);
         }
         
-        public void SendEvent(IServerGameEvent serverEvent, RecipientType recipientType)
+        void IServerEventBroadcaster.SendEvent(IServerGameEvent serverEvent, RecipientType recipientType)
         {
-            if (_relay == null)
+            var serverEvents = new List<IServerGameEvent>()
             {
-                Logger.Error("ServerEventBroadcaster.Broadcast: relay is null.");
-                return;
-            }
-            
-            var events = CreateEventsData(serverEvent);
-            var targets = GetClientTargetsByType(recipientType);
-            
-            _relay.SendEventsToClients(events, targets);
-        }
-
-        public void SendEvent(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType)
-        {
-            if (_relay == null)
-            {
-                Logger.Error("ServerEventBroadcaster.Broadcast: relay is null.");
-                return;
-            }
-            
-            var events = CreateEventsData(serverEvents);
-            var targets = GetClientTargetsByType(recipientType);
-            
-            _relay.SendEventsToClients(events, targets);
-        }
-
-        private GameEventsToClientsData CreateEventsData(IServerGameEvent gameEvent)
-        {
-            var gameEventStateData = gameEvent.ToState(this);
-
-            return new GameEventsToClientsData
-            {
-                GameEvents = new[]
-                {
-                    gameEventStateData
-                }
+                serverEvent
             };
+            
+            SendEventInternal(serverEvents, recipientType).FireAndForget();
         }
+
+        void IServerEventBroadcaster.SendEvent(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType) => 
+            SendEventInternal(serverEvents, recipientType).FireAndForget();
 
         private GameEventsToClientsData CreateEventsData(IEnumerable<IServerGameEvent> gameEvents)
         {
@@ -112,6 +88,26 @@ namespace Network.Game.Mutation
             }
 
             return result;
+        }
+        
+        private async Task SendEventInternal(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType)
+        {
+            if (_relay == null)
+            {
+                await _readyTcs.Task;
+            }
+
+            if (_relay == null)
+            {
+                Logger.Error($"{nameof(GameServerEventBroadcaster)}.{nameof(SendEventInternal)} relay is null.");
+                
+                return;
+            }
+            
+            var events = CreateEventsData(serverEvents);
+            var targets = GetClientTargetsByType(recipientType);
+            
+            _relay.SendEventsToClients(events, targets);
         }
 
         GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerAggressorSelectedEvent serverEvent)

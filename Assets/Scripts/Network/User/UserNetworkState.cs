@@ -116,9 +116,6 @@ namespace Network.User
 
         private async Task LoadPlayerStateAsync()
         {
-            // Костыль, но как будто лучше, чем усложнять код инициализации
-            await TaskUtils.WaitUntil(() => _networkService.IsLoaded);
-            
             var requestData = new UserStateRequestDto()
             {
                 UserId = OwnerClientId
@@ -130,7 +127,7 @@ namespace Network.User
 
             if (state == null)
             {
-                Logger.Error("UserNetworkState.LoadPlayerStateAsync: couldn't upload state data.");
+                Logger.Error($"{nameof(UserNetworkState)}.{nameof(LoadPlayerStateAsync)}: couldn't upload state data.");
 
                 return;
             }

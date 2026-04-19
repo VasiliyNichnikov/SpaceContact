@@ -92,7 +92,7 @@ namespace App
             
             // Requests
             builder.Register<NetworkRequestRouter>(Lifetime.Singleton).AsSelf();
-            builder.Register<NetworkService>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<NetworkService>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
             RegisterHandlerRequests(builder);
         }
 

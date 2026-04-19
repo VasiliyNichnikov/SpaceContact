@@ -73,7 +73,7 @@ namespace Network.Game
             AddToInitializer(eventRpcRelayInstance.NetworkObjectId, eventRpcRelayInstance.Initializer);
             
             var eventBroadcaster = _objectResolver.Resolve<GameServerEventBroadcaster>();
-            eventBroadcaster.Bind(eventRpcRelayInstance);
+            eventBroadcaster.SetRelayObject(eventRpcRelayInstance);
         }
         
         private void LoadPlayersNetwork()

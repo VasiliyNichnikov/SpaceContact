@@ -5,8 +5,6 @@ namespace Network.Requests
 {
     public interface INetworkService
     {
-        bool IsLoaded { get; }
-        
         Task<TResponse?> GetDataAsync<TRequest, TResponse>(
             TRequest requestData,
             NetworkRequestType requestType,
