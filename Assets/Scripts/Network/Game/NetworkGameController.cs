@@ -30,7 +30,7 @@ namespace Network.Game
         private INetworkSerializer _serializer = null!;
         private GamePlayersPhaseTracker _tracker = null!;
         
-        private Action? _pendingTransition;
+        private bool _isTransitioningPhase;
         private CachePhase? _cachePhase;
         
         [Inject]
@@ -69,21 +69,20 @@ namespace Network.Game
                 return;
             }
 
-            if (_pendingTransition != null)
+            if (_isTransitioningPhase)
             {
-                Logger.Error($"{nameof(NetworkGameController)}.{nameof(ReportPlayerStateChangedRpc)}: the transition has already started.");
+                Logger.Error($"{nameof(NetworkGameController)}.{nameof(ReportPlayerStateChangedRpc)}: server is already transitioning phase.");
                 return;
             }
             
             var phaseId = _phaseRegistry.GetId<TPhase>();
-
             var dataBytes = payload != null
                 ? _serializer.Serialize(payload)
-                : Array.Empty<byte>();
+                : null;
 
             _cachePhase = new CachePhase(phaseId, dataBytes);
             _tracker.ChangePhase(NetworkManager.LocalClientId, phaseId);
-            _pendingTransition = () => _stateMachine.TransitionTo(typeof(TPhase), payload).FireAndForget();
+            
             SetPhaseClientRpc(phaseId, dataBytes);
         }
 
@@ -117,19 +116,7 @@ namespace Network.Game
             try
             {
                 var phaseType = _phaseRegistry.GetPhaseType(phaseId);
-                var dataType = _phaseRegistry.GetDataType(phaseType);
-                IPhasePayload? payload = null;
-
-                if (dataType != null && dataBytes is { Length: > 0 })
-                {
-                    var objectRaw = _serializer.Deserialize(dataType, dataBytes);
-                    payload = objectRaw as IPhasePayload;
-
-                    if (payload == null && objectRaw != null!)
-                    {
-                        Logger.Error($"{nameof(NetworkGameController)}.{nameof(SetPhaseClientRpc)}: invalid data conversion.");
-                    }
-                }
+                var payload = DeserializePayload(phaseType, dataBytes);
                 
                 TransitionToStateAsync(phaseId, phaseType, payload).FireAndForget();
             }
@@ -146,7 +133,7 @@ namespace Network.Game
         }
 
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-        private void ReportPlayerStateChangedRpc(int phaseId, RpcParams rpcParams = default)
+        private void ReportPlayerStateChangedRpc(byte phaseId, RpcParams rpcParams = default)
         {
             if (!IsServer)
             {
@@ -160,17 +147,38 @@ namespace Network.Game
             {
                 return;
             }
-            
-            if (_pendingTransition == null)
+
+            _isTransitioningPhase = false;
+            var cachePhase = _cachePhase!.Value;
+            var phaseType = _phaseRegistry.GetPhaseType(cachePhase.StateId);
+            var payload = DeserializePayload(phaseType, cachePhase.Payload);
+            _stateMachine.TransitionTo(phaseType, payload).FireAndForget();
+        }
+        
+        private IPhasePayload? DeserializePayload(Type phaseType, byte[]? dataBytes)
+        {
+            if (dataBytes == null)
             {
-                Logger.Error($"{nameof(NetworkGameController)}.{nameof(ReportPlayerStateChangedRpc)}: no pending transition.");
-                    
-                return;
+                return null;
             }
             
-            var pendingTransitionAction = _pendingTransition;
-            _pendingTransition = null;
-            pendingTransitionAction.Invoke();
+            var dataType = _phaseRegistry.GetDataType(phaseType);
+            IPhasePayload? payload = null;
+
+            if (dataType != null && dataBytes is { Length: > 0 })
+            {
+                var objectRaw = _serializer.Deserialize(dataType, dataBytes);
+                payload = objectRaw as IPhasePayload;
+
+                if (payload == null && objectRaw != null!)
+                {
+                    Logger.Error($"{nameof(NetworkGameController)}.{nameof(DeserializePayload)}: invalid data conversion.");
+
+                    return null;
+                }
+            }
+
+            return payload;
         }
     }
 }
