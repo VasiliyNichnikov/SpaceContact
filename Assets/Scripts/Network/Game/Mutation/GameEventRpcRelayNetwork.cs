@@ -11,18 +11,15 @@ namespace Network.Game.Mutation
     public sealed class GameEventRpcRelayNetwork : BaseNetworkSync
     {
         private INetworkSerializer _serializer = null!;
-        private ClientEventsDispatcher _clientDispatcher = null!;
-        private GameEventFactory _gameEventFactory = null!;
+        private GameClientEventContext _clientEventContext = null!;
 
         [Inject]
         private void Constructor(
             INetworkSerializer serializer, 
-            ClientEventsDispatcher clientDispatcher,
-            GameEventFactory gameEventFactory)
+            GameClientEventContext clientEventContext)
         {
             _serializer = serializer;
-            _clientDispatcher = clientDispatcher;
-            _gameEventFactory = gameEventFactory;
+            _clientEventContext = clientEventContext;
         }
         
         protected override void OnNetworkSpawnInternal()
@@ -66,10 +63,10 @@ namespace Network.Game.Mutation
 
         private void ApplyEvents(GameEventsToClientsData gameEventsData)
         {
-            var gameEvents = gameEventsData
-                .GameEvents
-                .Select(e => _gameEventFactory.Create(e));
-            _clientDispatcher.ApplyEvents(gameEvents);
+            foreach (var gameEvent in gameEventsData.GameEvents)
+            {
+                gameEvent.Apply(_clientEventContext);
+            }
         }
     }
 }

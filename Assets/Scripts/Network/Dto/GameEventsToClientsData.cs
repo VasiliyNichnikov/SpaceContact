@@ -1,10 +1,11 @@
 using System;
+using Core.Game.Mutation;
 
 namespace Network.Dto
 {
     [Serializable]
     public class GameEventsToClientsData
     {
-        public GameEventStateData[] GameEvents = Array.Empty<GameEventStateData>();
+        public IGameEventData[] GameEvents = Array.Empty<IGameEventData>();
     }
 }

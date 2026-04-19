@@ -7,8 +7,8 @@ namespace Core.Game.Mutation
     /// </summary>
     public interface IServerEventBroadcaster
     {
-        void SendEvent(IServerGameEvent serverEvent, RecipientType recipientType);
+        void SendEvent(IGameEventData evt, RecipientType recipientType);
         
-        void SendEvent(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType);
+        void SendEvent(IEnumerable<IGameEventData> evts, RecipientType recipientType);
     }
 }

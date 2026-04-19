@@ -1,12 +1,12 @@
 using System;
 
-namespace Network.Dto
+namespace Core.Game.Dto
 {
     [Serializable]
     public struct GameEventMetadata
     {
         public int EventId;
 
-        public int CreatedAtSeconds;
+        public double CreatedAtSeconds;
     }
 }

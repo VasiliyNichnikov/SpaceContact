@@ -3,17 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Game.Encounter;
 using Core.Game.Mutation;
-using Core.Game.Mutation.Events;
 using Core.Game.Players;
 using GeneralUtils;
 using Network.Dto;
-using UnityEngine;
 using Logger = Logs.Logger;
 
 namespace Network.Game.Mutation
 {
-    public sealed class GameServerEventBroadcaster : IServerEventBroadcaster, 
-        IGameEventToStateMapper<GameEventStateData>
+    public sealed class GameServerEventBroadcaster : IServerEventBroadcaster
     {
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameServerSimpleEncounterState _simpleEncounterState;
@@ -35,25 +32,24 @@ namespace Network.Game.Mutation
             _readyTcs.SetResult(true);
         }
         
-        void IServerEventBroadcaster.SendEvent(IServerGameEvent serverEvent, RecipientType recipientType)
+        void IServerEventBroadcaster.SendEvent(IGameEventData evt, RecipientType recipientType)
         {
-            var serverEvents = new List<IServerGameEvent>()
+            var evts = new List<IGameEventData>()
             {
-                serverEvent
+                evt
             };
             
-            SendEventInternal(serverEvents, recipientType).FireAndForget();
+            SendEventInternal(evts, recipientType).FireAndForget();
         }
 
-        void IServerEventBroadcaster.SendEvent(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType) => 
-            SendEventInternal(serverEvents, recipientType).FireAndForget();
+        void IServerEventBroadcaster.SendEvent(IEnumerable<IGameEventData> evts, RecipientType recipientType) => 
+            SendEventInternal(evts, recipientType).FireAndForget();
 
-        private GameEventsToClientsData CreateEventsData(IEnumerable<IServerGameEvent> gameEvents)
+        private static GameEventsToClientsData CreateEventsData(IEnumerable<IGameEventData> gameEvents)
         {
-            var gameEventStatesData = gameEvents.Select(g => g.ToState(this)).ToArray();
             return new GameEventsToClientsData
             {
-                GameEvents = gameEventStatesData
+                GameEvents = gameEvents.ToArray()
             };
         }
 
@@ -90,7 +86,7 @@ namespace Network.Game.Mutation
             return result;
         }
         
-        private async Task SendEventInternal(IEnumerable<IServerGameEvent> serverEvents, RecipientType recipientType)
+        private async Task SendEventInternal(IEnumerable<IGameEventData> evts, RecipientType recipientType)
         {
             if (_relay == null)
             {
@@ -104,82 +100,10 @@ namespace Network.Game.Mutation
                 return;
             }
             
-            var events = CreateEventsData(serverEvents);
+            var events = CreateEventsData(evts);
             var targets = GetClientTargetsByType(recipientType);
             
             _relay.SendEventsToClients(events, targets);
-        }
-
-        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerAggressorSelectedEvent serverEvent)
-        {
-            var state = new GameEventStateData
-            {
-                HasAggressorSelectedEvent = true,
-                AggressorSelectedEvent = new GameAggressorSelectedEventStateData
-                {
-                    AggressorPlayerId = serverEvent.AggressorPlayerId,
-                    Metadata = CreateGameEventMetadata(serverEvent)
-                }
-            };
-            
-            return state;
-        }
-
-        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerDefenderSelectedEvent serverEvent)
-        {
-            var state = new GameEventStateData
-            {
-                HasDefenderSelectedEvent = true,
-                DefenderSelectedEvent = new GameDefenderSelectedEventStateData
-                {
-                    DefenderPlayerId = serverEvent.DefenderPlayerId,
-                    Metadata = CreateGameEventMetadata(serverEvent)
-                }
-            };
-
-            return state;
-        }
-
-        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerDestinyCardChangedEvent serverEvent)
-        {
-            var state = new GameEventStateData
-            {
-                HasDestinyCardChangedEvent = true,
-                DestinyCardChangedEvent = new GameDestinyCardChangedEventStateData
-                {
-                    DestinyCard = serverEvent.DestinyCardData,
-                    Metadata = CreateGameEventMetadata(serverEvent)
-                }
-            };
-
-            return state;
-        }
-
-        GameEventStateData IGameEventToStateMapper<GameEventStateData>.Visit(GameServerPlanetToAttackSelectedEvent serverEvent)
-        {
-            var state = new GameEventStateData
-            {
-                HasPlanetToAttackSelectedEvent = true,
-                PlanetSelectedEvent = new GamePlanetToAttackSelectedEventStateData
-                {
-                    PlanetId = serverEvent.PlanetId,
-                    InitiatedByPlayerId = serverEvent.InitiatedByPlayerId,
-                    Metadata = CreateGameEventMetadata(serverEvent)
-                }
-            };
-
-            return state;
-        }
-
-        private static GameEventMetadata CreateGameEventMetadata(IServerGameEvent gameEvent)
-        {
-            var createdAtSeconds = Mathf.FloorToInt(Time.realtimeSinceStartup);
-            
-            return new GameEventMetadata
-            {
-                EventId = gameEvent.EventId,
-                CreatedAtSeconds = createdAtSeconds
-            };
         }
     }
 }

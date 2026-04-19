@@ -73,7 +73,6 @@ namespace App.Game
             builder.Register<GameUILoader>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlayersPhaseTracker>(Lifetime.Singleton).AsSelf();
             builder.Register<PhasesHelper>(Lifetime.Singleton).AsSelf();
-            builder.Register<ClientEventsDispatcher>(Lifetime.Singleton).AsSelf();
             builder.Register<GameDestinyTargetSelector>(Lifetime.Singleton).AsSelf();
             builder.Register<GamePlanetAttackTargetSelector>(Lifetime.Singleton).AsSelf();
             builder.Register<GameCurrentPlayerInfoTabController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
@@ -94,7 +93,7 @@ namespace App.Game
             builder.Register<SpaceCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<DestinyCardFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<GameShipsOnPlanetInfoViewFactory>(Lifetime.Singleton).AsSelf();
-            builder.Register<GameEventFactory>(Lifetime.Singleton).AsSelf();
+            builder.Register<GameEventsFactory>(Lifetime.Singleton).AsSelf();
             builder.Register<GameShipsOnPlanetInfoViewModelFactory>(Lifetime.Singleton).AsSelf();
             
             // Creators
@@ -161,11 +160,11 @@ namespace App.Game
             builder.Register<GameClientEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientPlayerCardsDeckService>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<GameClientEventContext>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
             
             if (isServer)
             {
                 builder.Register<GameServerRequestsRegisterService>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
-                builder.Register<GameServerEventsFactory>(Lifetime.Singleton).AsSelf();
                 builder.Register<GameServerDestinyPhaseResolver>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerEncounterManager>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerEventBroadcaster>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();

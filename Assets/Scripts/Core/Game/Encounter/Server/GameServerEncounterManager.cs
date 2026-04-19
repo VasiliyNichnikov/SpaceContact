@@ -12,7 +12,7 @@ namespace Core.Game.Encounter
         private readonly IServerEventBroadcaster _broadcaster;
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameRulesChecker _rulesChecker;
-        private readonly GameServerEventsFactory _serverEventsFactory;
+        private readonly GameEventsFactory _eventsFactory;
         private readonly GameServerSimpleEncounterState _encounterState;
         
         private int? _currentAggressorIndex;
@@ -21,13 +21,13 @@ namespace Core.Game.Encounter
             IServerEventBroadcaster broadcaster,
             GamePlayersRegistry playersRegistry,
             GameRulesChecker rulesChecker,
-            GameServerEventsFactory serverEventsFactory,
+            GameEventsFactory eventsFactory,
             GameServerSimpleEncounterState encounterState)
         {
             _broadcaster = broadcaster;
             _playersRegistry = playersRegistry;
             _rulesChecker = rulesChecker;
-            _serverEventsFactory = serverEventsFactory;
+            _eventsFactory = eventsFactory;
             _encounterState = encounterState;
         }
 
@@ -87,7 +87,7 @@ namespace Core.Game.Encounter
             }
          
             _encounterState.SetDefenderPlayerId(playerId);
-            var selectedDefenderEvent = _serverEventsFactory.CreateDefenderSelectedEvent(playerId);
+            var selectedDefenderEvent = _eventsFactory.CreateDefenderSelectedEvent(playerId);
             _broadcaster.SendEvent(selectedDefenderEvent, RecipientType.AllClients);
         }
 
@@ -157,10 +157,10 @@ namespace Core.Game.Encounter
             _encounterState.SetDefenderPlayerId(defenderPlayer.PlayerId);
             _encounterState.SetPlanetIdToAttack(planetId);
             
-            var planetIdToAttackSelectedEvent = _serverEventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
-            var selectedDefenderEvent = _serverEventsFactory.CreateDefenderSelectedEvent(defenderPlayer.PlayerId);
+            var planetIdToAttackSelectedEvent = _eventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
+            var selectedDefenderEvent = _eventsFactory.CreateDefenderSelectedEvent(defenderPlayer.PlayerId);
             
-            var events = new IServerGameEvent[]
+            var events = new IGameEventData[]
             {
                 planetIdToAttackSelectedEvent,
                 selectedDefenderEvent
@@ -183,7 +183,7 @@ namespace Core.Game.Encounter
             }
             
             _encounterState.SetPlanetIdToAttack(planetId);
-            var planetIdToAttackSelectedEvent = _serverEventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
+            var planetIdToAttackSelectedEvent = _eventsFactory.CreatePlanetIdToAttackSelectedEvent(initiatedByPlayerId, planetId);
             _broadcaster.SendEvent(planetIdToAttackSelectedEvent, RecipientType.AllClients);
 
             return true;
