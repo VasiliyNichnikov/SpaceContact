@@ -14,7 +14,8 @@ namespace Network.Game.Mutation
     {
         private readonly GamePlayersRegistry _playersRegistry;
         private readonly GameServerSimpleEncounterState _simpleEncounterState;
-        private readonly TaskCompletionSource<bool> _readyTcs = new();
+        private readonly TaskCompletionSource<bool> _readyTcs = 
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
         
         private GameEventRpcRelayNetwork? _relay;
         

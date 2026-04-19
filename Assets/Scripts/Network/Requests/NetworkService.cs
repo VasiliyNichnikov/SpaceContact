@@ -6,7 +6,8 @@ namespace Network.Requests
 {
     public sealed class NetworkService : INetworkService
     {
-        private readonly TaskCompletionSource<bool> _readyTcs = new();
+        private readonly TaskCompletionSource<bool> _readyTcs = 
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
         
         private NetworkServiceObj? _serviceObj;
         
