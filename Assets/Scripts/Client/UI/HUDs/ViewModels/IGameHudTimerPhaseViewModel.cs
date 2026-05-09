@@ -7,6 +7,10 @@ namespace Client.UI.HUDs.ViewModels
     {
         IReactivityProperty<int> RemainingTimeInSeconds { get; }
 
+        IReactivityProperty<bool> IsReadyToNextPhase { get; }
+        
+        void OnReadyButtonClickHandler();
+        
         void Update();
     }
 }

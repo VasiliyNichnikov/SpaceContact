@@ -31,6 +31,8 @@ namespace Core.Game.Players
         
         public bool IsOwner => false;
 
+        public bool IsReadyToNextPhase { get; set; }
+
         public IGamePlayerHandController HandController => 
             EmptyGamePlayerHandController.Instance;
 

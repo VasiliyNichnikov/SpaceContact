@@ -7,6 +7,7 @@ namespace Network.Requests
         GetUserState,
         SkipDestinyCard,
         ChoosePlanetToAttack,
+        ChangePlayerReadiness,
         
         PostChangeUserName,
         PostChangeUserColorId,

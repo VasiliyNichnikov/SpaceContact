@@ -7,6 +7,8 @@ namespace Core.Game.Rules
         CanApplyDestinyCard,
         CanSkipDestinyCard,
         CanAggressorAttackToPlanet,
-        CanChoosePlanetToAttack
+        CanChoosePlanetToAttack,
+        CanPlayerChangeToReady,
+        CanPlayerChangeToNotReady,
     }
 }

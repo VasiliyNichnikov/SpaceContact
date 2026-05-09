@@ -5,7 +5,6 @@ using Reactivity;
 using TMPro;
 using UnityEngine;
 using VContainer;
-using Logger = Logs.Logger;
 
 namespace Client.UI.HUDs
 {
@@ -13,6 +12,9 @@ namespace Client.UI.HUDs
     {
         [SerializeField]
         private TextMeshProUGUI _valueText = null!;
+        
+        [SerializeField]
+        private GameObject _markGameObject = null!;
 
         private IGameHudTimerPhaseViewModel? _viewModel;
         
@@ -20,14 +22,13 @@ namespace Client.UI.HUDs
         private void Constructor(IGameHudTimerPhaseViewModel viewModel)
         {
             gameObject.UpdateViewModelDisposable(ref _viewModel!, viewModel);
-            gameObject.Subscribe(_viewModel!.RemainingTimeInSeconds, SetValueText);
+            gameObject.Subscribe(_viewModel.RemainingTimeInSeconds, SetValueText);
+            gameObject.Subscribe(_viewModel.IsReadyToNextPhase, _markGameObject.SetActive);
         }
         
         [CalledFromUnity]
-        public void OnReadyButtonClick()
-        {
-            Logger.Todo("GameHudTimerPhaseView.OnReadyButtonClick: need implementation");
-        }
+        public void OnReadyButtonClick() => 
+            _viewModel?.OnReadyButtonClickHandler();
 
         private void Update() => 
             _viewModel?.Update();

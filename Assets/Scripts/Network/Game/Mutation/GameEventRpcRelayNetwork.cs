@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Core.Game.Mutation;
+using Logs;
 using Network.Dto;
 using Network.Infrastructure;
 using Unity.Netcode;
@@ -63,6 +64,11 @@ namespace Network.Game.Mutation
 
         private void ApplyEvents(GameEventsToClientsData gameEventsData)
         {
+            if (gameEventsData.GameEvents.Length == 0)
+            {
+                Logger.Error($"{nameof(GameEventRpcRelayNetwork)}.{nameof(ApplyEvents)}: gameEvents is empty.");
+            }
+            
             foreach (var gameEvent in gameEventsData.GameEvents)
             {
                 gameEvent.Apply(_clientEventContext);

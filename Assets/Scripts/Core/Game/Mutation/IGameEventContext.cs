@@ -11,5 +11,7 @@ namespace Network.Game.Mutation
         void Execute(GameDestinyCardChangedEventData evt);
 
         void Execute(GamePlanetToAttackSelectedEventData evt);
+
+        void Execute(GamePlayerReadinessEventData evt);
     }
 }

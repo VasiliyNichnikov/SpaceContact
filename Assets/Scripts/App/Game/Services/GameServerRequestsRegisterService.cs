@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Core.Game.Cards;
 using Core.Game.Encounter;
 using Core.Game.Galaxy.Server;
 using Core.Game.Phases.Server;
@@ -19,6 +18,7 @@ namespace App.Game.Services
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
         private readonly IGameServerDestinyPhaseResolver _serverDestinyPhaseResolver;
         private readonly IGameServerEncounterManager _serverEncounterManager;
+        private readonly GameServerChangerStatePlayersReadiness _changerStatePlayersReadiness;
         
         private readonly GamePlayersRegistry _gamePlayersRegistry;
         
@@ -31,15 +31,16 @@ namespace App.Game.Services
             IGameServerGalaxyManager serverGalaxyManager,
             IGameServerDestinyPhaseResolver serverDestinyPhaseResolver,
             IGameServerEncounterManager serverEncounterManager,
-            GamePlayersRegistry gamePlayersRegistry)
+            GamePlayersRegistry gamePlayersRegistry,
+            GameServerChangerStatePlayersReadiness changerStatePlayersReadiness)
         {
             _router = router;
             _networkSerializer = networkSerializer;
             _gamePlayersRegistry = gamePlayersRegistry;
             _serverGalaxyManager = serverGalaxyManager;
-            _serverCardsManager = serverCardsManager;
             _serverDestinyPhaseResolver = serverDestinyPhaseResolver;
             _serverEncounterManager = serverEncounterManager;
+            _changerStatePlayersReadiness = changerStatePlayersReadiness;
             
             _handlers = CreateHandlers();
         }
@@ -62,6 +63,9 @@ namespace App.Game.Services
             var choosePlanetToAttackHandler = new ChoosePlanetToAttackNetworkRequestHandler(
                 _networkSerializer,
                 _serverEncounterManager);
+            var changeReadinessHandler = new ChangePlayerReadinessRequestHandler(
+                _changerStatePlayersReadiness,
+                _networkSerializer);
             
             var allStates = new List<INetworkRequestHandler>
             {
@@ -69,6 +73,7 @@ namespace App.Game.Services
                 playerHandStateHandler,
                 skipDestinyCardHandler,
                 choosePlanetToAttackHandler,
+                changeReadinessHandler,
             };
 
             return allStates.AsReadOnly();

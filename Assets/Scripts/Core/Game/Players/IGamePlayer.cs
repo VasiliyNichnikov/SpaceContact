@@ -24,6 +24,8 @@ namespace Core.Game.Players
         
         bool IsOwner { get; }
         
+        bool IsReadyToNextPhase { get; set; }
+        
         IGamePlayerHandController HandController { get; }
         
         IReadOnlyCollection<IPlanet> Planets { get; }

@@ -56,6 +56,21 @@ namespace Core.Game.Mutation
             return planetIdToAttackSelectedEvent;
         }
 
+        public GamePlayerReadinessEventData CreatePlayerReadinessEvent(ulong playerId, bool isReady)
+        {
+            var eventId = GetCurrentEventId();
+            var metadata = CreateMetadata(eventId);
+            
+            var playerReadinessEventData = new GamePlayerReadinessEventData
+            {
+                SelectedPlayerId = playerId,
+                IsPlayerReadyToNextPhase = isReady,
+                Metadata = metadata
+            };
+            
+            return playerReadinessEventData;
+        }
+
         private GameEventMetadata CreateMetadata(int eventId)
         {
             return new GameEventMetadata()

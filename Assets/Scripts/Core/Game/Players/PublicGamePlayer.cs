@@ -22,6 +22,7 @@ namespace Core.Game.Players
             Color = playerColor;
             Order = order;
             PlayerName = user.Name;
+            IsReadyToNextPhase = false;
         }
         
         public ulong PlayerId { get; }
@@ -33,6 +34,8 @@ namespace Core.Game.Players
         public Color Color { get; }
         
         public bool IsOwner => false;
+        
+        public bool IsReadyToNextPhase { get; set; }
 
         public IGamePlayerHandController HandController => 
             _handController;

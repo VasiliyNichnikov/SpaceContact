@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Network.Requests
 {
@@ -7,6 +8,7 @@ namespace Network.Requests
     {
         private static EmptyResponseData? _instance;
 
+        [JsonConstructor]
         private EmptyResponseData()
         {
             // nothing

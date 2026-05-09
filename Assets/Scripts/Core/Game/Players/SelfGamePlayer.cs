@@ -27,6 +27,7 @@ namespace Core.Game.Players
             Order = order;
             PlayerName = user.Name;
             _handController = new GamePlayerHandController(spaceCardFactory);
+            IsReadyToNextPhase = false;
         }
         
         public ulong PlayerId { get; }
@@ -38,6 +39,8 @@ namespace Core.Game.Players
         public Color Color { get; }
 
         public bool IsOwner { get; }
+        
+        public bool IsReadyToNextPhase { get; set; }
 
         public IGamePlayerHandController HandController => 
             _handController;
@@ -51,10 +54,8 @@ namespace Core.Game.Players
         public void Apply(IGamePlayerVisitor visitor) => 
             visitor.Visit(this);
         
-        public void LoadStartingPlanets(IReadOnlyCollection<IPlanet> planets)
-        {
+        public void LoadStartingPlanets(IReadOnlyCollection<IPlanet> planets) => 
             Planets = planets;
-        }
         
         public void UpdateHandState(PlayerHandStateData handState) => 
             _handController.UpdateState(handState);

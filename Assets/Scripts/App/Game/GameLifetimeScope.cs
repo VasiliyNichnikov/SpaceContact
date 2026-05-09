@@ -161,6 +161,7 @@ namespace App.Game
             builder.Register<GameClientGalaxyManager>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientPlayerCardsDeckService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameClientEventContext>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
+            builder.Register<GameClientPlayerReadinessController>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
             
             if (isServer)
             {
@@ -174,9 +175,10 @@ namespace App.Game
                 builder.Register<GameServerCardsManager>(Lifetime.Singleton).AsImplementedInterfaces();
                 builder.Register<GameServerPhasePayloadFactory>(Lifetime.Singleton).AsSelf();
                 builder.Register<GameServerPhaseTransitioner>(Lifetime.Singleton).AsSelf();
+                builder.Register<GameServerChangerStatePlayersReadiness>(Lifetime.Singleton).AsSelf();
             }
         }
-
+        
         private static void RegisterGameRules(IContainerBuilder builder)
         {
             builder.Register<GameRulesChecker>(Lifetime.Singleton);
@@ -187,6 +189,8 @@ namespace App.Game
             RegisterGameRule<GameCanSkipDestinyCardRule>(builder);
             RegisterGameRule<GameCanAggressorAttackToPlanetRule>(builder);
             RegisterGameRule<GameCanChoosePlanetToAttackRule>(builder);
+            RegisterGameRule<GameCanPlayerChangeToReadyRule>(builder);
+            RegisterGameRule<GameCanPlayerChangeToNotReadyRule>(builder);
         }
         
         private static void RegisterGameRule<TRule>(IContainerBuilder builder) where TRule : IGameRule

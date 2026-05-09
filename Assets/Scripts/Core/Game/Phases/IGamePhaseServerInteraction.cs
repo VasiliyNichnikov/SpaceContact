@@ -7,5 +7,9 @@ namespace Core.Game.Phases
     public interface IGamePhaseServerInteraction
     {
         Task<GalaxyStateData?> GetGalaxyStateAsync(CancellationToken ct);
+        
+        Task<bool> ReadyToNextPhaseAsync(CancellationToken ct);
+        
+        Task<bool> NotReadyToNextPhaseAsync(CancellationToken ct);
     }
 }

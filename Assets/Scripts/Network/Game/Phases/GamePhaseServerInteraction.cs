@@ -23,5 +23,24 @@ namespace Network.Game.Phases
                 NetworkRequestType.GetGalaxyState,
                 ct);
         }
+
+        public Task<bool> ReadyToNextPhaseAsync(CancellationToken ct) => 
+            ChangePlayerReadiness(true, ct);
+
+        public Task<bool> NotReadyToNextPhaseAsync(CancellationToken ct) => 
+            ChangePlayerReadiness(false, ct);
+
+        private Task<bool> ChangePlayerReadiness(bool isReady, CancellationToken ct)
+        {
+            var request = new GameChangePlayerReadinessRequestDto
+            {
+                IsReady = isReady
+            };
+
+            return _networkService.UpdateDataAsync(
+                request,
+                NetworkRequestType.ChangePlayerReadiness,
+                ct);
+        }
     }
 }

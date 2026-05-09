@@ -26,6 +26,7 @@ namespace Core.Game.Players
             IsOwner = user.IsCurrentPlayer;
             Order = order;
             PlayerName = user.Name;
+            IsReadyToNextPhase = false;
             _handController = new GamePlayerHandController(spaceCardFactory);
         }
         
@@ -38,6 +39,8 @@ namespace Core.Game.Players
         public Color Color { get; }
         
         public bool IsOwner { get; }
+        
+        public bool IsReadyToNextPhase { get; set; }
 
         public IGamePlayerHandController HandController => 
             _handController;

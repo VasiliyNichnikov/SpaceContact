@@ -1,6 +1,7 @@
 using Core.Game.Dto;
 using Core.Game.Encounter;
 using Core.Game.Phases.Client;
+using Core.Game.Players;
 using Core.Game.Rules;
 using Logs;
 using Network.Game.Mutation;
@@ -10,19 +11,25 @@ namespace Core.Game.Mutation
     public sealed class GameClientEventContext : IGameEventContext
     {
         private readonly GameRulesChecker _rulesChecker;
+        private readonly GamePlayersRegistry _playersRegistry;
         private readonly IGameClientEncounterEvents _encounterEvents;
         private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
+        private readonly IGameClientPlayerReadinessEvents _readinessEvents;
         
         private int _lastEventId = int.MinValue;
 
         public GameClientEventContext(
             GameRulesChecker rulesChecker,
+            GamePlayersRegistry playersRegistry,
             IGameClientEncounterEvents encounterEvents,
-            IGameClientDestinyPhaseResolver destinyPhaseResolver)
+            IGameClientDestinyPhaseResolver destinyPhaseResolver,
+            IGameClientPlayerReadinessEvents readinessEvents)
         {
             _rulesChecker = rulesChecker;
+            _playersRegistry = playersRegistry;
             _encounterEvents = encounterEvents;
             _destinyPhaseResolver = destinyPhaseResolver;
+            _readinessEvents = readinessEvents;
         }
         
         public void Execute(GameAggressorSelectedEventData evt)
@@ -95,6 +102,40 @@ namespace Core.Game.Mutation
             }
             
             _encounterEvents.SetPlanetIdToAttack(evt.PlanetId);
+        }
+
+        public void Execute(GamePlayerReadinessEventData evt)
+        {
+            if (!CheckLastEventId(evt))
+            {
+                return;
+            }
+
+            var ownerPlayer = _playersRegistry.GetOwnerWithError();
+
+            if (ownerPlayer == null || ownerPlayer.PlayerId != evt.SelectedPlayerId)
+            {
+                return;
+            }
+
+            var context = GameRuleContext.CheckPlayer(evt.SelectedPlayerId);
+
+            switch (evt.IsPlayerReadyToNextPhase)
+            {
+                case true when _rulesChecker.Check(GameRuleType.CanPlayerChangeToReady, context):
+                    ownerPlayer.IsReadyToNextPhase = true;
+                    _readinessEvents.SetReady();
+                    break;
+                    
+                case false when _rulesChecker.Check(GameRuleType.CanPlayerChangeToNotReady, context):
+                    ownerPlayer.IsReadyToNextPhase = false;
+                    _readinessEvents.SetNotReady();
+                    break;
+                    
+                default:
+                    Logger.Error($"{nameof(GameClientEventContext)}.{nameof(Execute)}: Failed to perform checks to switch the player's readiness.");
+                    break;
+            }
         }
 
         private bool CheckLastEventId(GameEventAbstractData data)
