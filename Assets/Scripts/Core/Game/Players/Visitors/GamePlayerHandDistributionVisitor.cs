@@ -8,9 +8,11 @@ namespace Core.Game.Players.Visitors
         
         public GamePlayerHandDistributionVisitor(PlayerHandStateData handStateData) => 
             _handStateData = handStateData;
-        
-        public void Visit(ServerGamePlayer player) => 
-            player.UpdateHandState(_handStateData);
+
+        public void Visit(ServerGamePlayer player)
+        {
+            // Серверный игрок разруливает себя при инициализации игры
+        }
 
         public void Visit(SelfGamePlayer player) => 
             player.UpdateHandState(_handStateData);

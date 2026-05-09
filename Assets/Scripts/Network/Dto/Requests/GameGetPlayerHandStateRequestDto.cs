@@ -3,7 +3,7 @@ using System;
 namespace Network.Dto.Requests
 {
     [Serializable]
-    public class GamePlayerHandStateRequestDto
+    public class GameGetPlayerHandStateRequestDto
     {
         public ulong PlayerId;
     }

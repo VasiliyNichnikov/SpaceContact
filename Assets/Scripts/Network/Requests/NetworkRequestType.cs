@@ -3,7 +3,7 @@ namespace Network.Requests
     public enum NetworkRequestType
     {
         GetGalaxyState,
-        CollectPlayerHandState,
+        GetPlayerHandState,
         GetUserState,
         SkipDestinyCard,
         ChoosePlanetToAttack,

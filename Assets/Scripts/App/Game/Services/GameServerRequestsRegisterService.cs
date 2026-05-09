@@ -17,7 +17,6 @@ namespace App.Game.Services
         private readonly INetworkSerializer _networkSerializer;
         
         private readonly IGameServerGalaxyManager _serverGalaxyManager;
-        private readonly IGameServerCardsManager _serverCardsManager;
         private readonly IGameServerDestinyPhaseResolver _serverDestinyPhaseResolver;
         private readonly IGameServerEncounterManager _serverEncounterManager;
         
@@ -30,7 +29,6 @@ namespace App.Game.Services
             INetworkSerializer networkSerializer,
             
             IGameServerGalaxyManager serverGalaxyManager,
-            IGameServerCardsManager serverCardsManager,
             IGameServerDestinyPhaseResolver serverDestinyPhaseResolver,
             IGameServerEncounterManager serverEncounterManager,
             GamePlayersRegistry gamePlayersRegistry)
@@ -55,9 +53,8 @@ namespace App.Game.Services
         private ReadOnlyCollection<INetworkRequestHandler> CreateHandlers()
         {
             var galaxyStateHandler = new GetGalaxyStateNetworkRequestHandler(_networkSerializer, _serverGalaxyManager);
-            var playerHandStateHandler = new CollectPlayerHandStateNetworkRequestHandler(
+            var playerHandStateHandler = new GetPlayerHandStateNetworkRequestHandler(
                 _networkSerializer,
-                _serverCardsManager,
                 _gamePlayersRegistry);
             var skipDestinyCardHandler = new SkipDestinyCardNetworkRequestHandler(
                 _networkSerializer,

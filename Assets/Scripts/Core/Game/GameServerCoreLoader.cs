@@ -2,13 +2,14 @@ using Core.Game.Cards;
 using Core.Game.Galaxy.Server;
 using Core.Game.Phases;
 using Core.Game.Players;
+using Logs;
 
 namespace Core.Game
 {
     /// <summary>
     /// Инициализация серверных данных
     /// </summary>
-    public class GameServerCoreLoader
+    public sealed class GameServerCoreLoader
     {
         private readonly IGameServerCardsManager _cardsManager;
         private readonly IGameServerGalaxyManager _galaxyManager;
@@ -33,6 +34,24 @@ namespace Core.Game
             _cardsManager.Init();
             _galaxyManager.Init();
             _playersPhaseTracker.Init(_registry.Players);
+
+            // Регистрация карт
+            HandOutSpaceCards();
+        }
+
+        private void HandOutSpaceCards()
+        {
+            foreach (var player in _registry.Players)
+            {
+                if (player is not ServerGamePlayer serverPlayer)
+                {
+                    Logger.Error($"{nameof(GameServerCoreLoader)}.{nameof(HandOutSpaceCards)}: player is not a ServerGamePlayer.");
+                    continue;
+                }
+
+                var hand = _cardsManager.CreatePlayerHand();
+                serverPlayer.UpdateHandState(hand);
+            }
         }
     }
 }

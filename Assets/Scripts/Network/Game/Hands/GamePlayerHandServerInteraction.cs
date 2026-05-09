@@ -18,14 +18,14 @@ namespace Network.Game.Hands
 
         public Task<PlayerHandStateData?> CreatePlayerHandAsync(ulong playerId, CancellationToken ct)
         {
-            var request = new GamePlayerHandStateRequestDto
+            var request = new GameGetPlayerHandStateRequestDto
             {
                 PlayerId = playerId,
             };
 
-            return _networkService.GetDataAsync<GamePlayerHandStateRequestDto, PlayerHandStateData>(
+            return _networkService.GetDataAsync<GameGetPlayerHandStateRequestDto, PlayerHandStateData>(
                 request,
-                NetworkRequestType.CollectPlayerHandState,
+                NetworkRequestType.GetPlayerHandState,
                 ct);
         }
 
