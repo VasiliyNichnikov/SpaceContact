@@ -66,7 +66,7 @@ namespace App
             _menuConfigs.Build(builder);
 
             // Singletons
-            builder.Register<JsonNetworkSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
+            builder.Register<NewtonsoftSerializer>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<NetworkAutoInjector>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<GameLevelService>(Lifetime.Singleton).AsImplementedInterfaces();
             builder.Register<DialogsManager>(Lifetime.Singleton).AsImplementedInterfaces();
