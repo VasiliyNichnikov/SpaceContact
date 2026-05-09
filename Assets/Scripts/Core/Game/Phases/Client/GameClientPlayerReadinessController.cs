@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Core.Game.Players;
 using Logs;
 
 namespace Core.Game.Phases.Client
@@ -8,13 +9,15 @@ namespace Core.Game.Phases.Client
     public sealed class GameClientPlayerReadinessController : IGameClientPlayerReadinessEvents, IDisposable
     {
         private readonly IGamePhaseServerInteraction _serverInteraction;
+        private readonly GamePlayersRegistry _playersRegistry;
         private readonly CancellationTokenSource _cts = new();
         private bool _isWaitingServer;
         private bool _isReadyToNextPhase;
 
-        public GameClientPlayerReadinessController(IGamePhaseServerInteraction serverInteraction)
+        public GameClientPlayerReadinessController(IGamePhaseServerInteraction serverInteraction, GamePlayersRegistry playersRegistry)
         {
             _serverInteraction = serverInteraction;
+            _playersRegistry = playersRegistry;
         }
 
         public bool IsReadyToNextPhase
@@ -37,11 +40,15 @@ namespace Core.Game.Phases.Client
         
         void IGameClientPlayerReadinessEvents.SetReady()
         {
+            var player = _playersRegistry.GetOwnerWithError();
+            player!.IsReadyToNextPhase = true;
             IsReadyToNextPhase = true;
         }
 
         void IGameClientPlayerReadinessEvents.SetNotReady()
         {
+            var player = _playersRegistry.GetOwnerWithError();
+            player!.IsReadyToNextPhase = false;
             IsReadyToNextPhase = false;
         }
 
@@ -50,6 +57,16 @@ namespace Core.Game.Phases.Client
             return _isWaitingServer 
                 ? Task.CompletedTask 
                 : SwitchReadinessInternalAsync();
+        }
+
+        public void SetAllNotReady()
+        {
+            foreach (var player in _playersRegistry.Players)
+            {
+                player.IsReadyToNextPhase = false;
+            }
+            
+            IsReadyToNextPhase = false;
         }
         
         public void Dispose()

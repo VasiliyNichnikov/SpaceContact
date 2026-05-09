@@ -123,12 +123,10 @@ namespace Core.Game.Mutation
             switch (evt.IsPlayerReadyToNextPhase)
             {
                 case true when _rulesChecker.Check(GameRuleType.CanPlayerChangeToReady, context):
-                    ownerPlayer.IsReadyToNextPhase = true;
                     _readinessEvents.SetReady();
                     break;
                     
                 case false when _rulesChecker.Check(GameRuleType.CanPlayerChangeToNotReady, context):
-                    ownerPlayer.IsReadyToNextPhase = false;
                     _readinessEvents.SetNotReady();
                     break;
                     

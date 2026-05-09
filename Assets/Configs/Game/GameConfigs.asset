@@ -19,3 +19,4 @@ MonoBehaviour:
   _handDisplayConfig: {fileID: 11400000, guid: 9b4d2ee238b1e40be87e415e4a7551ac, type: 2}
   _uiComponentsRegistrySO: {fileID: 11400000, guid: 6fbde877c8d5f465fad33ec9276470b6, type: 2}
   _uiShipsOnPlanetItemsRegistrySO: {fileID: 11400000, guid: 79cbff2e57e11407aa070e4bb2adc958, type: 2}
+  _phaseDurationConfig: {fileID: 11400000, guid: 39e783ee928ed4cf984e812c8d1ac2dd, type: 2}

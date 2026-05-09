@@ -7,6 +7,7 @@ namespace Core.Game.Phases.Server
     public sealed class GameServerPhaseTransitioner : IDisposable
     {
         private const int InitialPhaseIndex = 0;
+        private const int DelayBeforeTransitionInSeconds = 3;
         
         private readonly IServerStateMachineNetwork _serverStateMachine;
         private readonly GameServerPhasePayloadFactory _payloadFactory;
@@ -25,6 +26,7 @@ namespace Core.Game.Phases.Server
         private readonly Dictionary<GamePhaseType, Func<double?>> _transitionsByPhaseType = new();
 
         private (int Index, double? EndPhaseTime)? _activePhaseData;
+        private double? _playerReadinessEndTime;
 
         public GameServerPhaseTransitioner(
             IServerStateMachineNetwork serverStateMachine,
@@ -40,6 +42,9 @@ namespace Core.Game.Phases.Server
             InitTransitions();
         }
 
+        public bool IsReadinessTimerActive => 
+            _playerReadinessEndTime != null;
+        
         public void Dispose()
         {
             _serverTime.Tick -= Update;
@@ -57,6 +62,41 @@ namespace Core.Game.Phases.Server
             var phaseTransitionAction = _transitionsByPhaseType[phaseType];
             var endPhaseTime = phaseTransitionAction.Invoke();
             _activePhaseData = (InitialPhaseIndex, endPhaseTime);
+        }
+
+        public void StartReadinessTimer()
+        {
+            if (IsReadinessTimerActive)
+            {
+                Logger.Error($"{nameof(GameServerPhaseTransitioner)}.{nameof(StartReadinessTimer)}: readiness timer is already active.");
+                
+                return;
+            }
+            
+            if (_activePhaseData != null)
+            {
+                var (_, endPhaseTime) = _activePhaseData.Value;
+
+                if (endPhaseTime != null &&
+                    endPhaseTime - DelayBeforeTransitionInSeconds < _serverTime.ServerTimeInSeconds)
+                {
+                    return;
+                }
+            }
+            
+            _playerReadinessEndTime = _serverTime.ServerTimeInSeconds + DelayBeforeTransitionInSeconds;
+        }
+
+        public void StopReadinessTimer()
+        {
+            if (!IsReadinessTimerActive)
+            {
+                Logger.Error($"{nameof(GameServerPhaseTransitioner)}.{nameof(StopReadinessTimer)}: readiness timer is not active.");
+                
+                return;
+            }
+
+            _playerReadinessEndTime = null;
         }
 
         private void InitTransitions()
@@ -81,9 +121,17 @@ namespace Core.Game.Phases.Server
                 return;
             }
 
-            if (endPhaseTime != null && _serverTime.ServerTimeInSeconds < endPhaseTime)
+            if (endPhaseTime != null)
             {
-                return;
+                if (_playerReadinessEndTime != null && _serverTime.ServerTimeInSeconds < _playerReadinessEndTime.Value)
+                {
+                    return;
+                }
+            
+                if (_playerReadinessEndTime == null && _serverTime.ServerTimeInSeconds < endPhaseTime)
+                {
+                    return;
+                }
             }
 
             LoadNextPhase();
@@ -104,6 +152,7 @@ namespace Core.Game.Phases.Server
             
             var phaseType = _sequenceOfPhases[nextPhaseIndex];
             _activePhaseData = null;
+            _playerReadinessEndTime = null;
             var phaseDuration = _transitionsByPhaseType[phaseType].Invoke();
             _activePhaseData = (nextPhaseIndex, phaseDuration);
         }
