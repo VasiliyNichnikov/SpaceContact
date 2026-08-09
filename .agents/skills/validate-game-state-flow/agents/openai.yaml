@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate Game State Flow"
+  short_description: "Validate GameAction and GameEvent state flow"
+  default_prompt: "Use $validate-game-state-flow with the all argument to validate the complete GameAction to GameContext to GameEvent flow."
