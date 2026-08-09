@@ -1,4 +1,4 @@
-namespace Core.Game.Phases
+namespace Core.Game.Dto.Snapshots
 {
     public enum GamePhaseType
     {
