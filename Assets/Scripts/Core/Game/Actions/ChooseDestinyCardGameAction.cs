@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Game.Dto.States;
+using Core.Game.Dto.Snapshots;
 using Core.Game.Events;
 using Newtonsoft.Json;
 
@@ -12,17 +12,23 @@ namespace Core.Game.Actions
     {
         public override GameActionResult Execute(GameContext context, GameActor actor)
         {
-            if (context.Phase.Current != GamePhaseType.Destiny)
+            if (context.Phase.CurrentPhase != GamePhaseType.Destiny)
             {
-                return GameActionResult.Failed($"The wrong phase. Current is {context.Phase.Current}.");
+                return GameActionResult.Failed($"The wrong phase. Current is {context.Phase.CurrentPhase}.");
             }
             
-            var destinyCardData = context.Cards.DrawDestinyCard();
-            var events = new List<IGameEvent> { new ApplyDestinyCardGameEvent(destinyCardData) };
+            var nextDestinyCard = context.Cards.ViewFirstDestinyCard();
 
-            if (destinyCardData.SelectedPlayerId != null)
+            if (nextDestinyCard == null)
             {
-                events.Add(new ApplyDefenderPlayerGameEvent(destinyCardData.SelectedPlayerId.Value));
+                return GameActionResult.Failed("Next destiny card is null.");
+            }
+            
+            var events = new List<IGameEvent> { new ApplyFirstDestinyCardGameEvent() };
+
+            if (nextDestinyCard.SelectedPlayerId != null)
+            {
+                events.Add(new ApplyDefenderPlayerGameEvent(nextDestinyCard.SelectedPlayerId.Value));
             }
             
             return GameActionResult.Success(events);

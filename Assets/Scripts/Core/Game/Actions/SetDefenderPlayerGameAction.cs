@@ -23,6 +23,11 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed("Actor player id is null.");
             }
 
+            if (!context.Players.IsPlayerExist(DefenderPlayerId))
+            {
+                return GameActionResult.Failed($"Player with id {DefenderPlayerId} not found.");
+            }
+
             var encounter = context.Encounter;
 
             if (encounter.HasDefender)
@@ -30,7 +35,6 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed("Defender is already selected.");
             }
             
-            encounter.SetDefender(DefenderPlayerId);
             return GameActionResult.Success(new ApplyDefenderPlayerGameEvent(DefenderPlayerId));
         }
     }

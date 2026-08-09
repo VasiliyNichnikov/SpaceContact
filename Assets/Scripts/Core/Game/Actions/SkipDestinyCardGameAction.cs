@@ -26,12 +26,12 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed("The original destiny card is not selected.");
             }
 
-            if (destinyCardData.Value.IsJoker)
+            if (destinyCardData.IsJoker)
             {
                 return GameActionResult.Failed("You can't skip the Joker card.");
             }
 
-            var targetPlayerId = destinyCardData.Value.SelectedPlayerId;
+            var targetPlayerId = destinyCardData.SelectedPlayerId;
 
             if (targetPlayerId == null)
             {
@@ -50,11 +50,16 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed($"Mismatch of player IDs. TargetPlayerId: {targetPlayerId}; DefenderPlayerId: {NewTargetPlayerId}.");
             }
 
-            var nextDestinyCard = context.Cards.DrawDestinyCard();
-            
-            var events = new List<IGameEvent>()
+            var nextDestinyCard = context.Cards.ViewFirstDestinyCard();
+
+            if (nextDestinyCard == null)
             {
-                new ApplyDestinyCardGameEvent(nextDestinyCard)
+                return GameActionResult.Failed("Next destiny card is null.");
+            }
+            
+            var events = new List<IGameEvent>
+            {
+                new ApplyFirstDestinyCardGameEvent()
             };
 
             if (nextDestinyCard.SelectedPlayerId != null)

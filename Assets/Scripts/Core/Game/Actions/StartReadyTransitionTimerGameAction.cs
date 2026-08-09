@@ -24,6 +24,11 @@ namespace Core.Game.Actions
             {
                 return GameActionResult.Failed("The EndTimeInSeconds phase is null.");
             }
+
+            if (double.IsNaN(ReadyTransitionTimeInSeconds) || ReadyTransitionTimeInSeconds < 0)
+            {
+                return GameActionResult.Failed("ReadyTransitionTimeInSeconds has an incorrect value.");
+            }
             
             if (phase.EndTimeInSeconds > context.Time.ServerTimeInSeconds)
             {

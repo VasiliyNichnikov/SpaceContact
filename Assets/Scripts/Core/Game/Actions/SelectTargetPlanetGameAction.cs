@@ -32,9 +32,9 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed("DestinyCard is null.");
             }
 
-            var planetState = context.Galaxy.Planets.FirstOrDefault(p => p.PlanetId == PlanetId);
+            var planetData = context.Galaxy.Planets.FirstOrDefault(p => p.Id == PlanetId);
 
-            if (planetState == null)
+            if (planetData == null)
             {
                 return GameActionResult.Failed($"Planet with id {PlanetId} not found in Galaxy.");
             }
@@ -42,14 +42,15 @@ namespace Core.Game.Actions
             var events = new List<IGameEvent>();
             var defenderPlayerId = context.Encounter.DefenderPlayerId;
             
-            if (destinyCard.Value.IsJoker)
+            if (destinyCard.IsJoker)
             {
                 if (defenderPlayerId != null)
                 {
                     return GameActionResult.Failed("When joker destiny active, the defender must be empty.");
                 }
-                
-                events.Add(new ApplyDefenderPlayerGameEvent(planetState.OwnerId));
+
+                var planetOwnerId = context.Galaxy.GetPlanetOwnerId(planetData.Id);
+                events.Add(new ApplyDefenderPlayerGameEvent(planetOwnerId));
             }
             
             events.Add(new ApplyPlanetToAttackGameEvent(PlanetId));

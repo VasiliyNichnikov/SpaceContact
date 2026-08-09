@@ -17,8 +17,13 @@ namespace Core.Game.Actions
                 return GameActionResult.Failed("Player to switch is null");
             }
 
+            if (!context.Players.IsPlayerExist(selectedPlayerId.Value))
+            {
+                return GameActionResult.Failed($"Player with id {selectedPlayerId.Value} not found.");
+            }
+
             var selectedPlayer = context.Players.Get(selectedPlayerId.Value);
-            var gameEvent = new PlayerReadyToggledGameEvent(selectedPlayer.PlayerId, !selectedPlayer.IsReady);
+            var gameEvent = new PlayerReadyToggledGameEvent(selectedPlayer.Id, !selectedPlayer.IsReady);
 
             return GameActionResult.Success(gameEvent);
         }
