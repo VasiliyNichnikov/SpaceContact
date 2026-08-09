@@ -1,0 +1,4 @@
+interface:
+  display_name: "SpaceContact Development"
+  short_description: "Project rules for SpaceContact code changes"
+  default_prompt: "Use $space-contact-development when developing or modifying code in the SpaceContact project."
