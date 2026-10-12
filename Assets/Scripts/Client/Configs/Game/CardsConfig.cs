@@ -9,43 +9,20 @@ namespace Client.Configs.Game
     [CreateAssetMenu(fileName = "CardsConfig", menuName = "Configs/Game/CardsConfig", order = 0)]
     public class CardsConfig : ScriptableObject
     {
-        [Serializable]
-        private struct DamageSpaceCardData
-        {
-            public string Comment;
-            
-            [Min(0)]
-            public int Count;
-
-            public int DamageCount;
-        }
-
-        [Serializable]
-        private struct NumberOfColorCardsByPlayerCountData
-        {
-            public string Comment;
-            
-            [Min(2)]
-            public int PlayerCount;
-            
-            [Min(0)]
-            public int NumberOfColorCards;
-        }
-        
         [Header("Space Cards")]
         [SerializeField, Min(0)]
         private int _numberOfConversationsSpaceCards;
 
-        [SerializeField, Min(0)] 
+        [SerializeField, Min(0)]
         private int _playerStartingNumberOfSpaceCards;
-        
+
         [SerializeField]
         private DamageSpaceCardData[] _damageSpaceCards = null!;
-        
+
         [Header("Destiny Cards")]
         [SerializeField]
-        private NumberOfColorCardsByPlayerCountData[]  _numberOfColorCardsByPlayerCountData = null!;
-        
+        private NumberOfColorCardsByPlayerCountData[] _numberOfColorCardsByPlayerCountData = null!;
+
         [SerializeField]
         private int _numberOfJokersDestiny;
 
@@ -61,9 +38,7 @@ namespace Client.Configs.Game
         {
             var damages = CreateDamages();
 
-            return new DecksData(damages,
-                Array.Empty<SpaceCardArtifactData>(),
-                _playerStartingNumberOfSpaceCards);
+            return new DecksData(damages, _numberOfConversationsSpaceCards);
         }
 
         private IReadOnlyCollection<SpaceCardDamageData> CreateDamages()
@@ -76,11 +51,32 @@ namespace Client.Configs.Game
         private DestinyCardsGenerationData CreateDestinyCardsGenerationData()
         {
             var dependence = _numberOfColorCardsByPlayerCountData
-                .ToDictionary(item => 
-                    item.PlayerCount, 
-                    item => item.NumberOfColorCards);
+                .ToDictionary(item => item.PlayerCount, item => item.NumberOfColorCards);
 
             return new DestinyCardsGenerationData(dependence, _numberOfJokersDestiny);
+        }
+
+        [Serializable]
+        private struct DamageSpaceCardData
+        {
+            public string Comment;
+
+            [Min(0)]
+            public int Count;
+
+            public int DamageCount;
+        }
+
+        [Serializable]
+        private struct NumberOfColorCardsByPlayerCountData
+        {
+            public string Comment;
+
+            [Min(2)]
+            public int PlayerCount;
+
+            [Min(0)]
+            public int NumberOfColorCards;
         }
     }
 }

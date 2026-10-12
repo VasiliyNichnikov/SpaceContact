@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Core.Game.Dto.Rules.Cards;
 using Core.Game.Dto.Snapshots;
 
@@ -7,7 +8,6 @@ namespace Core.Game.Cards
 {
     public sealed class CardsInitialStateFactory
     {
-        private static readonly Random _random = new();
         private readonly CardsData _data;
 
         public CardsInitialStateFactory(CardsData data)
@@ -15,16 +15,31 @@ namespace Core.Game.Cards
             _data = data;
         }
         
-        public CardsSnapshot Create(IReadOnlyCollection<GamePlayerSnapshot> players)
+        public CardsSnapshot Create(IReadOnlyCollection<GamePlayerSnapshot> players, int seed)
         {
+            var numberOfColorCards = _data.DestinyCardsGeneration.GetNumberOfColorCards(players.Count);
+            var sortedPlayers = players.OrderBy(player => player.Order).ToList();
+            var random = new Random(seed);
             var spaceDeck = CreateSpaceDeck(_data);
+            var requiredCardCount = (long)players.Count * _data.PlayerStartingNumberOfSpaceCards;
+
+            if (spaceDeck.Count < requiredCardCount)
+            {
+                throw new InvalidOperationException(
+                    $"Space deck has {spaceDeck.Count} cards; dealing requires {requiredCardCount}.");
+            }
+
+            var destinyDeck = CreateDestinyCards(_data, sortedPlayers, numberOfColorCards);
+            Shuffle(spaceDeck, random);
+            Shuffle(destinyDeck, random);
+
             var state = new CardsSnapshot
             {
                 SpaceDeck = spaceDeck,
-                DestinyDeck = CreateDestinyCards(_data, players)
+                DestinyDeck = destinyDeck
             };
 
-            foreach (var player in players)
+            foreach (var player in sortedPlayers)
             {
                 var cards = DrawStartingSpaceCards(spaceDeck, _data.PlayerStartingNumberOfSpaceCards);
                 state.HandsByPlayerId.Add(player.PlayerId, new KnownPlayerHandSnapshot(cards));
@@ -63,13 +78,11 @@ namespace Core.Game.Cards
             //     }, artifactData.Count);
             // }
             
-            Shuffle(cards);
-
             return cards;
         }
 
         private static List<DestinyCardSnapshot> CreateDestinyCards(CardsData data,
-            IReadOnlyCollection<GamePlayerSnapshot> players)
+            IReadOnlyCollection<GamePlayerSnapshot> players, int numberOfColorCards)
         {
             var cards = new List<DestinyCardSnapshot>();
             var generationData = data.DestinyCardsGeneration;
@@ -80,15 +93,12 @@ namespace Core.Game.Cards
                 cards.Add(jokerCard);
             }, generationData.NumberOfJokers);
 
-            var playersCount = players.Count;
-            var numberOfColorCards = generationData.GetNumberOfColorCards(playersCount);
-
             foreach (var player in players)
             {
                 CallMethodMultipleTimes(() =>
                 {
-                    var damageStateCard = DestinyCardSnapshot.ColorCard(player.PlayerId);
-                    cards.Add(damageStateCard);
+                    var colorCard = DestinyCardSnapshot.ColorCard(player.PlayerId);
+                    cards.Add(colorCard);
                 }, numberOfColorCards);
             }
             
@@ -99,14 +109,8 @@ namespace Core.Game.Cards
 
         private static List<SpaceCardSnapshot> DrawStartingSpaceCards(List<SpaceCardSnapshot> deck, int numberOfSpaceCards)
         {
-            var cards = new List<SpaceCardSnapshot>();
-
-            for (var i = 0; i < numberOfSpaceCards; i++)
-            {
-                var card = deck[0];
-                deck.RemoveAt(0);
-                cards.Add(card);
-            }
+            var cards = deck.GetRange(0, numberOfSpaceCards);
+            deck.RemoveRange(0, numberOfSpaceCards);
             
             return cards;
         }
@@ -119,14 +123,14 @@ namespace Core.Game.Cards
             }
         }
         
-        private static void Shuffle<T>(IList<T> list)
+        private static void Shuffle<T>(IList<T> list, Random random)
         {
             var n = list.Count;
             
             while (n > 1)
             {
                 n--;
-                var k = _random.Next(n + 1);
+                var k = random.Next(n + 1);
             
                 // Меняем элементы местами (кортежный синтаксис C#)
                 (list[k], list[n]) = (list[n], list[k]);

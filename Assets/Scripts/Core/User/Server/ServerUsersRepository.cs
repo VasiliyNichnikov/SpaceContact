@@ -5,6 +5,8 @@ namespace Core.User
     public class ServerUsersRepository
     {
         private readonly Dictionary<ulong, IServerUser> _users = new();
+
+        public IReadOnlyCollection<IServerUser> Users => _users.Values;
         
         public bool ContainsUser(ulong clientId) => 
             _users.ContainsKey(clientId);

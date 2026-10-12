@@ -27,7 +27,7 @@ namespace Core.Game.Galaxy
             foreach (var player in sortedPlayers)
             {
                 var ships = new List<SpaceShipSnapshot>();
-                var planets = CreatePlanetsForPlayer(ref nextPlanetId, ref nextShipId, ref ships);
+                var planets = CreatePlanetsForPlayer(ref nextPlanetId, ref nextShipId, ships);
 
                 snapshot.Planets.Add(player.PlayerId, planets);
                 snapshot.Ships.Add(player.PlayerId, ships);
@@ -36,10 +36,8 @@ namespace Core.Game.Galaxy
             return snapshot;
         }
 
-        private List<PlanetSnapshot> CreatePlanetsForPlayer(
-            ref int nextPlanetId,
-            ref int nextShipId,
-            ref List<SpaceShipSnapshot> ships)
+        private List<PlanetSnapshot> CreatePlanetsForPlayer(ref int nextPlanetId, ref int nextShipId,
+            List<SpaceShipSnapshot> ships)
         {
             var planets = new List<PlanetSnapshot>();
 
@@ -48,7 +46,7 @@ namespace Core.Game.Galaxy
                 var planet = new PlanetSnapshot
                 {
                     PlanetId = nextPlanetId++,
-                    ShipIds = CreateShipsForPlanet(ref nextShipId, ref ships)
+                    ShipIds = CreateShipsForPlanet(ref nextShipId, ships)
                 };
 
                 planets.Add(planet);
@@ -57,7 +55,7 @@ namespace Core.Game.Galaxy
             return planets;
         }
 
-        private List<int> CreateShipsForPlanet(ref int nextShipId, ref List<SpaceShipSnapshot> ships)
+        private List<int> CreateShipsForPlanet(ref int nextShipId, List<SpaceShipSnapshot> ships)
         {
             var shipIds = new List<int>();
 
