@@ -6,7 +6,7 @@ namespace Core.Game
 {
     public sealed class PlayersContext : IContext<GamePlayersSnapshot>
     {
-        private readonly Dictionary<ulong, GamePlayerData> _players = new();
+        private Dictionary<ulong, GamePlayerData> _players = new();
         
         public event Action<ulong>? OnReadinessPlayerChanged;
         
@@ -31,12 +31,14 @@ namespace Core.Game
 
         public void LoadSnapshot(GamePlayersSnapshot snapshot)
         {
-            _players.Clear();
+            var players = new Dictionary<ulong, GamePlayerData>();
 
             foreach (var playerSnapshot in snapshot.Players)
             {
-                _players.Add(playerSnapshot.PlayerId, GamePlayerData.Convert(playerSnapshot));
+                players.Add(playerSnapshot.PlayerId, GamePlayerData.Convert(playerSnapshot));
             }
+
+            _players = players;
         }
 
         public GamePlayersSnapshot ToSnapshot()
@@ -57,6 +59,11 @@ namespace Core.Game
             }
             
             return snapshot;
+        }
+
+        internal void ReplaceState(PlayersContext prepared)
+        {
+            _players = prepared._players;
         }
     }
 }

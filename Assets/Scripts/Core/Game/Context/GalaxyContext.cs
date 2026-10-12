@@ -7,8 +7,8 @@ namespace Core.Game
 {
     public sealed class GalaxyContext : IContext<GalaxySnapshot>
     {
-        private readonly Dictionary<ulong, List<PlanetData>> _planetsByPlayerId = new();
-        private readonly Dictionary<ulong, List<SpaceShipData>> _shipsByPlayerId = new();
+        private Dictionary<ulong, List<PlanetData>> _planetsByPlayerId = new();
+        private Dictionary<ulong, List<SpaceShipData>> _shipsByPlayerId = new();
 
         public IReadOnlyCollection<PlanetData> Planets
         {
@@ -55,18 +55,21 @@ namespace Core.Game
 
         public void LoadSnapshot(GalaxySnapshot snapshot)
         {
-            _planetsByPlayerId.Clear();
-            _shipsByPlayerId.Clear();
+            var shipsByPlayerId = new Dictionary<ulong, List<SpaceShipData>>();
+            var planetsByPlayerId = new Dictionary<ulong, List<PlanetData>>();
 
             foreach (var (playerId, ships) in snapshot.Ships)
             {
-                _shipsByPlayerId.Add(playerId, ships.Select(SpaceShipData.Convert).ToList());
+                shipsByPlayerId.Add(playerId, ships.Select(SpaceShipData.Convert).ToList());
             }
 
             foreach (var (playerId, planets) in snapshot.Planets)
             {
-                _planetsByPlayerId.Add(playerId, planets.Select(PlanetData.Convert).ToList());
+                planetsByPlayerId.Add(playerId, planets.Select(PlanetData.Convert).ToList());
             }
+
+            _shipsByPlayerId = shipsByPlayerId;
+            _planetsByPlayerId = planetsByPlayerId;
         }
 
         public GalaxySnapshot ToSnapshot()
@@ -95,6 +98,12 @@ namespace Core.Game
             }
 
             return snapshot;
+        }
+
+        internal void ReplaceState(GalaxyContext prepared)
+        {
+            _shipsByPlayerId = prepared._shipsByPlayerId;
+            _planetsByPlayerId = prepared._planetsByPlayerId;
         }
     }
 }

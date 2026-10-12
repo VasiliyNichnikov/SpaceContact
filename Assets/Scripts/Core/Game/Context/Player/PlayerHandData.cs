@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Game.Dto.Snapshots;
@@ -28,11 +29,6 @@ namespace Core.Game
         public bool IsKnown => 
             _cards != null;
 
-        public void Add(SpaceCardData card)
-        {
-            _cards!.Add(card);
-        }
-
         public static PlayerHandData Convert(PlayerHandSnapshot snapshot)
         {
             if (snapshot is KnownPlayerHandSnapshot knownHand)
@@ -40,8 +36,22 @@ namespace Core.Game
                 return new PlayerHandData(knownHand.Cards.Select(SpaceCardData.Convert));
             }
 
-            var hiddenHand = (HiddenPlayerHandSnapshot)snapshot;
-            return new PlayerHandData(hiddenHand.CardsCount);
+            if (snapshot is HiddenPlayerHandSnapshot hiddenHand)
+            {
+                return new PlayerHandData(hiddenHand.CardsCount);
+            }
+
+            throw new ArgumentException("Unsupported hand snapshot type.", nameof(snapshot));
+        }
+
+        public void Add(SpaceCardData card)
+        {
+            if (_cards is null)
+            {
+                throw new InvalidOperationException("Cards cannot be added to a hidden hand.");
+            }
+
+            _cards.Add(card);
         }
 
         public PlayerHandSnapshot ToSnapshot()

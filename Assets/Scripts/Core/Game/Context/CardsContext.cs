@@ -7,37 +7,43 @@ namespace Core.Game
 {
     public sealed class CardsContext : IContext<CardsSnapshot>
     {
-        private readonly List<SpaceCardData> _spaceCardsDeck = new();
-        private readonly List<SpaceCardData> _spaceCardsDiscard = new();
+        private List<SpaceCardData>? _spaceCardsDeck;
+        private List<SpaceCardData> _spaceCardsDiscard = new();
 
-        private readonly List<DestinyCardData> _destinyCardsDeck = new();
-        private readonly List<DestinyCardData> _destinyCardsDiscard = new();
+        private List<DestinyCardData>? _destinyCardsDeck;
+        private List<DestinyCardData> _destinyCardsDiscard = new();
 
-        private readonly Dictionary<ulong, PlayerHandData> _handsByPlayerId = new();
+        private Dictionary<ulong, PlayerHandData> _handsByPlayerId = new();
 
         public event Action? OnDestinyCardChanged;
 
         public DestinyCardData? ActiveDestinyCard { get; private set; }
+
+        public bool IsSpaceDeckKnown => _spaceCardsDeck is not null;
+
+        public bool IsDestinyDeckKnown => _destinyCardsDeck is not null;
 
         public PlayerHandData GetHand(ulong playerId)
         {
             return _handsByPlayerId[playerId];
         }
 
-        public bool TryGetHand(ulong playerId, out PlayerHandData hand)
+        public bool TryGetHand(ulong playerId, out PlayerHandData? hand)
         {
             return _handsByPlayerId.TryGetValue(playerId, out hand);
         }
 
         public DestinyCardData? ViewFirstDestinyCard()
         {
-            return _destinyCardsDeck.Count == 0 ? null : _destinyCardsDeck[0];
+            var deck = GetKnownDestinyDeck();
+            return deck.Count == 0 ? null : deck[0];
         }
 
         public DestinyCardData DrawDestinyCard()
         {
-            var card = _destinyCardsDeck[0];
-            _destinyCardsDeck.RemoveAt(0);
+            var deck = GetKnownDestinyDeck();
+            var card = deck[0];
+            deck.RemoveAt(0);
             _destinyCardsDiscard.Add(card);
             return card;
         }
@@ -60,36 +66,36 @@ namespace Core.Game
 
         public void LoadSnapshot(CardsSnapshot snapshot)
         {
-            _spaceCardsDeck.Clear();
-            _spaceCardsDiscard.Clear();
-
-            _destinyCardsDeck.Clear();
-            _destinyCardsDiscard.Clear();
-            _handsByPlayerId.Clear();
-
-            _spaceCardsDeck.AddRange(snapshot.SpaceDeck.Select(SpaceCardData.Convert));
-            _spaceCardsDiscard.AddRange(snapshot.SpaceDiscard.Select(SpaceCardData.Convert));
-
-            _destinyCardsDeck.AddRange(snapshot.DestinyDeck.Select(DestinyCardData.Convert));
-            _destinyCardsDiscard.AddRange(snapshot.DestinyDiscard.Select(DestinyCardData.Convert));
+            var spaceDeck = snapshot.SpaceDeck?.Select(SpaceCardData.Convert).ToList();
+            var spaceDiscard = snapshot.SpaceDiscard.Select(SpaceCardData.Convert).ToList();
+            var destinyDeck = snapshot.DestinyDeck?.Select(DestinyCardData.Convert).ToList();
+            var destinyDiscard = snapshot.DestinyDiscard.Select(DestinyCardData.Convert).ToList();
+            var hands = new Dictionary<ulong, PlayerHandData>();
 
             foreach (var (playerId, handSnapshot) in snapshot.HandsByPlayerId)
             {
-                _handsByPlayerId.Add(playerId, PlayerHandData.Convert(handSnapshot));
+                hands.Add(playerId, PlayerHandData.Convert(handSnapshot));
             }
 
-            ActiveDestinyCard = snapshot.ActiveDestinyCard != null
+            var activeDestinyCard = snapshot.ActiveDestinyCard != null
                 ? DestinyCardData.Convert(snapshot.ActiveDestinyCard.Value)
                 : null;
+
+            _spaceCardsDeck = spaceDeck;
+            _spaceCardsDiscard = spaceDiscard;
+            _destinyCardsDeck = destinyDeck;
+            _destinyCardsDiscard = destinyDiscard;
+            _handsByPlayerId = hands;
+            ActiveDestinyCard = activeDestinyCard;
         }
 
         public CardsSnapshot ToSnapshot()
         {
             var snapshot = new CardsSnapshot
             {
-                SpaceDeck = _spaceCardsDeck.Select(card => card.ToSnapshot()).ToList(),
+                SpaceDeck = _spaceCardsDeck?.Select(card => card.ToSnapshot()).ToList(),
                 SpaceDiscard = _spaceCardsDiscard.Select(card => card.ToSnapshot()).ToList(),
-                DestinyDeck = _destinyCardsDeck.Select(card => card.ToSnapshot()).ToList(),
+                DestinyDeck = _destinyCardsDeck?.Select(card => card.ToSnapshot()).ToList(),
                 DestinyDiscard = _destinyCardsDiscard.Select(card => card.ToSnapshot()).ToList(),
                 ActiveDestinyCard = ActiveDestinyCard?.ToSnapshot()
             };
@@ -100,6 +106,22 @@ namespace Core.Game
             }
 
             return snapshot;
+        }
+
+        internal void ReplaceState(CardsContext prepared)
+        {
+            _spaceCardsDeck = prepared._spaceCardsDeck;
+            _spaceCardsDiscard = prepared._spaceCardsDiscard;
+            _destinyCardsDeck = prepared._destinyCardsDeck;
+            _destinyCardsDiscard = prepared._destinyCardsDiscard;
+            _handsByPlayerId = prepared._handsByPlayerId;
+            ActiveDestinyCard = prepared.ActiveDestinyCard;
+        }
+
+        private List<DestinyCardData> GetKnownDestinyDeck()
+        {
+            return _destinyCardsDeck
+                ?? throw new InvalidOperationException("The Destiny deck is hidden in this context.");
         }
     }
 }

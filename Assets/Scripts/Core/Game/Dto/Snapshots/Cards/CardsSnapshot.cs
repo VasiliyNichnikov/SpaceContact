@@ -6,10 +6,13 @@ namespace Core.Game.Dto.Snapshots
     [Serializable]
     public sealed class CardsSnapshot
     {
-        public List<SpaceCardSnapshot> SpaceDeck = new();
+        // Null means hidden, while an empty list means a known, exhausted deck.
+        public List<SpaceCardSnapshot>? SpaceDeck = new();
+
         public List<SpaceCardSnapshot> SpaceDiscard = new();
         
-        public List<DestinyCardSnapshot> DestinyDeck = new();
+        public List<DestinyCardSnapshot>? DestinyDeck = new();
+
         public List<DestinyCardSnapshot> DestinyDiscard = new();
 
         public DestinyCardSnapshot? ActiveDestinyCard;

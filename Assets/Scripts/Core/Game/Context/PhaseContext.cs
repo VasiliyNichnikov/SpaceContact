@@ -1,10 +1,13 @@
+using System;
 using Core.Game.Dto.Snapshots;
 
 namespace Core.Game
 {
     public sealed class PhaseContext : IContext<PhaseSnapshot>
     {
-        public GamePhaseType CurrentPhase { get; private set; }
+        public event Action? PhaseChanged;
+
+        public GamePhaseType Type { get; private set; }
         
         public double? EndTimeInSeconds { get; private set; }
         
@@ -12,11 +15,18 @@ namespace Core.Game
         
         public long Revision { get; private set; }
 
+        /// <summary>
+        /// TODO: в валидации надо проверять ревизии
+        /// </summary>
+        /// <param name="phase"></param>
+        /// <param name="revision"></param>
+        /// <param name="endTime"></param>
         public void SetPhase(GamePhaseType phase, long revision, double? endTime)
         {
-            CurrentPhase = phase;
+            Type = phase;
             EndTimeInSeconds = endTime;
             Revision = revision;
+            PhaseChanged?.Invoke();
         }
 
         public void SetReadyTransitionTime(double readyTransitionTimeInSc)
@@ -31,7 +41,7 @@ namespace Core.Game
 
         public void LoadSnapshot(PhaseSnapshot snapshot)
         {
-            CurrentPhase = snapshot.CurrentPhase;
+            Type = snapshot.CurrentPhase;
             EndTimeInSeconds = snapshot.EndTimeInSeconds;
             Revision = snapshot.Revision;
             ReadyTransitionTimeInSeconds = snapshot.ReadyTransitionTimeInSeconds;
@@ -41,13 +51,21 @@ namespace Core.Game
         {
             var snapshot = new PhaseSnapshot
             {
-                CurrentPhase = CurrentPhase,
+                CurrentPhase = Type,
                 EndTimeInSeconds = EndTimeInSeconds,
                 ReadyTransitionTimeInSeconds = ReadyTransitionTimeInSeconds,
                 Revision = Revision
             };
             
             return snapshot;
+        }
+
+        internal void ReplaceState(PhaseContext prepared)
+        {
+            Type = prepared.Type;
+            Revision = prepared.Revision;
+            EndTimeInSeconds = prepared.EndTimeInSeconds;
+            ReadyTransitionTimeInSeconds = prepared.ReadyTransitionTimeInSeconds;
         }
     }
 }

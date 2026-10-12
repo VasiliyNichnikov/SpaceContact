@@ -5,8 +5,8 @@ namespace Core.Game
 {
     public sealed class EncounterContext : IContext<EncounterSnapshot>
     {
-        private readonly List<ulong> _aggressorUnionPlayerIds = new();
-        private readonly List<ulong> _defenderUnionPlayerIds = new();
+        private List<ulong> _aggressorUnionPlayerIds = new();
+        private List<ulong> _defenderUnionPlayerIds = new();
 
         public ulong? AggressorPlayerId { get; private set; }
 
@@ -57,15 +57,15 @@ namespace Core.Game
 
         public void LoadSnapshot(EncounterSnapshot snapshot)
         {
+            var aggressorUnionPlayerIds = new List<ulong>(snapshot.AggressorUnionPlayerIds);
+            var defenderUnionPlayerIds = new List<ulong>(snapshot.DefenderUnionPlayerIds);
+
             AggressorPlayerId = snapshot.AggressorPlayerId;
             DefenderPlayerId = snapshot.DefenderPlayerId;
             PlanetIdToAttack = snapshot.PlanetIdToAttack;
             
-            _defenderUnionPlayerIds.Clear();
-            _defenderUnionPlayerIds.AddRange(snapshot.DefenderUnionPlayerIds);
-            
-            _aggressorUnionPlayerIds.Clear();
-            _aggressorUnionPlayerIds.AddRange(snapshot.AggressorUnionPlayerIds);
+            _defenderUnionPlayerIds = defenderUnionPlayerIds;
+            _aggressorUnionPlayerIds = aggressorUnionPlayerIds;
         }
 
         public EncounterSnapshot ToSnapshot()
@@ -81,6 +81,15 @@ namespace Core.Game
             snapshot.AggressorUnionPlayerIds.AddRange(_aggressorUnionPlayerIds);
             
             return snapshot;
+        }
+
+        internal void ReplaceState(EncounterContext prepared)
+        {
+            AggressorPlayerId = prepared.AggressorPlayerId;
+            DefenderPlayerId = prepared.DefenderPlayerId;
+            PlanetIdToAttack = prepared.PlanetIdToAttack;
+            _aggressorUnionPlayerIds = prepared._aggressorUnionPlayerIds;
+            _defenderUnionPlayerIds = prepared._defenderUnionPlayerIds;
         }
     }
 }

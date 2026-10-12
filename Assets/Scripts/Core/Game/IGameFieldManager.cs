@@ -1,14 +1,13 @@
 using System.Collections.Generic;
-using Core.Game.Players;
 
 namespace Core.Game
 {
     public interface IGameFieldManager
     {
-        IGamePlayer CurrentPlayer { get; }
+        bool IsReady { get; }
+
+        GamePlayerData CurrentPlayer { get; }
         
-        IReadOnlyCollection<IGamePlayer> Opponents { get; }
-        
-        int NumberOfPlanetsOnPlayer { get; }
+        IReadOnlyCollection<GamePlayerData> Opponents { get; }
     }
 }

@@ -1,40 +1,41 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Game.Players;
 
 namespace Core.Game
 {
     public sealed class GameFieldManager : IGameFieldManager
     {
-        /// <summary>
-        /// В будущем будет настраиваться во время запуска игры
-        /// </summary>
-        private const int NumberPlanetsOnPlayer = 5;
+        private readonly GameContext _context;
         
-        private readonly GamePlayersRegistry _playersRegistry;
-        
-        public GameFieldManager(GamePlayersRegistry playersRegistry)
+        public GameFieldManager(GameContext context)
         {
-            _playersRegistry = playersRegistry;
+            _context = context;
         }
 
-        public IGamePlayer CurrentPlayer => 
-            _playersRegistry.GetOwnerWithError() ?? EmptyGamePlayer.Instance;
+        public bool IsReady => _context.LocalPlayerState is not null;
 
-        public IReadOnlyCollection<IGamePlayer> Opponents
+        public GamePlayerData CurrentPlayer => _context.LocalPlayerState
+            ?? throw new InvalidOperationException("The field requires an initialized client context.");
+
+        public IReadOnlyCollection<GamePlayerData> Opponents
         {
             get
             {
-                var players = _playersRegistry
-                    .SortedByOrderPlayers
-                    .Where(p => !p.IsOwner)
+                if (!IsReady)
+                {
+                    throw new InvalidOperationException("The field requires an initialized client context.");
+                }
+
+                var players = _context
+                    .Players
+                    .All
+                    .OrderBy(p => p.Order)
+                    .Where(p => p.Id != _context.LocalPlayerId)
                     .ToList();
 
                 return players;
             }
         }
-
-        public int NumberOfPlanetsOnPlayer => 
-            NumberPlanetsOnPlayer;
     }
 }

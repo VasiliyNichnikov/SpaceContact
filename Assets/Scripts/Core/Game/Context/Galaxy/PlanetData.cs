@@ -19,7 +19,7 @@ namespace Core.Game
 
         public static PlanetData Convert(PlanetSnapshot snapshot)
         {
-            return new PlanetData(snapshot.PlanetId, snapshot.ShipIds);
+            return new PlanetData(snapshot.PlanetId, new List<int>(snapshot.ShipIds));
         }
     }
 }
