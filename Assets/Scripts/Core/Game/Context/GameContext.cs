@@ -1,6 +1,7 @@
 using System;
 using Core.Game.Dto.Snapshots;
 using Core.Game.Validation;
+using Logs;
 
 namespace Core.Game
 {
@@ -8,6 +9,7 @@ namespace Core.Game
     {
         private readonly IGameDataProvider _dataProvider;
         private bool _isNotifying;
+        private bool _isApplyingServerOperation;
 
         public GameContext(IGameServerTime time, IGameDataProvider dataProvider, GameContextRole role)
         {
@@ -39,6 +41,8 @@ namespace Core.Game
 
         public bool IsInitialized { get; private set; }
 
+        public bool IsOperationFaulted { get; private set; }
+
         public GamePlayerData? LocalPlayerState
         {
             get
@@ -54,7 +58,7 @@ namespace Core.Game
         
         public void LoadSnapshot(long revision, GameSnapshot snapshot)
         {
-            EnsureNotNotifying();
+            EnsureAvailable();
             if (IsInitialized && revision < Revision)
             {
                 throw new StateValidationException("$.Revision", "An older snapshot cannot replace the current state.");
@@ -89,6 +93,10 @@ namespace Core.Game
         public GameSnapshot ToSnapshot()
         {
             EnsureInitialized();
+            if (IsOperationFaulted || (_isApplyingServerOperation && !_isNotifying))
+            {
+                throw new InvalidOperationException("An incomplete server operation cannot be exposed as a snapshot.");
+            }
 
             return new GameSnapshot
             {
@@ -102,11 +110,59 @@ namespace Core.Game
 
         public void CommitRevision(long revision)
         {
-            EnsureNotNotifying();
+            EnsureAvailable();
             EnsureInitialized();
 
+            if (Role != GameContextRole.Client)
+            {
+                throw new InvalidOperationException("Server revisions are committed only by the action executor.");
+            }
+
+            EnsureNextRevision(revision);
             Revision = revision;
             NotifyStateChanged();
+        }
+
+        internal void BeginServerOperation()
+        {
+            EnsureAvailable();
+            EnsureInitialized();
+            if (Role != GameContextRole.Server)
+            {
+                throw new InvalidOperationException("Only a server context can execute authoritative actions.");
+            }
+
+            _isApplyingServerOperation = true;
+        }
+
+        internal void CommitServerOperation(long revision)
+        {
+            if (!_isApplyingServerOperation || IsOperationFaulted)
+            {
+                throw new InvalidOperationException("There is no active server operation to commit.");
+            }
+
+            EnsureNextRevision(revision);
+            Revision = revision;
+            NotifyStateChanged();
+        }
+
+        internal void FaultServerOperation()
+        {
+            IsOperationFaulted = true;
+        }
+
+        internal void EndServerOperation()
+        {
+            _isApplyingServerOperation = false;
+        }
+
+        private void EnsureNextRevision(long revision)
+        {
+            if (Revision == long.MaxValue || revision != Revision + 1)
+            {
+                throw new InvalidOperationException("A committed operation must advance the revision by exactly one.");
+            }
         }
 
         private void EnsureInitialized()
@@ -117,11 +173,16 @@ namespace Core.Game
             }
         }
 
-        private void EnsureNotNotifying()
+        private void EnsureAvailable()
         {
-            if (_isNotifying)
+            if (_isNotifying || _isApplyingServerOperation)
             {
-                throw new InvalidOperationException("State observers cannot load or commit another state synchronously.");
+                throw new InvalidOperationException("Another state operation is still in progress.");
+            }
+
+            if (IsOperationFaulted)
+            {
+                throw new InvalidOperationException("A server operation failed; this game session cannot continue.");
             }
         }
 
@@ -131,7 +192,24 @@ namespace Core.Game
 
             try
             {
-                StateChanged?.Invoke();
+                var observers = StateChanged?.GetInvocationList();
+                if (observers is null)
+                {
+                    return;
+                }
+
+                foreach (Action observer in observers)
+                {
+                    try
+                    {
+                        observer();
+                    }
+                    catch (Exception exception)
+                    {
+                        // State is committed. A failing observer must not turn success into a retryable failure.
+                        Logger.Error($"Game state observer failed after revision {Revision}: {exception}");
+                    }
+                }
             }
             finally
             {
