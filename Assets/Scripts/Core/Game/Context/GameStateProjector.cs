@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using Core.Game.Dto.Snapshots;
+using Core.Game.Visibility;
 
 namespace Core.Game
 {
@@ -28,21 +28,7 @@ namespace Core.Game
                 throw new ArgumentException("The snapshot recipient must be a participant.", nameof(recipientPlayerId));
             }
 
-            var snapshot = _context.ToSnapshot();
-            var projectedHands = new Dictionary<ulong, PlayerHandSnapshot>();
-
-            foreach (var (playerId, hand) in snapshot.Cards.HandsByPlayerId)
-            {
-                projectedHands.Add(playerId, playerId == recipientPlayerId
-                    ? hand
-                    : new HiddenPlayerHandSnapshot(hand.Count));
-            }
-
-            snapshot.Cards.HandsByPlayerId = projectedHands;
-            snapshot.Cards.SpaceDeck = null;
-            snapshot.Cards.DestinyDeck = null;
-
-            return snapshot;
+            return StateProjection.ToClient(_context.ToSnapshot(), recipientPlayerId);
         }
     }
 }

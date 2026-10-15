@@ -1,10 +1,10 @@
 #if UNITY_EDITOR
-using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
+using System;
 using Logger = Logs.Logger;
+using UnityEditor.Build.Reporting;
+using UnityEditor.Build;
+using UnityEditor;
 
 namespace Editor
 {
@@ -16,7 +16,8 @@ namespace Editor
         {
             new LobbySettingsValidation(),
             new CardsConfigValidation(),
-            new PlanetsConfigValidation()
+            new PlanetsConfigValidation(),
+            new StateVisibilitySchemaValidation()
         };
 
         public int callbackOrder => 0;

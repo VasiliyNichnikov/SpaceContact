@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Core.Game.Dto.Snapshots;
 
 namespace Core.Game
@@ -20,28 +20,20 @@ namespace Core.Game
             _hiddenCardsCount = hiddenCardsCount;
         }
 
-        public IReadOnlyList<SpaceCardData>? Cards => 
+        public IReadOnlyList<SpaceCardData>? Cards =>
             _cards;
 
-        public int Count => 
+        public int Count =>
             _cards?.Count ?? _hiddenCardsCount;
 
-        public bool IsKnown => 
+        public bool IsKnown =>
             _cards != null;
 
         public static PlayerHandData Convert(PlayerHandSnapshot snapshot)
         {
-            if (snapshot is KnownPlayerHandSnapshot knownHand)
-            {
-                return new PlayerHandData(knownHand.Cards.Select(SpaceCardData.Convert));
-            }
-
-            if (snapshot is HiddenPlayerHandSnapshot hiddenHand)
-            {
-                return new PlayerHandData(hiddenHand.CardsCount);
-            }
-
-            throw new ArgumentException("Unsupported hand snapshot type.", nameof(snapshot));
+            return snapshot.Cards is null
+                ? new PlayerHandData(snapshot.Count)
+                : new PlayerHandData(snapshot.Cards.Select(SpaceCardData.Convert));
         }
 
         public void Add(SpaceCardData card)
@@ -58,11 +50,12 @@ namespace Core.Game
         {
             if (_cards == null)
             {
-                return new HiddenPlayerHandSnapshot(_hiddenCardsCount);
+                return new PlayerHandSnapshot(_hiddenCardsCount);
             }
 
-            return new KnownPlayerHandSnapshot(
-                _cards.Select(card => card.ToSnapshot()).ToList());
+            var cards = _cards.Select(card => card.ToSnapshot()).ToList();
+            
+            return new PlayerHandSnapshot(cards);
         }
     }
 }

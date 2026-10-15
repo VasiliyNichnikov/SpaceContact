@@ -1,5 +1,6 @@
-using System;
 using System.Globalization;
+using System;
+using Core.Game.Visibility;
 
 namespace Core.EngineData
 {
@@ -7,15 +8,19 @@ namespace Core.EngineData
     {
         private const float MaxAlpha = 1.0f;
         private const float MaxColorValue = 255.0f;
-        
+
+        [StateVisibility(StateAudience.Everyone)]
         public readonly float R;
-        
+
+        [StateVisibility(StateAudience.Everyone)]
         public readonly float G;
-        
+
+        [StateVisibility(StateAudience.Everyone)]
         public readonly float B;
-        
+
+        [StateVisibility(StateAudience.Everyone)]
         public readonly float A;
-        
+
         public Color(float r, float g, float b, float a)
         {
             R = r;
@@ -27,9 +32,9 @@ namespace Core.EngineData
         public static Color FromHex(string hex)
         {
             hex = hex.Replace("#", string.Empty);
-            
+
             var value = int.Parse(hex, NumberStyles.HexNumber);
-            
+
             var rawR = (value >> 16) & 0xFF;
             var rawG = (value >> 8) & 0xFF;
             var rabB = value & 0xFF;
@@ -37,7 +42,7 @@ namespace Core.EngineData
             var r = rawR / MaxColorValue;
             var g = rawG / MaxColorValue;
             var b =  rabB / MaxColorValue;
-            
+
             return new Color(r, g, b, MaxAlpha);
         }
 
