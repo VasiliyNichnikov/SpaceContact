@@ -153,7 +153,19 @@ namespace Editor
                         new() { PlayerId = RemotePlayerId, Name = "Remote", Order = 1 }
                     }
                 },
-                Galaxy = new GalaxySnapshot(),
+                Galaxy = new GalaxySnapshot
+                {
+                    Planets = new Dictionary<ulong, List<PlanetSnapshot>>
+                    {
+                        [HostPlayerId] = new(),
+                        [RemotePlayerId] = new()
+                    },
+                    Ships = new Dictionary<ulong, List<SpaceShipSnapshot>>
+                    {
+                        [HostPlayerId] = new(),
+                        [RemotePlayerId] = new()
+                    }
+                },
                 Encounter = new EncounterSnapshot(),
                 Phase = new PhaseSnapshot { CurrentPhase = GamePhaseType.Initialization, Revision = InitialRevision },
                 Cards = new CardsSnapshot

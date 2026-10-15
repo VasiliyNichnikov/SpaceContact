@@ -1,20 +1,25 @@
 using System;
+using Core.Game.Validation;
 using Core.Game.Visibility;
 using Newtonsoft.Json;
 
 namespace Core.Game.Dto.Snapshots
 {
     [Serializable]
+    [StateRule(typeof(DestinyCardShapeRule))]
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public struct DestinyCardSnapshot
     {
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
         public bool IsJoker;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateReference(typeof(GamePlayerSnapshot))]
         public ulong? SelectedPlayerId;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRange(0)]
         public int? SpecificCardId;
 
         private DestinyCardSnapshot(

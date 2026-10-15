@@ -1,5 +1,6 @@
 using System;
 using Core.Game.Dto.Snapshots;
+using Core.Game.Validation;
 
 namespace Core.Game
 {
@@ -54,6 +55,12 @@ namespace Core.Game
         public void LoadSnapshot(long revision, GameSnapshot snapshot)
         {
             EnsureNotNotifying();
+            if (IsInitialized && revision < Revision)
+            {
+                throw new StateValidationException("$.Revision", "An older snapshot cannot replace the current state.");
+            }
+
+            StateValidator.Validate(snapshot, Role, LocalPlayerId, revision);
 
             var players = new PlayersContext();
             var galaxy = new GalaxyContext();
@@ -73,7 +80,7 @@ namespace Core.Game
             Cards.ReplaceState(cards);
             Encounter.ReplaceState(encounter);
             Phase.ReplaceState(phase);
-            
+
             Revision = revision;
             IsInitialized = true;
             NotifyStateChanged();
@@ -92,7 +99,7 @@ namespace Core.Game
                 Phase = Phase.ToSnapshot()
             };
         }
-        
+
         public void CommitRevision(long revision)
         {
             EnsureNotNotifying();

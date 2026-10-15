@@ -17,7 +17,8 @@ namespace Editor
             new LobbySettingsValidation(),
             new CardsConfigValidation(),
             new PlanetsConfigValidation(),
-            new StateVisibilitySchemaValidation()
+            new StateVisibilitySchemaValidation(),
+            new SnapshotValidationSchemaValidation()
         };
 
         public int callbackOrder => 0;

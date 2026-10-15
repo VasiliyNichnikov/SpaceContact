@@ -1,5 +1,6 @@
 using System.Globalization;
 using System;
+using Core.Game.Validation;
 using Core.Game.Visibility;
 
 namespace Core.EngineData
@@ -10,15 +11,23 @@ namespace Core.EngineData
         private const float MaxColorValue = 255.0f;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0, 1)]
         public readonly float R;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0, 1)]
         public readonly float G;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0, 1)]
         public readonly float B;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0, 1)]
         public readonly float A;
 
         public Color(float r, float g, float b, float a)

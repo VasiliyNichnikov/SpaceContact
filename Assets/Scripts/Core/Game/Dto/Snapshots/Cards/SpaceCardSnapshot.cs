@@ -1,20 +1,25 @@
 using System;
+using Core.Game.Validation;
 using Core.Game.Visibility;
 using Newtonsoft.Json;
 
 namespace Core.Game.Dto.Snapshots
 {
     [Serializable]
+    [StateRule(typeof(SpaceCardShapeRule))]
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public struct SpaceCardSnapshot
     {
         [StateVisibility(StateAudience.Everyone)]
+        [StateRange(0)]
         public int? DamageCount;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRange(0)]
         public int? ArtifactId;
 
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
         public bool IsConversation;
 
         public static SpaceCardSnapshot ConversationStateCard()

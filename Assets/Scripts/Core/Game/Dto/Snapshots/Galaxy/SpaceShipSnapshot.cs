@@ -1,4 +1,5 @@
 using System;
+using Core.Game.Validation;
 using Core.Game.Visibility;
 using Newtonsoft.Json;
 
@@ -9,6 +10,9 @@ namespace Core.Game.Dto.Snapshots
     public struct SpaceShipSnapshot
     {
         [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0)]
+        [StateIdentity(typeof(SpaceShipSnapshot))]
         public int ShipId;
     }
 }

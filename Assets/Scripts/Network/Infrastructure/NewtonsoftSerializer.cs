@@ -1,4 +1,5 @@
 using System;
+using Core.Game.Validation;
 using Newtonsoft.Json;
 
 namespace Network.Infrastructure
@@ -7,7 +8,8 @@ namespace Network.Infrastructure
     {
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
         {
-            TypeNameHandling = TypeNameHandling.Auto
+            TypeNameHandling = TypeNameHandling.Auto,
+            ContractResolver = new StateValidationContractResolver()
         };
 
         public byte[] Serialize<T>(T data)
