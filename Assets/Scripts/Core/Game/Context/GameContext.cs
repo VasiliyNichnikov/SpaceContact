@@ -8,14 +8,13 @@ namespace Core.Game
     public sealed class GameContext
     {
         private readonly IGameDataProvider _dataProvider;
-        private bool _isNotifying;
-        private bool _isApplyingServerOperation;
+        private GameContextState _state;
 
         public GameContext(IGameServerTime time, IGameDataProvider dataProvider, GameContextRole role)
         {
             Time = time;
             _dataProvider = dataProvider;
-            Role = role;
+            _state = new GameContextState(role);
         }
         
         public event Action? StateChanged;
@@ -35,19 +34,21 @@ namespace Core.Game
 
         public IGameServerTime Time { get; }
 
-        public long Revision { get; private set; }
+        public long Revision => _state.Revision;
 
-        public GameContextRole Role { get; }
+        public GameContextRole Role => _state.Role;
 
-        public bool IsInitialized { get; private set; }
+        public bool IsInitialized => _state.IsInitialized;
 
-        public bool IsOperationFaulted { get; private set; }
+        public bool IsOperationFaulted => _state.IsOperationFaulted;
+
+        public bool IsSynchronizationRequired => _state.IsSynchronizationRequired;
 
         public GamePlayerData? LocalPlayerState
         {
             get
             {
-                if (!IsInitialized || Role != GameContextRole.Client || !Players.IsPlayerExist(LocalPlayerId))
+                if (!IsInitialized || Role != GameContextRole.Client || IsSynchronizationRequired || !Players.IsPlayerExist(LocalPlayerId))
                 {
                     return null;
                 }
@@ -62,6 +63,11 @@ namespace Core.Game
             if (IsInitialized && revision < Revision)
             {
                 throw new StateValidationException("$.Revision", "An older snapshot cannot replace the current state.");
+            }
+
+            if (_state.RequiredSnapshotRevision.HasValue && revision < _state.RequiredSnapshotRevision.Value)
+            {
+                throw new StateValidationException("$.Revision", "The snapshot does not cover the revisions awaiting synchronization.");
             }
 
             StateValidator.Validate(snapshot, Role, LocalPlayerId, revision);
@@ -85,27 +91,19 @@ namespace Core.Game
             Encounter.ReplaceState(encounter);
             Phase.ReplaceState(phase);
 
-            Revision = revision;
-            IsInitialized = true;
+            _state.LoadSnapshot(revision);
             NotifyStateChanged();
         }
 
         public GameSnapshot ToSnapshot()
         {
             EnsureInitialized();
-            if (IsOperationFaulted || (_isApplyingServerOperation && !_isNotifying))
+            if (!_state.CanCreateSnapshot)
             {
-                throw new InvalidOperationException("An incomplete server operation cannot be exposed as a snapshot.");
+                throw new InvalidOperationException("An incomplete or unsynchronized state cannot be exposed as a snapshot.");
             }
 
-            return new GameSnapshot
-            {
-                GamePlayers = Players.ToSnapshot(),
-                Galaxy = Galaxy.ToSnapshot(),
-                Cards = Cards.ToSnapshot(),
-                Encounter = Encounter.ToSnapshot(),
-                Phase = Phase.ToSnapshot()
-            };
+            return CreateSnapshot();
         }
 
         public void CommitRevision(long revision)
@@ -118,9 +116,47 @@ namespace Core.Game
                 throw new InvalidOperationException("Server revisions are committed only by the action executor.");
             }
 
+            EnsureClientSynchronized();
             EnsureNextRevision(revision);
-            Revision = revision;
+            _state.CommitRevision(revision);
             NotifyStateChanged();
+        }
+
+        internal void BeginClientBatch()
+        {
+            EnsureAvailable();
+            if (Role != GameContextRole.Client)
+            {
+                throw new InvalidOperationException("Only a client context can apply received event batches.");
+            }
+
+            _state.BeginClientBatch();
+        }
+
+        internal void CommitClientBatch(long revision)
+        {
+            if (!_state.IsApplyingClientBatch)
+            {
+                throw new InvalidOperationException("There is no active client batch to commit.");
+            }
+
+            EnsureClientSynchronized();
+            EnsureNextRevision(revision);
+#if UNITY_EDITOR || DEBUG
+            StateValidator.Validate(CreateSnapshot(), Role, LocalPlayerId, revision);
+#endif
+            _state.CommitRevision(revision);
+            NotifyStateChanged();
+        }
+
+        internal void RequireClientSnapshot(long revision)
+        {
+            _state.RequireClientSnapshot(revision);
+        }
+
+        internal void EndClientBatch()
+        {
+            _state.EndOperation();
         }
 
         internal void BeginServerOperation()
@@ -132,29 +168,50 @@ namespace Core.Game
                 throw new InvalidOperationException("Only a server context can execute authoritative actions.");
             }
 
-            _isApplyingServerOperation = true;
+            _state.BeginServerOperation();
         }
 
         internal void CommitServerOperation(long revision)
         {
-            if (!_isApplyingServerOperation || IsOperationFaulted)
+            if (!_state.IsApplyingServerOperation || IsOperationFaulted)
             {
                 throw new InvalidOperationException("There is no active server operation to commit.");
             }
 
             EnsureNextRevision(revision);
-            Revision = revision;
+            _state.CommitRevision(revision);
             NotifyStateChanged();
         }
 
         internal void FaultServerOperation()
         {
-            IsOperationFaulted = true;
+            _state.FaultServerOperation();
         }
 
         internal void EndServerOperation()
         {
-            _isApplyingServerOperation = false;
+            _state.EndOperation();
+        }
+
+        private GameSnapshot CreateSnapshot()
+        {
+            return new GameSnapshot
+            {
+                GamePlayers = Players.ToSnapshot(),
+                Galaxy = Galaxy.ToSnapshot(),
+                Cards = Cards.ToSnapshot(),
+                Encounter = Encounter.ToSnapshot(),
+                Phase = Phase.ToSnapshot()
+            };
+        }
+
+        private void EnsureClientSynchronized()
+        {
+            EnsureInitialized();
+            if (IsSynchronizationRequired)
+            {
+                throw new InvalidOperationException("A current snapshot is required before committing client state.");
+            }
         }
 
         private void EnsureNextRevision(long revision)
@@ -175,7 +232,7 @@ namespace Core.Game
 
         private void EnsureAvailable()
         {
-            if (_isNotifying || _isApplyingServerOperation)
+            if (_state.IsBusy)
             {
                 throw new InvalidOperationException("Another state operation is still in progress.");
             }
@@ -188,7 +245,7 @@ namespace Core.Game
 
         private void NotifyStateChanged()
         {
-            _isNotifying = true;
+            _state.BeginNotification();
 
             try
             {
@@ -213,7 +270,7 @@ namespace Core.Game
             }
             finally
             {
-                _isNotifying = false;
+                _state.EndNotification();
             }
         }
     }
