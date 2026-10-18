@@ -12,7 +12,12 @@ namespace Core.Game.Actions
     {
         public override GameActionResult Execute(GameContext context, GameActor actor)
         {
-            if (context.Phase.CurrentPhase is not GamePhaseType.FirstMove)
+            if (context.Role != GameContextRole.Server || !actor.IsSystem)
+            {
+                return GameActionResult.Failed("Only the system can start an encounter on the server.");
+            }
+
+            if (context.Phase.Type is not GamePhaseType.FirstMove)
             {
                 return GameActionResult.Failed("Start encounter can only be started in the phase FirstMove.");
             }
@@ -31,11 +36,16 @@ namespace Core.Game.Actions
             var encounter = context.Encounter;
             var nextAggressorIndex = 0;
 
-            if (encounter.HasAggressor)
+            if (encounter.AggressorPlayerId.HasValue)
             {
-                var aggressorPlayerId = encounter.AggressorPlayerId!.Value;
+                var aggressorPlayerId = encounter.AggressorPlayerId.Value;
                 var currentAggressorIndex = playersSortedByOrder
                     .FindIndex(p => p.Id == aggressorPlayerId);
+                if (currentAggressorIndex < 0)
+                {
+                    return GameActionResult.Failed("The current aggressor is not a participant.");
+                }
+
                 nextAggressorIndex = currentAggressorIndex + 1 < playersSortedByOrder.Count
                     ? currentAggressorIndex + 1
                     : 0;

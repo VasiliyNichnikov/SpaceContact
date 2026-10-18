@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Core.Game.Dto.Snapshots;
 
 namespace Core.Game
@@ -48,6 +48,25 @@ namespace Core.Game
             if (_planetsByPlayerId.TryGetValue(playerId, out var planets))
             {
                 return planets.Any(p => p.Id == planetId);
+            }
+
+            return false;
+        }
+
+        public bool HasPlayerShipsOnPlanet(ulong playerId, int planetId)
+        {
+            if (!_shipsByPlayerId.TryGetValue(playerId, out var ships))
+            {
+                return false;
+            }
+
+            foreach (var planets in _planetsByPlayerId.Values)
+            {
+                var planet = planets.FirstOrDefault(candidate => candidate.Id == planetId);
+                if (planet is not null)
+                {
+                    return ships.Any(ship => planet.ShipIds.Contains(ship.Id));
+                }
             }
 
             return false;
