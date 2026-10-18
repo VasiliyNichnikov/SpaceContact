@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Logs;
 
 namespace Core.Game.Actions
 {
@@ -21,25 +22,43 @@ namespace Core.Game.Actions
             return _actionsById.Values.Any(action => action is TAction);
         }
 
-        public void Add(IGameAction action)
+        internal bool TryAdd(IGameAction action)
         {
-            _actionsById[action.Id] = action;
-            Changed?.Invoke();
+            if (!_actionsById.TryAdd(action.Id, action))
+            {
+                return false;
+            }
+
+            NotifyChanged();
+            return true;
         }
 
-        public void Complete(Guid actionId)
+        internal void Remove(Guid actionId)
         {
             if (_actionsById.Remove(actionId))
             {
-                Changed?.Invoke();
+                NotifyChanged();
             }
         }
 
-        public void Cancel(Guid actionId)
+        private void NotifyChanged()
         {
-            if (_actionsById.Remove(actionId))
+            if (Changed is not { } handlers)
             {
-                Changed?.Invoke();
+                return;
+            }
+
+            foreach (var action in handlers.GetInvocationList())
+            {
+                var handler = (Action)action;
+                try
+                {
+                    handler();
+                }
+                catch (Exception exception)
+                {
+                    Logger.Error($"Pending action observer failed: {exception}");
+                }
             }
         }
     }

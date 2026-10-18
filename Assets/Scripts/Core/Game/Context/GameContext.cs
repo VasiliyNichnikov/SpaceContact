@@ -57,6 +57,8 @@ namespace Core.Game
             }
         }
         
+        internal bool IsBusy => _state.IsBusy;
+
         public void LoadSnapshot(long revision, GameSnapshot snapshot)
         {
             EnsureAvailable();
@@ -255,8 +257,9 @@ namespace Core.Game
                     return;
                 }
 
-                foreach (Action observer in observers)
+                foreach (var action in observers)
                 {
+                    var observer = (Action)action;
                     try
                     {
                         observer();
