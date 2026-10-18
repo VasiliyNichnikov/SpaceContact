@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using Core.Game.Events;
+using Core.Game.Dto.Snapshots;
 using Newtonsoft.Json;
 
 namespace Core.Game.Actions
@@ -13,62 +12,41 @@ namespace Core.Game.Actions
         {
             NewTargetPlayerId = newTargetPlayerId;
         }
-        
+
         [JsonProperty]
         public ulong NewTargetPlayerId { get; }
-        
+
         public override GameActionResult Execute(GameContext context, GameActor actor)
         {
-            var destinyCardData = context.Cards.ActiveDestinyCard;
-
-            if (destinyCardData == null)
+            if (context.Role != GameContextRole.Server || context.Phase.Type != GamePhaseType.Destiny)
             {
-                return GameActionResult.Failed("The original destiny card is not selected.");
-            }
-
-            if (destinyCardData.IsJoker)
-            {
-                return GameActionResult.Failed("You can't skip the Joker card.");
-            }
-
-            var targetPlayerId = destinyCardData.SelectedPlayerId;
-
-            if (targetPlayerId == null)
-            {
-                return GameActionResult.Failed("TargetPlayerId is null.");
+                return GameActionResult.Failed("Destiny cards can only be skipped on the server during Destiny.");
             }
 
             var aggressorPlayerId = context.Encounter.AggressorPlayerId;
-
-            if (aggressorPlayerId == null)
+            if (!aggressorPlayerId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId.Value))
             {
-                return GameActionResult.Failed("AggressorPlayerId is null.");
+                return GameActionResult.Failed("The encounter requires an existing aggressor.");
             }
 
-            if (targetPlayerId != aggressorPlayerId || targetPlayerId != NewTargetPlayerId)
+            if (!actor.IsSystem && actor.PlayerId != aggressorPlayerId)
             {
-                return GameActionResult.Failed($"Mismatch of player IDs. TargetPlayerId: {targetPlayerId}; DefenderPlayerId: {NewTargetPlayerId}.");
+                return GameActionResult.Failed("Only the aggressor can skip a Destiny card.");
             }
 
-            var nextDestinyCard = context.Cards.ViewFirstDestinyCard();
-
-            if (nextDestinyCard == null)
+            if (context.Encounter.HasPlanetToAttack)
             {
-                return GameActionResult.Failed("Next destiny card is null.");
+                return GameActionResult.Failed("The encounter target has already been selected.");
             }
-            
-            var events = new List<IGameEvent>
-            {
-                new ApplyFirstDestinyCardGameEvent()
-            };
 
-            if (nextDestinyCard.SelectedPlayerId != null)
+            var activeCard = context.Cards.ActiveDestinyCard;
+            if (activeCard is null || activeCard.IsJoker || activeCard.SpecificCardId.HasValue ||
+                activeCard.SelectedPlayerId != aggressorPlayerId || NewTargetPlayerId != aggressorPlayerId)
             {
-                events.Add(new ApplyDefenderPlayerGameEvent(nextDestinyCard.SelectedPlayerId.Value));
+                return GameActionResult.Failed("Only the aggressor's own color Destiny card can be skipped.");
             }
-            
-            
-            return GameActionResult.Success(events);
+
+            return ChooseDestinyCardGameAction.CreateSelectionResult(context, true);
         }
     }
 }

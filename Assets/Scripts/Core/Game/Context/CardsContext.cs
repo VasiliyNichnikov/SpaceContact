@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Core.Game.Dto.Snapshots;
 
 namespace Core.Game
@@ -39,13 +39,21 @@ namespace Core.Game
             return deck.Count == 0 ? null : deck[0];
         }
 
-        public DestinyCardData DrawDestinyCard()
+        public void RemoveFirstDestinyCard()
         {
-            var deck = GetKnownDestinyDeck();
-            var card = deck[0];
-            deck.RemoveAt(0);
-            _destinyCardsDiscard.Add(card);
-            return card;
+            GetKnownDestinyDeck().RemoveAt(0);
+        }
+
+        public void DiscardActiveDestinyCard()
+        {
+            if (ActiveDestinyCard is null)
+            {
+                return;
+            }
+
+            _destinyCardsDiscard.Add(ActiveDestinyCard);
+            ActiveDestinyCard = null;
+            OnDestinyCardChanged?.Invoke();
         }
 
         public void AddCardToPlayerHand(ulong playerId, SpaceCardData card)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Core.Game.Dto.Snapshots;
 
@@ -8,24 +9,63 @@ namespace Core.Game
         private List<ulong> _aggressorUnionPlayerIds = new();
         private List<ulong> _defenderUnionPlayerIds = new();
 
+        private ulong? _defenderPlayerId;
+        private int? _planetIdToAttack;
+
+        public event Action? OnDefenderPlayerChanged;
+
+        public event Action? OnPlanetIdChanged;
+
         public ulong? AggressorPlayerId { get; private set; }
 
-        public ulong? DefenderPlayerId { get; private set; }
-        
-        public int? PlanetIdToAttack { get; private set; }
-        
-        public bool HasAggressor => 
+        public ulong? DefenderPlayerId
+        {
+            get => _defenderPlayerId;
+            private set
+            {
+                if (_defenderPlayerId == value)
+                {
+                    return;
+                }
+
+                _defenderPlayerId = value;
+                OnDefenderPlayerChanged?.Invoke();
+            }
+        }
+
+        public int? PlanetIdToAttack
+        {
+            get => _planetIdToAttack;
+            private set
+            {
+                if (_planetIdToAttack == value)
+                {
+                    return;
+                }
+
+                _planetIdToAttack = value;
+
+                OnPlanetIdChanged?.Invoke();
+            }
+        }
+
+        public bool HasAggressor =>
             AggressorPlayerId != null;
-        
-        public bool HasDefender => 
+
+        public bool HasDefender =>
             DefenderPlayerId != null;
 
-        public bool HasPlanetToAttack => 
+        public bool HasPlanetToAttack =>
             PlanetIdToAttack != null;
 
         public void SetAggressor(ulong playerId)
         {
             AggressorPlayerId = playerId;
+            ResetTarget();
+        }
+
+        public void ResetTarget()
+        {
             DefenderPlayerId = null;
             PlanetIdToAttack = null;
             _aggressorUnionPlayerIds.Clear();
@@ -63,7 +103,7 @@ namespace Core.Game
             AggressorPlayerId = snapshot.AggressorPlayerId;
             DefenderPlayerId = snapshot.DefenderPlayerId;
             PlanetIdToAttack = snapshot.PlanetIdToAttack;
-            
+
             _defenderUnionPlayerIds = defenderUnionPlayerIds;
             _aggressorUnionPlayerIds = aggressorUnionPlayerIds;
         }
@@ -76,10 +116,10 @@ namespace Core.Game
                 DefenderPlayerId = DefenderPlayerId,
                 PlanetIdToAttack = PlanetIdToAttack
             };
-            
+
             snapshot.DefenderUnionPlayerIds.AddRange(_defenderUnionPlayerIds);
             snapshot.AggressorUnionPlayerIds.AddRange(_aggressorUnionPlayerIds);
-            
+
             return snapshot;
         }
 
