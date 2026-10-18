@@ -247,3 +247,11 @@ builder.Register<GameViewService>(Lifetime.Singleton).AsSelf();
 - [Unity 6.3 Manual: C# compiler and language version reference](https://docs.unity3d.com/6000.3/Documentation/Manual/csharp-compiler.html)
 - [StyleCop Analyzers: SA1201](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/SA1201.md)
 - [StyleCop Analyzers: Ordering Rules](https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/OrderingRules.md)
+
+## Отмена асинхронных операций
+
+- Отмена — обычный исход операции. В проектном коде не использовать `OperationCanceledException` (включая `TaskCanceledException`) для управления выполнением: не бросать и не перехватывать эти исключения.
+- Не вызывать `ThrowIfCancellationRequested`, не возвращать отменённые Task через `Task.FromCanceled`, `SetCanceled` или `TrySetCanceled`.
+- Проверять `IsCancellationRequested` явно до начала работы и после `await`, прежде чем применять результат или изменять состояние. При отмене завершать метод обычным `return`; для методов с результатом явно определить представление отмены в контракте.
+- Освобождать ресурсы и очищать pending в `finally`, независимо от исхода операции. Отмена ожидания не означает откат уже выполненного действия.
+- Не передавать токен в API, которое при его отмене выбрасывает исключение или возвращает отменённый Task. Для такого API организовать обычное завершение ожидания при отмене, игнорировать поздний результат и наблюдать возможные ошибки оставшейся операции. Проверка токена после `await` сама по себе не предотвращает исключение из отменённого Task.
