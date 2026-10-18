@@ -1,5 +1,6 @@
 using System;
 using Core.Game.Dto.Snapshots;
+using Core.Game.Dto.Phases;
 using Core.Game.Validation;
 using Logs;
 
@@ -10,13 +11,18 @@ namespace Core.Game
         private readonly IGameDataProvider _dataProvider;
         private GameContextState _state;
 
-        public GameContext(IGameServerTime time, IGameDataProvider dataProvider, GameContextRole role)
+        public GameContext(
+            IGameServerTime time, 
+            IGameDataProvider dataProvider, 
+            GameContextRole role,
+            GamePhaseDurationData phaseDurations)
         {
             Time = time;
+            PhaseDurations = phaseDurations;
             _dataProvider = dataProvider;
             _state = new GameContextState(role);
         }
-        
+
         public event Action? StateChanged;
 
         public PlayersContext Players { get; } = new();
@@ -33,6 +39,8 @@ namespace Core.Game
             _dataProvider.LocalPlayerId;
 
         public IGameServerTime Time { get; }
+
+        public GamePhaseDurationData PhaseDurations { get; }
 
         public long Revision => _state.Revision;
 
@@ -56,7 +64,7 @@ namespace Core.Game
                 return Players.Get(LocalPlayerId);
             }
         }
-        
+
         internal bool IsBusy => _state.IsBusy;
 
         public void LoadSnapshot(long revision, GameSnapshot snapshot)

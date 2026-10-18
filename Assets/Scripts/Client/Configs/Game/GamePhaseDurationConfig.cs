@@ -6,25 +6,29 @@ namespace Client.Configs.Game
     [CreateAssetMenu(fileName = "GamePhaseDurationConfig", menuName = "Configs/Game/GamePhaseDurationConfig", order = 0)]
     public sealed class GamePhaseDurationConfig : ScriptableObject
     {
-        [SerializeField, Min(0), Header("In Seconds")] 
-        private float _regroupPhaseDuration;
-        
         [SerializeField, Min(0), Header("In Seconds")]
-        private float _destinyPhaseDuration;
-        
+        private float _regroupPhaseDurationInSeconds;
+
         [SerializeField, Min(0), Header("In Seconds")]
-        private float _launchPhaseDuration;
-        
+        private float _destinyPhaseDurationInSeconds;
+
         [SerializeField, Min(0), Header("In Seconds")]
-        private float _alliancePhaseDuration;
-        
+        private float _launchPhaseDurationInSeconds;
+
+        [SerializeField, Min(0), Header("In Seconds")]
+        private float _alliancePhaseDurationInSeconds;
+
+        [SerializeField, Min(0), Header("In Seconds")]
+        private float _readyTransitionDurationInSeconds;
+
         public GamePhaseDurationData BuildData()
         {
             return new GamePhaseDurationData(
-                _regroupPhaseDuration, 
-                _destinyPhaseDuration, 
-                _launchPhaseDuration,
-                _alliancePhaseDuration);
+                _regroupPhaseDurationInSeconds, 
+                _destinyPhaseDurationInSeconds, 
+                _launchPhaseDurationInSeconds,
+                _alliancePhaseDurationInSeconds, 
+                _readyTransitionDurationInSeconds);
         }
     }
 }

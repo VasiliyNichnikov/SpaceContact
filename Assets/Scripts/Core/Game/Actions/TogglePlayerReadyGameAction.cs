@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Core.Game.Events;
+using Core.Helpers;
 using Newtonsoft.Json;
 
 namespace Core.Game.Actions
@@ -10,22 +12,50 @@ namespace Core.Game.Actions
     {
         public override GameActionResult Execute(GameContext context, GameActor actor)
         {
-            var selectedPlayerId = actor.PlayerId;
-
-            if (selectedPlayerId == null)
+            if (context.Role != GameContextRole.Server || actor.IsSystem || !actor.PlayerId.HasValue)
             {
-                return GameActionResult.Failed("Player to switch is null");
+                return GameActionResult.Failed("Only a participant can change their readiness on the server.");
             }
 
-            if (!context.Players.IsPlayerExist(selectedPlayerId.Value))
+            var playerId = actor.PlayerId.Value;
+            if (!context.Players.IsPlayerExist(playerId))
             {
-                return GameActionResult.Failed($"Player with id {selectedPlayerId.Value} not found.");
+                return GameActionResult.Failed($"Player with id {playerId} not found.");
             }
 
-            var selectedPlayer = context.Players.Get(selectedPlayerId.Value);
-            var gameEvent = new PlayerReadyToggledGameEvent(selectedPlayer.Id, !selectedPlayer.IsReady);
+            var phase = context.Phase;
+            if (!TransitionPhaseHelper.IsTimedPhase(phase.Type) || !phase.EndTimeInSeconds.HasValue)
+            {
+                return GameActionResult.Failed("Readiness requires a running phase timer.");
+            }
 
-            return GameActionResult.Success(gameEvent);
+            var now = context.Time.ServerTimeInSeconds;
+            var endTime = phase.EndTimeInSeconds.Value;
+            var readyTime = phase.ReadyTransitionTimeInSeconds;
+
+            if (now >= endTime)
+            {
+                return GameActionResult.Failed("The phase deadline has elapsed and cannot be cancelled.");
+            }
+
+            if (readyTime.HasValue && now >= readyTime.Value && context.Players.All.All(player => player.IsReady))
+            {
+                return GameActionResult.Failed("The ready deadline has elapsed.");
+            }
+
+            var wasReady = context.Players.Get(playerId).IsReady;
+            var readyEvent = new PlayerReadyToggledGameEvent(playerId, !wasReady);
+
+            if (wasReady && readyTime.HasValue)
+            {
+                return GameActionResult.Success(new IGameEvent[]
+                {
+                    readyEvent,
+                    new ApplyPhaseTransitionTimerCancellationGameEvent()
+                });
+            }
+
+            return GameActionResult.Success(readyEvent);
         }
     }
 }

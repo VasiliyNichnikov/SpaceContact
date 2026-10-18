@@ -29,9 +29,9 @@ namespace Core.Game
             EndTimeInSeconds = endTimeInSeconds;
         }
 
-        public void SetReadyTransitionTime(double readyTransitionTimeInSc)
+        public void SetReadyTransitionTime(double readyTransitionTimeInSeconds)
         {
-            ReadyTransitionTimeInSeconds = readyTransitionTimeInSc;
+            ReadyTransitionTimeInSeconds = readyTransitionTimeInSeconds;
         }
 
         public void ResetReadyTransitionTime()
