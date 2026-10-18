@@ -1,0 +1,6 @@
+<linker>
+  <assembly fullname="Core">
+    <type fullname="Core.Game.*" preserve="all" />
+    <type fullname="Core.EngineData.Color" preserve="all" />
+  </assembly>
+</linker>
