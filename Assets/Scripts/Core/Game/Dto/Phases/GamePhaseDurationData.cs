@@ -1,3 +1,6 @@
+using Core.Game.Dto.Snapshots;
+using Core.Helpers;
+
 namespace Core.Game.Dto.Phases
 {
     public readonly struct GamePhaseDurationData
@@ -20,6 +23,20 @@ namespace Core.Game.Dto.Phases
             DestinyPhaseDuration = destinyPhaseDuration;
             LaunchPhaseDuration = launchPhaseDuration;
             AlliancePhaseDuration = alliancePhaseDuration;
+        }
+
+        public bool TryGetDuration(GamePhaseType phase, out double durationInSeconds)
+        {
+            durationInSeconds = phase switch
+            {
+                GamePhaseType.Regroup => RegroupPhaseDuration,
+                GamePhaseType.Destiny => DestinyPhaseDuration,
+                GamePhaseType.Launch => LaunchPhaseDuration,
+                GamePhaseType.Alliance => AlliancePhaseDuration,
+                _ => 0
+            };
+
+            return TransitionPhaseHelper.IsTimedPhase(phase);
         }
     }
 }

@@ -8,25 +8,25 @@ namespace Core.Game
         public event Action? PhaseChanged;
 
         public GamePhaseType Type { get; private set; }
-        
+
         public double? EndTimeInSeconds { get; private set; }
-        
+
         public double? ReadyTransitionTimeInSeconds { get; private set; }
-        
+
         public long Revision { get; private set; }
 
-        /// <summary>
-        /// TODO: в валидации надо проверять ревизии
-        /// </summary>
-        /// <param name="phase"></param>
-        /// <param name="revision"></param>
-        /// <param name="endTime"></param>
-        public void SetPhase(GamePhaseType phase, long revision, double? endTime)
+        public void SetPhase(GamePhaseType phase, long revision)
         {
             Type = phase;
-            EndTimeInSeconds = endTime;
+            EndTimeInSeconds = null;
+            ReadyTransitionTimeInSeconds = null;
             Revision = revision;
             PhaseChanged?.Invoke();
+        }
+
+        public void StartTimer(double endTimeInSeconds)
+        {
+            EndTimeInSeconds = endTimeInSeconds;
         }
 
         public void SetReadyTransitionTime(double readyTransitionTimeInSc)
@@ -36,7 +36,7 @@ namespace Core.Game
 
         public void ResetReadyTransitionTime()
         {
-            ReadyTransitionTimeInSeconds = 0;
+            ReadyTransitionTimeInSeconds = null;
         }
 
         public void LoadSnapshot(PhaseSnapshot snapshot)
@@ -56,7 +56,7 @@ namespace Core.Game
                 ReadyTransitionTimeInSeconds = ReadyTransitionTimeInSeconds,
                 Revision = Revision
             };
-            
+
             return snapshot;
         }
 

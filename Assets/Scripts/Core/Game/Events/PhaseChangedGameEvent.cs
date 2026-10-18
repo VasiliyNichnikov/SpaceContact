@@ -9,11 +9,10 @@ namespace Core.Game.Events
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class PhaseChangedGameEvent : PublicGameEvent
     {
-        public PhaseChangedGameEvent(GamePhaseType nextPhaseType, long phaseRevision, double? endTime)
+        public PhaseChangedGameEvent(GamePhaseType nextPhaseType, long phaseRevision)
         {
             NextPhaseType = nextPhaseType;
             PhaseRevision = phaseRevision;
-            EndTime = endTime;
         }
 
         [StateVisibility(StateAudience.Everyone)]
@@ -24,13 +23,14 @@ namespace Core.Game.Events
         [JsonProperty]
         public long PhaseRevision { get; }
 
-        [StateVisibility(StateAudience.Everyone)]
-        [JsonProperty]
-        public double? EndTime { get; }
-
         public override void Apply(GameContext context)
         {
-            context.Phase.SetPhase(NextPhaseType, PhaseRevision, EndTime);
+            foreach (var player in context.Players.All)
+            {
+                context.Players.SetReadyState(player.Id, false);
+            }
+
+            context.Phase.SetPhase(NextPhaseType, PhaseRevision);
         }
     }
 }
