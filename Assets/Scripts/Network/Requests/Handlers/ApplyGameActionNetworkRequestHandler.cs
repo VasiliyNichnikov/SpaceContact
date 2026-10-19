@@ -1,6 +1,8 @@
+using System;
 using Core.Game.Actions;
 using Core.Game.Dto;
 using Core.Game.Server;
+using Logs;
 using Network.Infrastructure;
 
 namespace Network.Requests
@@ -24,6 +26,12 @@ namespace Network.Requests
         protected override GameApplyActionResponseDto ProcessRequest(GameApplyActionRequestDto request, ulong senderId)
         {
             var action = request.Action;
+            
+            if (action is not ClientGameAction)
+            {
+                return GameApplyActionResponseDto.Rejected(action?.Id ?? Guid.Empty, "This action is not allowed from a client.");
+            }
+
             var result = _executor.Execute(action, GameActor.Player(senderId));
 
             if (!result.IsSuccess)
@@ -39,7 +47,14 @@ namespace Network.Requests
                 {
                     if (senderId != playerId)
                     {
-                        _eventBroadcaster.SendEvent(playerId, batchData);
+                        try
+                        {
+                            _eventBroadcaster.SendEvent(playerId, batchData);
+                        }
+                        catch (Exception exception)
+                        {
+                            Logger.Error($"Batch delivery to {playerId} failed: {exception}");
+                        }
                     }
                 }
             }

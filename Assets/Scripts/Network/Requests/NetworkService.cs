@@ -34,9 +34,21 @@ namespace Network.Requests
             NetworkRequestType requestType,
             CancellationToken token) where TResponse : class
         {
+            if (token.IsCancellationRequested)
+            {
+                return null;
+            }
+            
             if (_serviceObj == null)
             {
-                await _readyTcs.Task;
+                var cancelled = new TaskCompletionSource<bool>();
+                await using var registration = token.Register(() => cancelled.TrySetResult(true));
+                await Task.WhenAny(_readyTcs.Task, cancelled.Task);
+            }
+
+            if (token.IsCancellationRequested)
+            {
+                return null;
             }
 
             if (_serviceObj == null)

@@ -11,7 +11,7 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class SelectTargetPlanetGameAction : BaseGameAction
+    public sealed class SelectTargetPlanetGameAction : ClientGameAction
     {
         public SelectTargetPlanetGameAction(int planetId, ulong? defenderPlayerId = null)
         {

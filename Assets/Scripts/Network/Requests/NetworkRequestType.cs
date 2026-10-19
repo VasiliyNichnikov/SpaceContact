@@ -2,15 +2,12 @@ namespace Network.Requests
 {
     public enum NetworkRequestType
     {
-        GetGalaxyState,
-        GetPlayerHandState,
         GetUserState,
-        SkipDestinyCard,
-        ChoosePlanetToAttack,
-        ChangePlayerReadiness,
+        GetGameSnapshot,
         
         PostChangeUserName,
         PostChangeUserColorId,
         PostChangeUserSeatNumber,
+        ApplyGameAction,
     }
 }

@@ -6,7 +6,7 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class SkipDestinyCardGameAction : BaseGameAction
+    public sealed class SkipDestinyCardGameAction : ClientGameAction
     {
         public SkipDestinyCardGameAction(ulong newTargetPlayerId)
         {

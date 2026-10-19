@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Core.Game.Dto;
 using Logs;
 
@@ -13,7 +14,37 @@ namespace Core.Game.Events
             _context = context;
         }
 
+        public event Action<GameEventBatchApplyResult, long>? Completed;
+
         public GameEventBatchApplyResult Apply(GameEventBatchData? batch)
+        {
+            var result = ApplyInternal(batch);
+
+            if (Completed != null)
+            {
+                foreach (var actionRaw in Completed.GetInvocationList())
+                {
+                    try
+                    {
+                        var action = (Action<GameEventBatchApplyResult, long>)actionRaw;
+                        action.Invoke(result, batch?.Revision ?? _context.Revision);
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Error($"Batch completion observer failed: {exception}");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static bool AreEventsValid(IGameEvent?[]? events)
+        {
+            return events != null && events.All(gameEvent => gameEvent != null);
+        }
+
+        private GameEventBatchApplyResult ApplyInternal(GameEventBatchData? batch)
         {
             _context.BeginClientBatch();
             var revision = batch?.Revision ?? _context.Revision;
@@ -42,6 +73,7 @@ namespace Core.Game.Events
                 }
 
                 var events = batch.Events;
+                
                 if (!AreEventsValid(events))
                 {
                     return RequireSnapshot(revision, "The event list is missing or contains a null event.");
@@ -65,24 +97,6 @@ namespace Core.Game.Events
             {
                 _context.EndClientBatch();
             }
-        }
-
-        private static bool AreEventsValid(IGameEvent?[]? events)
-        {
-            if (events is null)
-            {
-                return false;
-            }
-
-            foreach (var gameEvent in events)
-            {
-                if (gameEvent is null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private GameEventBatchApplyResult RequireSnapshot(long revision, string message)

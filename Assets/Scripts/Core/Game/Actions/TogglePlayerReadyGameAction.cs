@@ -8,7 +8,7 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class TogglePlayerReadyGameAction : BaseGameAction
+    public sealed class TogglePlayerReadyGameAction : ClientGameAction
     {
         public override GameActionResult Execute(GameContext context, GameActor actor)
         {
