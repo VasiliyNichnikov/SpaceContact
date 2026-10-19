@@ -16,21 +16,20 @@ namespace App.Game.Services
         private readonly GameStateProjector _projector;
         private readonly GameActionExecutor _executor;
         private readonly IServerEventBroadcaster _broadcaster;
+        private readonly GameContext _context;
 
         private ReadOnlyCollection<INetworkRequestHandler>? _handlers;
 
-        public GameServerRequestsRegisterService(
-            NetworkRequestRouter router,
-            INetworkSerializer networkSerializer,
-            GameStateProjector projector,
-            GameActionExecutor executor,
-            IServerEventBroadcaster broadcaster)
+        public GameServerRequestsRegisterService(NetworkRequestRouter router,
+            INetworkSerializer networkSerializer, GameStateProjector projector, GameActionExecutor executor,
+            IServerEventBroadcaster broadcaster, GameContext context)
         {
             _router = router;
             _networkSerializer = networkSerializer;
             _projector = projector;
             _executor = executor;
             _broadcaster = broadcaster;
+            _context = context;
         }
 
         public void ConfigureRegistry()
@@ -55,7 +54,7 @@ namespace App.Game.Services
 
         private ReadOnlyCollection<INetworkRequestHandler> CreateHandlers()
         {
-            var getGameSnapshotHandler = new GetGameSnapshotStateNetworkRequestHandler(_networkSerializer, _projector);
+            var getGameSnapshotHandler = new GetGameSnapshotStateNetworkRequestHandler(_networkSerializer, _projector, _context);
             var applyGameActionStateHandler = new ApplyGameActionNetworkRequestHandler(_networkSerializer, _executor, _broadcaster);
 
             var allStates = new List<INetworkRequestHandler>
