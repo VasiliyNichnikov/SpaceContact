@@ -1,6 +1,4 @@
 <linker>
-  <assembly fullname="Core">
-    <type fullname="Core.Game.*" preserve="all" />
-    <type fullname="Core.EngineData.Color" preserve="all" />
-  </assembly>
+  <!-- Network discovery scans all of Core, including future actions/events outside Core.Game. -->
+  <assembly fullname="Core" preserve="all" />
 </linker>

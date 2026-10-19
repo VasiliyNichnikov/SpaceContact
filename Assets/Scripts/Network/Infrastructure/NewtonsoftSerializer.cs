@@ -9,12 +9,13 @@ namespace Network.Infrastructure
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.Auto,
+            SerializationBinder = new GameNetworkSerializationBinder(),
             ContractResolver = new StateValidationContractResolver()
         };
 
         public byte[] Serialize<T>(T data)
         {
-            var json = JsonConvert.SerializeObject(data, _settings);
+            var json = JsonConvert.SerializeObject(data, typeof(T), _settings);
             
             return System.Text.Encoding.UTF8.GetBytes(json);
         }
