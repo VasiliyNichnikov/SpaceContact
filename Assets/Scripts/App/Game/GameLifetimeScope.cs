@@ -90,6 +90,7 @@ namespace App.Game
             
             // Entry Point
             builder.RegisterEntryPoint<GameStartupService>();
+            builder.RegisterEntryPoint<GamePresentationStartup>();
         }
         
         private static void RegisterViewModels(IContainerBuilder builder)

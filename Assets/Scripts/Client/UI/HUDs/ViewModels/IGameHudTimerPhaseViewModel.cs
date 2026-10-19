@@ -12,5 +12,7 @@ namespace Client.UI.HUDs.ViewModels
         void OnReadyButtonClickHandler();
         
         void Update();
+
+        void Init();
     }
 }

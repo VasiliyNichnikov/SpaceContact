@@ -19,6 +19,7 @@ namespace Client.UI.HUDs
         {
             gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
             gameObject.SubscribeWithoutCall(_viewModel.ActivePhaseChangedEvent, ChangeActivePhase);
+            ChangeActivePhase();
         }
 
         private void ChangeActivePhase()

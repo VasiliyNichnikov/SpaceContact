@@ -2,53 +2,53 @@ using System;
 using System.Collections.Generic;
 using Client.Helpers;
 using Core.Game;
-using Core.Game.Phases;
+using Core.Game.Dto.Snapshots;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
     public class GameHudTopViewModel : IGameHudTopViewModel
     {
+        private readonly GameContext _context;
         private readonly EventProvider _activePhaseChangedEvent = new();
-        private readonly IGameStateMachineReadOnly _stateMachine;
         private readonly PhasesHelper _phasesHelper;
-        
-        public GameHudTopViewModel(IGameStateMachineReadOnly stateMachine, PhasesHelper phasesHelper)
+
+        public GameHudTopViewModel(GameContext context, PhasesHelper phasesHelper)
         {
-            _stateMachine = stateMachine;
+            _context = context;
             _phasesHelper = phasesHelper;
-            ActiveGamePhaseType = GamePhaseType.None;
-            PhaseScale = Array.Empty<GamePhaseType>();
-            _stateMachine.OnPhaseChanged += OnPhaseChanged;
         }
 
-        public IEventProvider ActivePhaseChangedEvent => 
-            _activePhaseChangedEvent;
-        
-        public GamePhaseType ActiveGamePhaseType { get; private set; }
-        
-        public IReadOnlyCollection<GamePhaseType> PhaseScale { get; private set; }
-        
-        public void Dispose() => 
-            _stateMachine.OnPhaseChanged -= OnPhaseChanged;
-        
-        private void OnPhaseChanged()
+        public IEventProvider ActivePhaseChangedEvent => _activePhaseChangedEvent;
+
+        public GamePhaseType ActiveGamePhaseType { get; private set; } = GamePhaseType.None;
+
+        public IReadOnlyCollection<GamePhaseType> PhaseScale { get; private set; } = Array.Empty<GamePhaseType>();
+
+        public void Init()
         {
-            var phase = _stateMachine.CurrentPhase;
+            _context.StateChanged += Refresh;
+            Refresh();
+        }
 
-            if (phase == null)
+        public void Dispose()
+        {
+            _context.StateChanged -= Refresh;
+        }
+
+        private void Refresh()
+        {
+            var phaseType = _context.IsInitialized ? _context.Phase.Type : GamePhaseType.None;
+           
+            if (ActiveGamePhaseType == phaseType)
             {
                 return;
             }
 
-            if (!_phasesHelper.ContainsPhase(phase.Type))
-            {
-                return;
-            }
-            
-            ActiveGamePhaseType = phase.Type;
-            PhaseScale = _phasesHelper.GetPhaseScaleByPhase(phase.Type);
-            
+            ActiveGamePhaseType = phaseType;
+            PhaseScale = _phasesHelper.ContainsPhase(phaseType)
+                ? _phasesHelper.GetPhaseScaleByPhase(phaseType)
+                : Array.Empty<GamePhaseType>();
             _activePhaseChangedEvent.Call();
         }
     }

@@ -1,8 +1,9 @@
+using System;
 using Core.Game;
-using Core.Game.Phases;
-using Core.Game.Phases.Client;
-using GeneralUtils;
+using Core.Game.Actions;
+using Core.Helpers;
 using Reactivity;
+using VContainer;
 
 namespace Client.UI.HUDs.ViewModels
 {
@@ -10,63 +11,74 @@ namespace Client.UI.HUDs.ViewModels
     {
         private readonly ReactivityProperty<int> _remainingTimeInSeconds = new();
         private readonly ReactivityProperty<bool> _isReadyToNextPhase = new();
-        
-        private readonly IGameStateMachineReadOnly _stateMachine;
-        private readonly GameClientPlayerReadinessController _readinessController;
-        
-        private IGamePhaseWithContext? _phaseWithContext;
-        
-        public GameHudTimerPhaseViewModel(
-            IGameStateMachineReadOnly stateMachine,
-            GameClientPlayerReadinessController readinessController)
+
+        [Inject] private readonly GameContext _gameContext = null!;
+        [Inject] private readonly GameActionClient _actionClient = null!;
+        [Inject] private readonly PendingGameActions _pendingActions = null!;
+
+        public IReactivityProperty<int> RemainingTimeInSeconds => _remainingTimeInSeconds;
+
+        public IReactivityProperty<bool> IsReadyToNextPhase => _isReadyToNextPhase;
+
+        public void Init()
         {
-            _stateMachine = stateMachine;
-            _readinessController = readinessController;
-            _stateMachine.OnPhaseChanged += TryRefreshPhaseTimer;
-            _readinessController.Changed += ReadinessChanged;
-            TryRefreshPhaseTimer();
+            _gameContext.StateChanged += Refresh;
+            Refresh();
         }
 
-        public IReactivityProperty<int> RemainingTimeInSeconds => 
-            _remainingTimeInSeconds;
-
-        public IReactivityProperty<bool> IsReadyToNextPhase => 
-            _isReadyToNextPhase;
-
-        public void OnReadyButtonClickHandler() => 
-            _readinessController
-                .SwitchReadinessAsync()
-                .FireAndForget();
-
-        public void Update()
+        public void OnReadyButtonClickHandler()
         {
-            if (_phaseWithContext == null)
+            if (_gameContext.LocalPlayerState is null ||
+                _pendingActions.Contains<TogglePlayerReadyGameAction>())
             {
                 return;
             }
 
-            _remainingTimeInSeconds.Value = _phaseWithContext.RemainingTime;
+            var deadline = GetDeadline();
+            if (!deadline.HasValue || _gameContext.Time.ServerTimeInSeconds >= deadline.Value)
+            {
+                return;
+            }
+
+            _actionClient.Send(new TogglePlayerReadyGameAction());
         }
-        
+
+        public void Update()
+        {
+            Refresh();
+        }
+
         public void Dispose()
         {
-            _stateMachine.OnPhaseChanged -= TryRefreshPhaseTimer;
-            _readinessController.Changed -= ReadinessChanged;
+            _gameContext.StateChanged -= Refresh;
         }
 
-        private void TryRefreshPhaseTimer()
+        private void Refresh()
         {
-            var phase = _stateMachine.CurrentPhase;
+            _isReadyToNextPhase.Value = _gameContext.LocalPlayerState?.IsReady ?? false;
+            var deadline = GetDeadline();
+            var remaining = deadline.HasValue
+                ? Math.Max(0, Math.Ceiling(deadline.Value - _gameContext.Time.ServerTimeInSeconds))
+                : 0;
+            _remainingTimeInSeconds.Value = (int)Math.Min(int.MaxValue, remaining);
+        }
 
-            if (phase is IGamePhaseWithContext phaseWithContext)
+        private double? GetDeadline()
+        {
+            if (_gameContext.LocalPlayerState is null || !TransitionPhaseHelper.IsTimedPhase(_gameContext.Phase.Type))
             {
-                _phaseWithContext = phaseWithContext;
+                return null;
             }
-        }
 
-        private void ReadinessChanged()
-        {
-            _isReadyToNextPhase.Value = _readinessController.IsReadyToNextPhase;
+            var phase = _gameContext.Phase;
+            if (!phase.EndTimeInSeconds.HasValue)
+            {
+                return null;
+            }
+
+            return phase.ReadyTransitionTimeInSeconds.HasValue
+                ? Math.Min(phase.EndTimeInSeconds.Value, phase.ReadyTransitionTimeInSeconds.Value)
+                : phase.EndTimeInSeconds;
         }
     }
 }

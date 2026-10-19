@@ -12,25 +12,26 @@ namespace Client.UI.HUDs
     {
         [SerializeField]
         private TextMeshProUGUI _valueText = null!;
-        
+
         [SerializeField]
         private GameObject _markGameObject = null!;
 
         private IGameHudTimerPhaseViewModel? _viewModel;
-        
+
+        [CalledFromUnity]
+        public void OnReadyButtonClick() =>
+            _viewModel?.OnReadyButtonClickHandler();
+
         [Inject]
         private void Constructor(IGameHudTimerPhaseViewModel viewModel)
         {
             gameObject.UpdateViewModelDisposable(ref _viewModel!, viewModel);
-            gameObject.Subscribe(_viewModel.RemainingTimeInSeconds, SetValueText);
-            gameObject.Subscribe(_viewModel.IsReadyToNextPhase, _markGameObject.SetActive);
+            viewModel.Init();
+            gameObject.Subscribe(viewModel.RemainingTimeInSeconds, SetValueText);
+            gameObject.Subscribe(viewModel.IsReadyToNextPhase, _markGameObject.SetActive);
         }
-        
-        [CalledFromUnity]
-        public void OnReadyButtonClick() => 
-            _viewModel?.OnReadyButtonClickHandler();
 
-        private void Update() => 
+        private void Update() =>
             _viewModel?.Update();
 
         private void SetValueText(int value)

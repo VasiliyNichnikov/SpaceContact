@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Game.Phases;
+using Core.Game.Dto.Snapshots;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
@@ -12,5 +12,7 @@ namespace Client.UI.HUDs.ViewModels
         GamePhaseType ActiveGamePhaseType { get; }
         
         IReadOnlyCollection<GamePhaseType> PhaseScale { get; }
+
+        void Init();
     }
 }
