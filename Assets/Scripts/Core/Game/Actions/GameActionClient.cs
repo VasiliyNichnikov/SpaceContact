@@ -15,7 +15,6 @@ namespace Core.Game.Actions
         private readonly PendingGameActions _pendingActions;
         private readonly GameEventBatchApplier _batchApplier;
         private readonly CancellationTokenSource _lifetimeCancellation = new();
-        private bool _isDisposed;
 
         public GameActionClient(IGameActionServerInteraction network, GameContext context,
             PendingGameActions pendingActions, GameEventBatchApplier batchApplier)
@@ -31,6 +30,12 @@ namespace Core.Game.Actions
         public void Send(ClientGameAction action)
         {
             SendAsync(action, CancellationToken.None).FireAndForget(exception => Logger.Error($"Action send failed: {exception}"));
+        }
+
+        public void Dispose()
+        {
+            _lifetimeCancellation.Cancel();
+            _lifetimeCancellation.Dispose();
         }
 
         private async Task<GameActionSendResult> SendAsync(ClientGameAction action, CancellationToken ct)
@@ -74,7 +79,7 @@ namespace Core.Game.Actions
             }
             catch (Exception exception)
             {
-                if (wasSent && !_isDisposed)
+                if (wasSent)
                 {
                     result = RequireSnapshot(actionId, exception.Message);
                 }
@@ -84,32 +89,15 @@ namespace Core.Game.Actions
             finally
             {
                 _pendingActions.Remove(actionId);
-                if (result is not null && !_isDisposed)
+                if (result != null)
                 {
                     NotifyCompleted(result);
                 }
             }
         }
 
-        public void Dispose()
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            _isDisposed = true;
-            _lifetimeCancellation.Cancel();
-            _lifetimeCancellation.Dispose();
-        }
-
         private void EnsureCanSend()
         {
-            if (_isDisposed)
-            {
-                throw new ObjectDisposedException(nameof(GameActionClient));
-            }
-
             if (_context.Role != GameContextRole.Client)
             {
                 throw new InvalidOperationException("The action client requires a client context.");
@@ -140,7 +128,7 @@ namespace Core.Game.Actions
 
         private GameActionSendResult CreateCancelledResult(Guid actionId, bool wasSent)
         {
-            var batchResult = wasSent && !_isDisposed ? _batchApplier.Apply(null) : null;
+            var batchResult = wasSent ? _batchApplier.Apply(null) : null;
             return new GameActionSendResult(actionId, null, batchResult, null, isCancelled: true);
         }
 
