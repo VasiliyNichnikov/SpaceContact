@@ -12,6 +12,7 @@ Follow this workflow whenever developing or modifying code in the SpaceContact p
 1. Read `docs/CSharpCodeStyle.md` completely before creating or changing any code.
 2. Treat every rule in that document as mandatory for all new and modified C# code.
 3. Re-read the document if its contents change during the task.
+4. For GameAction validators and failure enums, follow section 1.1: nest the class named `Validator` and any failure enum inside the corresponding GameAction, rather than creating separate files.
 
 Do not begin code edits until the style document has been read.
 
