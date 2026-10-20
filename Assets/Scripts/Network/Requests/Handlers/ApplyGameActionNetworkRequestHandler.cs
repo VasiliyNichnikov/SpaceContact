@@ -26,17 +26,17 @@ namespace Network.Requests
         protected override GameApplyActionResponseDto ProcessRequest(GameApplyActionRequestDto request, ulong senderId)
         {
             var action = request.Action;
-            
-            if (action is not ClientGameAction clientAction)
+
+            if (action == null)
             {
-                return GameApplyActionResponseDto.Rejected(action?.Id ?? Guid.Empty, "This action is not allowed from a client.");
+                return GameApplyActionResponseDto.Rejected(Guid.Empty, "This action is null.");
             }
 
-            var result = _executor.ExecuteClientAction(clientAction, senderId);
+            var result = _executor.ExecuteClientAction(action, senderId);
 
             if (!result.IsSuccess)
             {
-                return GameApplyActionResponseDto.Rejected(action.Id, result.ErrorMessage);
+                return GameApplyActionResponseDto.Rejected(action.Id, result.ErrorMessage, result.ValidationCode);
             }
 
             var senderBatch = result.BatchesByRecipient[senderId];

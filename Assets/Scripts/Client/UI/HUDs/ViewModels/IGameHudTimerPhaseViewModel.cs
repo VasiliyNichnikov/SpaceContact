@@ -8,9 +8,11 @@ namespace Client.UI.HUDs.ViewModels
         IReactivityProperty<int> RemainingTimeInSeconds { get; }
 
         IReactivityProperty<bool> IsReadyToNextPhase { get; }
-        
+
+        IReactivityProperty<bool> CanToggleReady { get; }
+
         void OnReadyButtonClickHandler();
-        
+
         void Update();
 
         void Init();

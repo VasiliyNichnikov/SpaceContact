@@ -1,7 +1,6 @@
 using System;
-using Core.Game.Cards;
-using Core.Game.Players;
-using Core.Game.Rules;
+using Core.Game;
+using Core.Game.Actions;
 using CoreConvertor;
 using UnityEngine;
 
@@ -9,45 +8,47 @@ namespace Client.UI.HUDs.ViewModels
 {
     public class GameDestinyCardViewModel : IGameDestinyCardViewModel
     {
-        private readonly IGamePlayer _ownerPlayer;
-        private readonly IDestinyCard _card;
-        private readonly GameRulesChecker _rulesChecker;
+        private readonly GameContext _context;
+        private readonly PendingGameActions _pendingActions;
         private readonly Action _onSkipButtonClickAction;
-        
+
         public GameDestinyCardViewModel(
-            IGamePlayer ownerPlayer,
-            IDestinyCard card, 
-            GameRulesChecker rulesChecker,
+            GamePlayerData ownerPlayer, 
+            GameContext context,
+            PendingGameActions pendingActions, 
             Action onSkipButtonClickAction)
         {
-            _card = card;
-            _ownerPlayer = ownerPlayer;
-            _rulesChecker = rulesChecker;
-            Description = card.Description;
-            BackgroundColor = ColorConvertor.FromCoreColor(card.BackgroundColor);
+            _context = context;
+            _pendingActions = pendingActions;
+            Description = string.Empty;
+            BackgroundColor = ColorConvertor.FromCoreColor(ownerPlayer.Color);
             _onSkipButtonClickAction = onSkipButtonClickAction;
         }
 
         public Color BackgroundColor { get; }
-        
+
         public string Description { get; }
 
-        public bool IsSkipButtonVisible
-        {
-            get
-            {
-                if (_card.TargetPlayerId == null)
-                {
-                    return false;
-                }
+        public bool IsSkipButtonVisible => CanSkip(_context, _pendingActions);
 
-                var context = GameRuleContext.CheckPlayer(_ownerPlayer.PlayerId);
-                
-                return _rulesChecker.Check(GameRuleType.CanSkipDestinyCard, context);
+        public static bool CanSkip(GameContext context, PendingGameActions pendingActions)
+        {
+            var localPlayer = context.LocalPlayerState;
+            if (localPlayer is null || pendingActions.HasAny)
+            {
+                return false;
+            }
+
+            var action = new SkipDestinyCardGameAction(localPlayer.Id);
+            return action.GetValidator().Check(context, GameActor.Player(localPlayer.Id)).IsSuccess;
+        }
+
+        public void OnSkipButtonClickHandler()
+        {
+            if (IsSkipButtonVisible)
+            {
+                _onSkipButtonClickAction.Invoke();
             }
         }
-        
-        public void OnSkipButtonClickHandler() => 
-            _onSkipButtonClickAction.Invoke();
     }
 }

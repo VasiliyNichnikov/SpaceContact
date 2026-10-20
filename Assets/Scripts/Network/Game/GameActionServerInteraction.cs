@@ -15,7 +15,7 @@ namespace Network.Game
             _network = network;
         }
 
-        public async Task<GameApplyActionResponseDto?> SendAsync(IGameAction action, GameActor actor, CancellationToken ct)
+        public async Task<GameApplyActionResponseDto?> SendAsync(ClientGameAction action, GameActor actor, CancellationToken ct)
         {
             if (ct.IsCancellationRequested)
             {

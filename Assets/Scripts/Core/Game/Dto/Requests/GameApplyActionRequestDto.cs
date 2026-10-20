@@ -6,6 +6,7 @@ namespace Core.Game.Dto
     [Serializable]
     public class GameApplyActionRequestDto
     {
-        public IGameAction Action = null!;
+        // Missing or null actions are rejected by the request handler.
+        public ClientGameAction? Action;
     }
 }

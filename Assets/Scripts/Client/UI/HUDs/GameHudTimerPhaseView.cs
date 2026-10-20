@@ -4,6 +4,7 @@ using Client.UI.Utils;
 using Reactivity;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 
 namespace Client.UI.HUDs
@@ -15,6 +16,9 @@ namespace Client.UI.HUDs
 
         [SerializeField]
         private GameObject _markGameObject = null!;
+
+        [SerializeField]
+        private Button _readyButton = null!;
 
         private IGameHudTimerPhaseViewModel? _viewModel;
 
@@ -29,6 +33,7 @@ namespace Client.UI.HUDs
             viewModel.Init();
             gameObject.Subscribe(viewModel.RemainingTimeInSeconds, SetValueText);
             gameObject.Subscribe(viewModel.IsReadyToNextPhase, _markGameObject.SetActive);
+            gameObject.Subscribe(viewModel.CanToggleReady, SetReadyButtonInteractable);
         }
 
         private void Update() =>
@@ -37,6 +42,11 @@ namespace Client.UI.HUDs
         private void SetValueText(int value)
         {
             _valueText.SetText(UIUtils.SecondsToTimeFormat(value));
+        }
+
+        private void SetReadyButtonInteractable(bool canToggleReady)
+        {
+            _readyButton.interactable = canToggleReady;
         }
     }
 }

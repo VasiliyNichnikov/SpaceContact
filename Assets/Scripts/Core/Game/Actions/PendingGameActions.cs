@@ -7,22 +7,22 @@ namespace Core.Game.Actions
 {
     public sealed class PendingGameActions
     {
-        private readonly Dictionary<Guid, IGameAction> _actionsById = new();
+        private readonly Dictionary<Guid, ClientGameAction> _actionsById = new();
 
         public event Action? Changed;
 
-        public bool HasAny => 
+        public bool HasAny =>
             _actionsById.Count > 0;
 
         public bool Contains(Guid actionId) =>
             _actionsById.ContainsKey(actionId);
 
-        public bool Contains<TAction>() where TAction : IGameAction
+        public bool Contains<TAction>() where TAction : ClientGameAction
         {
             return _actionsById.Values.Any(action => action is TAction);
         }
 
-        internal bool TryAdd(IGameAction action)
+        internal bool TryAdd(ClientGameAction action)
         {
             if (!_actionsById.TryAdd(action.Id, action))
             {

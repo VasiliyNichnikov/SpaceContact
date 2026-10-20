@@ -28,26 +28,26 @@ namespace Core.Game.Actions
 
         public event Action<GameActionSendResult>? Completed;
 
-        public void Send(IGameAction action)
+        public void Send(ClientGameAction action)
         {
             SendAsync(action, CancellationToken.None).FireAndForget(exception => Logger.Error($"Action send failed: {exception}"));
         }
 
-        public async Task<GameActionSendResult> SendAsync(IGameAction action, CancellationToken ct)
+        private async Task<GameActionSendResult> SendAsync(ClientGameAction action, CancellationToken ct)
         {
             EnsureCanSend();
             var actionId = action.Id;
-            
+
             if (ct.IsCancellationRequested)
             {
                 return CreateCancelledResult(actionId, false);
             }
-            
+
             if (actionId == Guid.Empty)
             {
                 throw new ArgumentException("An action must have a non-empty ID.", nameof(action));
             }
-            
+
             if (!_pendingActions.TryAdd(action))
             {
                 throw new InvalidOperationException($"Action {actionId} is already pending.");
@@ -56,13 +56,13 @@ namespace Core.Game.Actions
             GameActionSendResult? result = null;
             var wasSent = false;
             using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(ct, _lifetimeCancellation.Token);
-            
+
             try
             {
                 EnsureCanSend();
                 wasSent = true;
                 var response = await _network.SendAsync(action, GameActor.Player(_context.LocalPlayerId), cancellation.Token);
-                
+
                 if (cancellation.IsCancellationRequested)
                 {
                     result = CreateCancelledResult(actionId, wasSent);
@@ -130,7 +130,8 @@ namespace Core.Game.Actions
 
             if (!response.IsAccepted)
             {
-                return new GameActionSendResult(actionId, false, null, response.ErrorMessage);
+                return new GameActionSendResult(actionId, false, null, response.ErrorMessage,
+                    validationCode: response.ValidationCode);
             }
 
             var batchResult = _batchApplier.Apply(response.Batch);

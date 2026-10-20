@@ -11,6 +11,7 @@ namespace Client.UI.HUDs.ViewModels
     {
         private readonly ReactivityProperty<int> _remainingTimeInSeconds = new();
         private readonly ReactivityProperty<bool> _isReadyToNextPhase = new();
+        private readonly ReactivityProperty<bool> _canToggleReady = new();
 
         [Inject] private readonly GameContext _gameContext = null!;
         [Inject] private readonly GameActionClient _actionClient = null!;
@@ -20,22 +21,18 @@ namespace Client.UI.HUDs.ViewModels
 
         public IReactivityProperty<bool> IsReadyToNextPhase => _isReadyToNextPhase;
 
+        public IReactivityProperty<bool> CanToggleReady => _canToggleReady;
+
         public void Init()
         {
             _gameContext.StateChanged += Refresh;
+            _pendingActions.Changed += Refresh;
             Refresh();
         }
 
         public void OnReadyButtonClickHandler()
         {
-            if (_gameContext.LocalPlayerState is null ||
-                _pendingActions.Contains<TogglePlayerReadyGameAction>())
-            {
-                return;
-            }
-
-            var deadline = GetDeadline();
-            if (!deadline.HasValue || _gameContext.Time.ServerTimeInSeconds >= deadline.Value)
+            if (!CanSendReady())
             {
                 return;
             }
@@ -51,10 +48,22 @@ namespace Client.UI.HUDs.ViewModels
         public void Dispose()
         {
             _gameContext.StateChanged -= Refresh;
+            _pendingActions.Changed -= Refresh;
+        }
+
+        private bool CanSendReady()
+        {
+            var validator = new TogglePlayerReadyGameAction().GetValidator();
+            var localPlayer = _gameContext.LocalPlayerState;
+            
+            return localPlayer != null && 
+                   !_pendingActions.HasAny &&
+                   validator.Check(_gameContext, GameActor.Player(localPlayer.Id)).IsSuccess;
         }
 
         private void Refresh()
         {
+            _canToggleReady.Value = CanSendReady();
             _isReadyToNextPhase.Value = _gameContext.LocalPlayerState?.IsReady ?? false;
             var deadline = GetDeadline();
             var remaining = deadline.HasValue
