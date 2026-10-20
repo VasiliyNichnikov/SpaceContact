@@ -1,5 +1,6 @@
 using System;
 using Client.Game.Field;
+using Client.UI;
 using Client.UI.Loaders;
 using Core.Game;
 using VContainer.Unity;
@@ -12,19 +13,21 @@ namespace App.Game.Services
         private readonly GameFieldPlanetsViewProvider _fieldPlanetsViewProvider;
         private readonly IGameFieldViewManager _fieldViewManager;
         private readonly GameUILoader _uiLoader;
+        private readonly GamePlanetInfoPresenter _planetInfoPresenter;
         private bool _isStarted;
         private bool _isLoaded;
 
         public GamePresentationStartup(
-            GameContext context, 
+            GameContext context,
             GameFieldPlanetsViewProvider fieldPlanetsViewProvider,
-            IGameFieldViewManager fieldViewManager, 
-            GameUILoader uiLoader)
+            IGameFieldViewManager fieldViewManager,
+            GameUILoader uiLoader, GamePlanetInfoPresenter planetInfoPresenter)
         {
             _context = context;
             _fieldPlanetsViewProvider = fieldPlanetsViewProvider;
             _fieldViewManager = fieldViewManager;
             _uiLoader = uiLoader;
+            _planetInfoPresenter = planetInfoPresenter;
         }
 
         public void Start()
@@ -55,6 +58,7 @@ namespace App.Game.Services
             _isLoaded = true;
             _context.StateChanged -= TryLoad;
             _fieldPlanetsViewProvider.CreateFieldPlanets();
+            _planetInfoPresenter.Init();
             _fieldViewManager.Init();
             _uiLoader.Load();
         }

@@ -1,13 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Client.UI.HUDs;
 using Client.UI.HUDs.ViewModels;
-using Core.Game.Encounter;
-using Core.Game.Phases.Client;
-using Core.Game.Planets;
-using Core.Game.Players;
-using Core.Game.Rules;
+using Core.Game;
+using Core.Game.Actions;
 using CoreConvertor;
 using Reactivity;
 using UnityEngine;
@@ -18,123 +15,89 @@ namespace Client.Game.Planets.ViewModels
     {
         private const string DefaultBorderColorHex = "#7EFF00";
         private const string PlanetToAttackBorderColorHex = "#FF2900";
-        
+
         private readonly ReactivityListProperty<IGameShipsOnPlanetInfoItemViewModel> _infoViewModels = new();
         private readonly ReactivityProperty<bool> _isVisible = new();
         private readonly ReactivityProperty<Color> _borderColor = new();
-        
+        private readonly GameContext _context;
         private readonly int _planetId;
-        private readonly ulong _ownerClientPlayerId;
-        private readonly IGamePlayer _planetPlayerOwner;
-        private readonly GameRulesChecker _rulesChecker;
-        private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
-        private readonly IGameClientEncounterManager _encounterManager;
-        private readonly GamePlanetAttackTargetSelector _attackTargetSelector;
         private readonly IGameCurrentPlayerInfoTabController _infoTabController;
-        
-        public GameShipsOnPlanetInfoViewModel(
-            int planetId,
-            ulong ownerClientPlayerId,
-            IGamePlayer planetPlayerOwner,
-            GameRulesChecker rulesChecker,
-            IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameClientEncounterManager encounterManager,
-            GamePlanetAttackTargetSelector attackTargetSelector,
-            IGameCurrentPlayerInfoTabController infoTabController)
+        private readonly GameActionClient _actionClient;
+        private readonly PendingGameActions _pendingActions;
+        private bool _isDisposed;
+
+        public GameShipsOnPlanetInfoViewModel(int planetId, GameContext context,
+            IGameCurrentPlayerInfoTabController infoTabController, GameActionClient actionClient,
+            PendingGameActions pendingActions)
         {
             _planetId = planetId;
-            _ownerClientPlayerId = ownerClientPlayerId;
-            _planetPlayerOwner = planetPlayerOwner;
-            _rulesChecker = rulesChecker;
-            _destinyPhaseResolver = destinyPhaseResolver;
-            _encounterManager = encounterManager;
-            _attackTargetSelector = attackTargetSelector;
+            _context = context;
             _infoTabController = infoTabController;
-            
-            _destinyPhaseResolver.Changed += RefreshInfoViewModels;
-            _encounterManager.DefenderChanged += RefreshInfoViewModels;
-            _encounterManager.PlanetChanged += RefreshInfoViewModels;
-            _infoTabController.Changed += RefreshPlanetInfoVisibility;
-
-            RefreshPlanetInfoVisibility();
-            RefreshInfoViewModels();
+            _actionClient = actionClient;
+            _pendingActions = pendingActions;
         }
 
-        public IReactivityReadOnlyCollectionProperty<IGameShipsOnPlanetInfoItemViewModel> InfoViewModels =>
-            _infoViewModels;
+        public IReactivityReadOnlyCollectionProperty<IGameShipsOnPlanetInfoItemViewModel> InfoViewModels => _infoViewModels;
 
-        public IReactivityProperty<bool> IsVisible => 
-            _isVisible;
+        public IReactivityProperty<bool> IsVisible => _isVisible;
 
-        public IReactivityProperty<Color> BorderColor => 
-            _borderColor;
+        public IReactivityProperty<Color> BorderColor => _borderColor;
+
+        public void Init()
+        {
+            _context.StateChanged += Refresh;
+            _pendingActions.Changed += Refresh;
+            _infoTabController.Changed += Refresh;
+            Refresh();
+        }
 
         public void Dispose()
         {
-            _destinyPhaseResolver.Changed -= RefreshInfoViewModels;
-            _encounterManager.DefenderChanged -= RefreshInfoViewModels;
-            _encounterManager.PlanetChanged -= RefreshInfoViewModels;
-            _infoTabController.Changed -= RefreshPlanetInfoVisibility;
-        }
-
-        private void RefreshInfoViewModels()
-        {
-            RefreshBorderColor();
-            _infoViewModels.Value = CreateItemViewModels();
-        }
-        
-        private IReadOnlyCollection<IGameShipsOnPlanetInfoItemViewModel> CreateItemViewModels()
-        {
-            var result = new List<IGameShipsOnPlanetInfoItemViewModel>();
-            
-            // Порядок добавления важен
-            AddShipsInfoViewModel(result);
-            TryAddChoicePlanetToAttackViewModel(result);
-            
-            return result;
-        }
-
-        private void AddShipsInfoViewModel(List<IGameShipsOnPlanetInfoItemViewModel> items)
-        {
-            var planets = _planetPlayerOwner.Planets;
-            var selectedPlanet = planets.First(p => p.Id == _planetId);
-            var shipsInfoViewModel = new GameShipsInfoViewModel(_planetPlayerOwner.Color, selectedPlanet.Ships.Count);
-            
-            items.Add(shipsInfoViewModel);
-        }
-
-        private void TryAddChoicePlanetToAttackViewModel(List<IGameShipsOnPlanetInfoItemViewModel> items)
-        {
-            var context = GameRuleContext.CheckPlanet(_ownerClientPlayerId, _planetId);
-            
-            if (!_rulesChecker.Check(GameRuleType.CanAggressorAttackToPlanet, context))
+            if (_isDisposed)
             {
                 return;
             }
-
-            var viewModel = new GameChoicePlanetToAttackViewModel(_planetId, _attackTargetSelector);
-            items.Add(viewModel);
+            
+            _context.StateChanged -= Refresh;
+            _pendingActions.Changed -= Refresh;
+            _infoTabController.Changed -= Refresh;
+            _isDisposed = true;
         }
 
-        private void RefreshBorderColor()
+        private void Refresh()
         {
-            var isPlanetTarget = (_encounterManager.PlanetIdToAttack == null && _planetPlayerOwner.PlayerId != _ownerClientPlayerId) || 
-                                 _encounterManager.PlanetIdToAttack == _planetId;
-            
-            var colorHex = isPlanetTarget ? PlanetToAttackBorderColorHex : DefaultBorderColorHex;
+            var items = new List<IGameShipsOnPlanetInfoItemViewModel>();
+            var localPlayer = _context.LocalPlayerState;
+            if (localPlayer is null || _context.Galaxy.Planets.All(planet => planet.Id != _planetId))
+            {
+                _isVisible.Value = false;
+                _infoViewModels.Value = items;
+                return;
+            }
+
+            var ownerId = _context.Galaxy.GetPlanetOwnerId(_planetId);
+            _isVisible.Value = ownerId != localPlayer.Id ||
+                               _infoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay;
+            var colorHex = _context.Encounter.PlanetIdToAttack == _planetId
+                ? PlanetToAttackBorderColorHex
+                : DefaultBorderColorHex;
             _borderColor.Value = ColorConvertor.FromCoreColor(Core.EngineData.Color.FromHex(colorHex));
-        }
 
-        private void RefreshPlanetInfoVisibility()
-        {
-            if (_planetPlayerOwner.PlayerId != _ownerClientPlayerId)
+            foreach (var player in _context.Players.All.OrderBy(player => player.Order))
             {
-                _isVisible.Value = true;
-                
-                return;
+                var count = _context.Galaxy.GetPlayerShipCountOnPlanet(player.Id, _planetId);
+                if (count > 0)
+                {
+                    items.Add(new GameShipsInfoViewModel(player.Color, count));
+                }
+
+                if (GameChoicePlanetToAttackViewModel.CanSelect(_context, _pendingActions, _planetId, player.Id))
+                {
+                    items.Add(new GameChoicePlanetToAttackViewModel(_planetId, player, _context, _actionClient, _pendingActions));
+                }
             }
 
-            _isVisible.Value = _infoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay;
+            _infoViewModels.Value = items;
         }
     }
 }

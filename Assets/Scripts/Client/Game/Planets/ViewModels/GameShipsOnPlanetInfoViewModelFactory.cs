@@ -1,48 +1,35 @@
 using Client.UI.HUDs;
-using Core.Game.Encounter;
-using Core.Game.Phases.Client;
-using Core.Game.Planets;
-using Core.Game.Players;
-using Core.Game.Rules;
+using Core.Game;
+using Core.Game.Actions;
 
 namespace Client.Game.Planets.ViewModels
 {
     public sealed class GameShipsOnPlanetInfoViewModelFactory
     {
-        private readonly GameRulesChecker _rulesChecker;
-        private readonly IGameClientDestinyPhaseResolver _destinyPhaseResolver;
-        private readonly IGameClientEncounterManager _encounterManager;
-        private readonly GamePlanetAttackTargetSelector _attackTargetSelector;
         private readonly IGameCurrentPlayerInfoTabController _infoTabController;
-        
-        public GameShipsOnPlanetInfoViewModelFactory(
-            GameRulesChecker rulesChecker,
-            IGameClientDestinyPhaseResolver destinyPhaseResolver,
-            IGameClientEncounterManager encounterManager,
-            GamePlanetAttackTargetSelector attackTargetSelector,
-            IGameCurrentPlayerInfoTabController infoTabController)
+        private readonly GameContext _context;
+        private readonly GameActionClient _actionClient;
+        private readonly PendingGameActions _pendingActions;
+
+        public GameShipsOnPlanetInfoViewModelFactory(IGameCurrentPlayerInfoTabController infoTabController,
+            GameContext context, GameActionClient actionClient, PendingGameActions pendingActions)
         {
-            _rulesChecker = rulesChecker;
-            _destinyPhaseResolver = destinyPhaseResolver;
-            _encounterManager = encounterManager;
-            _attackTargetSelector = attackTargetSelector;
             _infoTabController = infoTabController;
+            _context = context;
+            _actionClient = actionClient;
+            _pendingActions = pendingActions;
         }
-        
-        public GameShipsOnPlanetInfoViewModel Create(
-            int planetId,
-            ulong ownerClientPlayerId,
-            IGamePlayer planetPlayerOwner)
+
+        public GameShipsOnPlanetInfoViewModel Create(int planetId)
         {
-            return new GameShipsOnPlanetInfoViewModel(
+            var viewModel = new GameShipsOnPlanetInfoViewModel(
                 planetId, 
-                ownerClientPlayerId, 
-                planetPlayerOwner, 
-                _rulesChecker,
-                _destinyPhaseResolver,
-                _encounterManager,
-                _attackTargetSelector,
-                _infoTabController);
+                _context, 
+                _infoTabController,
+                _actionClient, 
+                _pendingActions);
+            viewModel.Init();
+            return viewModel;
         }
     }
 }

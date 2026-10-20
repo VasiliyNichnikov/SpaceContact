@@ -1,5 +1,5 @@
 using System;
-using Core.Game.Players;
+using Core.Game;
 
 namespace Client.Game.Field
 {
@@ -13,7 +13,7 @@ namespace Client.Game.Field
         
         event Action? OnMovementAnimationEnded;
         
-        IGamePlayer? ViewedOpponentPlayer { get; }
+        GamePlayerData? ViewedOpponentPlayer { get; }
         
         void Init();
         

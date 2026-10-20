@@ -70,6 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ed35e48e094a1f9170ef0ecb0ea4d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Client::Client.Game.Planets.GameChoicePlanetToAttackItemView
+  _attackName: {fileID: 4017790123123464772}
 --- !u!1 &5335719914870343477
 GameObject:
   m_ObjectHideFlags: 0

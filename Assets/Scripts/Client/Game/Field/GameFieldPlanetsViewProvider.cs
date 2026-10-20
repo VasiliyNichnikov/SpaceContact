@@ -6,7 +6,6 @@ using Client.Game.Planets;
 using Client.Game.Planets.ViewModels;
 using Client.UI.HUDs;
 using Client.UI.HUDs.ViewModels;
-using Core.Game;
 using UnityEngine;
 using Logger = Logs.Logger;
 
@@ -14,256 +13,154 @@ namespace Client.Game.Field
 {
     public sealed class GameFieldPlanetsViewProvider : IDisposable
     {
-        private enum PositionPlanetsType
-        {
-            Center,
-            Left,
-            Right
-        }
-        
-        private const string InvalidPlanetsRootName = "InvalidPlanetsRoot";
+        private const string PlayerPlanetsRootName = "PlayerPlanetsRoot";
+        private const string CenterPlanetsRootName = "CenterPlanetsRoot";
         private const string LeftPlanetsRootName = "LeftPlanetsRoot";
         private const string RightPlanetsRootName = "RightPlanetsRoot";
-        private const string CenterPlanetsRootName = "CenterPlanetsRoot";
-        
+
         private readonly PlayerPlanetsFactory _factory;
-        private readonly IGameFieldManager _fieldManager;
         private readonly PlanetLayoutSetData _planetLayoutSetData;
         private readonly IGameCurrentPlayerInfoTabController _currentPlayerInfoTabController;
-        
-        private Transform? _centerOpponentRootPlanets;
         private readonly List<PlanetView> _centerOpponentPlanets = new();
-        
-        private Transform? _leftOpponentRootPlanets;
         private readonly List<PlanetView> _leftOpponentPlanets = new();
-        
-        private Transform? _rightOpponentRootPlanets;
-        
         private readonly List<PlanetView> _rightOpponentPlanets = new();
         private readonly List<PlanetView> _playerPlanets = new();
-        
-        public GameFieldPlanetsViewProvider(
-            PlayerPlanetsFactory factory,
-            IGameFieldManager fieldManager,
-            PlanetLayoutSetData planetLayoutSetData,
+        private Transform? _playerRootPlanets;
+        private Transform? _centerOpponentRootPlanets;
+        private Transform? _leftOpponentRootPlanets;
+        private Transform? _rightOpponentRootPlanets;
+        private bool _isInitialized;
+
+        public GameFieldPlanetsViewProvider(PlayerPlanetsFactory factory, PlanetLayoutSetData planetLayoutSetData,
             IGameCurrentPlayerInfoTabController currentPlayerInfoTabController)
         {
             _factory = factory;
-            _fieldManager = fieldManager;
             _planetLayoutSetData = planetLayoutSetData;
             _currentPlayerInfoTabController = currentPlayerInfoTabController;
-            _currentPlayerInfoTabController.Changed += RefreshCurrentPlayerInfoTab;
         }
-        
-        public void Dispose()
-        {
-            _currentPlayerInfoTabController.Changed -= RefreshCurrentPlayerInfoTab;
-        }
-        
-        public Transform? CenterOpponentRootPlanets => 
-            _centerOpponentRootPlanets;
-        
-        public Transform? LeftOpponentRootPlanets => 
-            _leftOpponentRootPlanets;
-        
-        public Transform? RightOpponentRootPlanets =>
-            _rightOpponentRootPlanets;
-        
-        public IReadOnlyCollection<PlanetView> ViewedOpponentPlanets => 
-            _centerOpponentPlanets;
 
-        public IReadOnlyCollection<PlanetView> PlayerPlanets =>
-            _playerPlanets;
-        
-        public float DistanceBetweenCentralPlanetsByX => 
-            _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
-        
+        public Transform? CenterOpponentRootPlanets => _centerOpponentRootPlanets;
+
+        public Transform? LeftOpponentRootPlanets => _leftOpponentRootPlanets;
+
+        public Transform? RightOpponentRootPlanets => _rightOpponentRootPlanets;
+
+        public IReadOnlyCollection<PlanetView> ViewedOpponentPlanets => _centerOpponentPlanets;
+
+        public IReadOnlyCollection<PlanetView> PlayerPlanets => _playerPlanets;
+
+        public float DistanceBetweenCentralPlanetsByX => _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
+
         public void CreateFieldPlanets()
         {
-            var numberOfPlanetsOnPlayer = _fieldManager.NumberOfPlanetsOnPlayer;
-            
-            InitCenterPlayerPlanets(numberOfPlanetsOnPlayer);
-            InitCenterOpponentPlanets(numberOfPlanetsOnPlayer);
-            InitLeftEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
-            InitRightEmptyOpponentPlanets(numberOfPlanetsOnPlayer);
+            if (_isInitialized)
+            {
+                return;
+            }
+
+            _isInitialized = true;
+            _currentPlayerInfoTabController.Changed += RefreshCurrentPlayerInfoTab;
         }
 
         public void InitLeftOpponentPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
-            InitPlanets(_leftOpponentPlanets, viewModels);
+            InitPlanets(_leftOpponentPlanets, viewModels, ref _leftOpponentRootPlanets,
+                LeftPlanetsRootName, -DistanceBetweenCentralPlanetsByX, false);
         }
 
         public void InitRightOpponentPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
-            InitPlanets(_rightOpponentPlanets, viewModels);
+            InitPlanets(_rightOpponentPlanets, viewModels, ref _rightOpponentRootPlanets,
+                RightPlanetsRootName, DistanceBetweenCentralPlanetsByX, false);
         }
 
         public void InitCenterOpponentPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
-            InitPlanets(_centerOpponentPlanets, viewModels);
+            InitPlanets(_centerOpponentPlanets, viewModels, ref _centerOpponentRootPlanets,
+                CenterPlanetsRootName, 0.0f, false);
         }
 
         public void InitPlayerPlanets(IReadOnlyList<PlanetViewModel> viewModels)
         {
-            InitPlanets(_playerPlanets, viewModels);
+            InitPlanets(_playerPlanets, viewModels, ref _playerRootPlanets, PlayerPlanetsRootName, 0.0f, true);
+            RefreshCurrentPlayerInfoTab();
+        }
+
+        public void ClearSidePlanets()
+        {
+            DestroyRoot(ref _leftOpponentRootPlanets, _leftOpponentPlanets);
+            DestroyRoot(ref _rightOpponentRootPlanets, _rightOpponentPlanets);
+        }
+
+        public void Dispose()
+        {
+            _isInitialized = false;
+            _currentPlayerInfoTabController.Changed -= RefreshCurrentPlayerInfoTab;
+            ClearSidePlanets();
+            DestroyRoot(ref _playerRootPlanets, _playerPlanets);
+            DestroyRoot(ref _centerOpponentRootPlanets, _centerOpponentPlanets);
+        }
+
+        private static void DestroyRoot(ref Transform? root, List<PlanetView> views)
+        {
+            if (root != null)
+            {
+                root.gameObject.SetActive(false);
+                UnityEngine.Object.Destroy(root.gameObject);
+                root = null;
+            }
+
+            views.Clear();
         }
 
         private void RefreshCurrentPlayerInfoTab()
         {
-            if (_currentPlayerInfoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay)
-            {
-                ShowPlayerPlanets();
-            }
-            else
-            {
-                HidePlayerPlanets();
-            }
-        }
-        
-        private void ShowPlayerPlanets()
-        {
             foreach (var planetView in _playerPlanets)
             {
-                planetView.Show();
+                if (_currentPlayerInfoTabController.ActiveTab == GamePlayerInfoTabType.PlanetsDisplay)
+                {
+                    planetView.Show();
+                }
+                else
+                {
+                    planetView.Hide();
+                }
             }
         }
 
-        private void HidePlayerPlanets()
-        {
-            foreach (var planetView in _playerPlanets)
-            {
-                planetView.Hide();
-            }
-        }
-
-        private void InitPlanets(IReadOnlyList<PlanetView> views, IReadOnlyList<PlanetViewModel> viewModels)
+        private void InitPlanets(List<PlanetView> views, IReadOnlyList<PlanetViewModel> viewModels,
+            ref Transform? root, string rootName, float positionX, bool isPlayer)
         {
             if (views.Count != viewModels.Count)
             {
-                Logger.Error($"{nameof(GameFieldPlanetsViewProvider)}.{nameof(InitPlanets)}: views.Count != viewModels.Count");
+                DestroyRoot(ref root, views);
+            }
+
+            if (viewModels.Count == 0)
+            {
                 return;
             }
 
-            for (var i = 0; i < views.Count; i++)
+            if (root == null)
             {
-                var view = views[i];
-                var viewModel = viewModels[i];
-                view.Init(viewModel);
-            }
-        }
-
-        private void InitCenterPlayerPlanets(int numberOfPlanets)
-        {
-            InitEmptyPlanets(numberOfPlanets, PositionPlanetsType.Center, 
-                _playerPlanets, 
-                out _, 
-                true);
-        }
-
-        private void InitCenterOpponentPlanets(int numberOfPlanets)
-        {
-            InitEmptyPlanets(numberOfPlanets, PositionPlanetsType.Center, 
-                _centerOpponentPlanets, 
-                out _centerOpponentRootPlanets,
-                false);
-        }
-
-        private void InitLeftEmptyOpponentPlanets(int numberOfPlanets)
-        {
-            InitEmptyPlanets(numberOfPlanets, PositionPlanetsType.Left, 
-                _leftOpponentPlanets, 
-                out _leftOpponentRootPlanets,
-                false);
-        }
-
-        private void InitRightEmptyOpponentPlanets(int numberOfPlanets)
-        {
-            InitEmptyPlanets(numberOfPlanets, PositionPlanetsType.Right,
-                _rightOpponentPlanets,
-                out _rightOpponentRootPlanets,
-                false);
-        }
-        
-        private void InitEmptyPlanets(
-            int numberOfPlanets, 
-            PositionPlanetsType positionPlanetsType,
-            List<PlanetView> createdPlanets,
-            out Transform rootPlanetsTransform,
-            bool isPlayer)
-        {
-            var rootPlanetsName = GetRootPlanetsNameByType(positionPlanetsType);
-            var rootPlanets = new GameObject(rootPlanetsName)
-            {
-                transform =
+                if (!_planetLayoutSetData.TryGetPlanetsLayout(viewModels.Count, isPlayer, out var layout) ||
+                    layout.PlanetPositions.Length != viewModels.Count)
                 {
-                    position = Vector3.zero
+                    Logger.Error($"Planet layout does not match the number of planets: {viewModels.Count}.");
+                    return;
                 }
-            };
-            
-            rootPlanetsTransform = rootPlanets.transform;
-            var layout = isPlayer 
-                ? _planetLayoutSetData.GetPlayerPlanetsLayoutData(numberOfPlanets)
-                : _planetLayoutSetData.GetOppositePlanetsLayoutData(numberOfPlanets);
 
-            if (layout.PlanetPositions.Length != numberOfPlanets)
-            {
-                Logger.Error($"{nameof(GameFieldPlanetsViewProvider)}.{nameof(InitEmptyPlanets)}: numberOfPlanets != layout planets length.");
-                return;
+                root = new GameObject(rootName).transform;
+                root.position = new Vector3(positionX, 0.0f, 0.0f);
+                foreach (var position in layout.PlanetPositions)
+                {
+                    views.Add(_factory.CreatePlanet(position, root));
+                }
             }
-            
-            for (var i = 0; i < numberOfPlanets; i++)
-            {
-                var localPlanetPosition = layout.PlanetPositions[i];
-                
-                var createdPlanet = _factory.CreatePlanet(localPlanetPosition, rootPlanets.transform);
-                createdPlanets.Add(createdPlanet);
-            }
-            
-            var currentRootPosition = rootPlanets.transform.position;
-            var refreshedRootXPosition = GetRootPositionByX(currentRootPosition.x, positionPlanetsType);
-            
-            var refreshedRootPosition = new Vector3(
-                refreshedRootXPosition,
-                currentRootPosition.y,
-                currentRootPosition.z);
-            rootPlanets.transform.position = refreshedRootPosition;
-        }
 
-        private static string GetRootPlanetsNameByType(PositionPlanetsType positionType)
-        {
-            switch (positionType)
+            for (var index = 0; index < views.Count; index++)
             {
-                case PositionPlanetsType.Center:
-                    return CenterPlanetsRootName;
-                
-                case PositionPlanetsType.Left:
-                    return LeftPlanetsRootName;
-                
-                case PositionPlanetsType.Right:
-                    return RightPlanetsRootName;
-                
-                default:
-                    Logger.Error($"{nameof(GameFieldPlanetsViewProvider)}.{nameof(GetRootPlanetsNameByType)}: planetsType is not supported: {positionType}.");
-                    return InvalidPlanetsRootName;
-            }
-        }
-
-        private float GetRootPositionByX(float currentPositionX, PositionPlanetsType positionType)
-        {
-            switch (positionType)
-            {
-                case PositionPlanetsType.Center:
-                    return currentPositionX;
-                    
-                case PositionPlanetsType.Left:
-                    return currentPositionX - _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
-                
-                case PositionPlanetsType.Right:
-                    return currentPositionX + _planetLayoutSetData.DistanceBetweenCentralPlanetsByX;
-                
-                default:
-                    Logger.Error($"{nameof(GameFieldPlanetsViewProvider)}.{nameof(GetRootPlanetsNameByType)}: planetsType is not supported: {positionType}.");
-                    return currentPositionX;
+                views[index].Init(viewModels[index]);
             }
         }
     }

@@ -72,6 +72,17 @@ namespace Core.Game
             return false;
         }
 
+        public int GetPlayerShipCountOnPlanet(ulong playerId, int planetId)
+        {
+            if (!_shipsByPlayerId.TryGetValue(playerId, out var ships))
+            {
+                return 0;
+            }
+
+            var planet = Planets.FirstOrDefault(candidate => candidate.Id == planetId);
+            return planet is null ? 0 : ships.Count(ship => planet.ShipIds.Contains(ship.Id));
+        }
+
         public void LoadSnapshot(GalaxySnapshot snapshot)
         {
             var shipsByPlayerId = new Dictionary<ulong, List<SpaceShipData>>();

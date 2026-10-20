@@ -9,16 +9,17 @@ namespace Client.UI.Dialogs.Game.PlayerChoice
     {
         [SerializeField]
         private GameObject _leftArrowGameObject = null!;
-        
+
         [SerializeField]
         private GameObject _rightArrowGameObject = null!;
 
         private GameArrowsHolderViewModel _viewModel = null!;
-        
+
         [Inject]
         public void Constructor(GameArrowsHolderViewModel viewModel)
         {
-            gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
+            gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
+            _viewModel.Init();
             gameObject.Subscribe(_viewModel.IsRightArrowVisible, _rightArrowGameObject.SetActive);
             gameObject.Subscribe(_viewModel.IsLeftArrowVisible, _leftArrowGameObject.SetActive);
         }
@@ -31,13 +32,13 @@ namespace Client.UI.Dialogs.Game.PlayerChoice
         /// <summary>
         /// Called from Unity
         /// </summary>
-        public void OnLeftArrowClick() => 
+        public void OnLeftArrowClick() =>
             _viewModel.OnLeftArrowClickHandler();
 
         /// <summary>
         /// Called from Unity
         /// </summary>
-        public void OnRightArrowClick() => 
+        public void OnRightArrowClick() =>
             _viewModel.OnRightArrowClickHandler();
     }
 }
