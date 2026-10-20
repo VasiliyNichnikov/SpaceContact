@@ -169,6 +169,15 @@ namespace Core.Game
             _state.EndOperation();
         }
 
+        internal void EnsureActionExecutionAllowed()
+        {
+            if (Role != GameContextRole.Server || !IsInitialized || IsOperationFaulted ||
+                !_state.IsApplyingServerOperation || _state.IsNotifying)
+            {
+                throw new InvalidOperationException("Actions require an active, healthy server operation outside notifications.");
+            }
+        }
+
         internal void BeginServerOperation()
         {
             EnsureAvailable();

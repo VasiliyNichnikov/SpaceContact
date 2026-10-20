@@ -8,66 +8,57 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class ChooseDestinyCardGameAction : BaseGameAction
+    public sealed class ChooseDestinyCardGameAction : ServerGameAction
     {
-        public override GameActionResult Execute(GameContext context, GameActor actor)
+        public enum Status
         {
-            if (!actor.IsSystem)
-            {
-                return GameActionResult.Failed("Only the system can reveal the first Destiny card.");
-            }
-
-            if (context.Cards.ActiveDestinyCard is not null)
-            {
-                return GameActionResult.Failed("A Destiny card has already been revealed.");
-            }
-
-            return CreateSelectionResult(context, false);
+            InvalidPhase = 0,
+            MissingAggressor = 1,
+            CardAlreadyRevealed = 2,
+            DeckExhausted = 3
+        }
+        
+        public override IActionValidator GetValidator()
+        {
+            return new Validator();
         }
 
-        internal static GameActionResult CreateSelectionResult(GameContext context, bool discardActiveCard)
+        protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
         {
-            if (context.Role != GameContextRole.Server || context.Phase.Type != GamePhaseType.Destiny)
+            return DestinyCardEventBuilder.Create(context, false);
+        }
+        
+        private sealed class Validator : IActionValidator
+        {
+            public ValidationResult Check(GameContext context, GameActor actor)
             {
-                return GameActionResult.Failed("Destiny cards can only be selected on the server during Destiny.");
-            }
+                if (context.Phase.Type != GamePhaseType.Destiny)
+                {
+                    return ValidationResult.Failed((int)Status.InvalidPhase,
+                        "Destiny cards can only be selected during Destiny.");
+                }
 
-            var aggressorPlayerId = context.Encounter.AggressorPlayerId;
-            
-            if (!aggressorPlayerId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId.Value))
-            {
-                return GameActionResult.Failed("The encounter requires an existing aggressor.");
-            }
+                var aggressorPlayerId = context.Encounter.AggressorPlayerId;
+                if (!aggressorPlayerId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId.Value))
+                {
+                    return ValidationResult.Failed((int)Status.MissingAggressor,
+                        "The encounter requires an existing aggressor.");
+                }
 
-            var nextCard = context.Cards.ViewFirstDestinyCard();
-            
-            if (nextCard is null)
-            {
-                return GameActionResult.Failed("The Destiny deck is exhausted. Reshuffling is not implemented.");
-            }
+                if (context.Cards.ActiveDestinyCard is not null)
+                {
+                    return ValidationResult.Failed((int)Status.CardAlreadyRevealed,
+                        "A Destiny card has already been revealed.");
+                }
 
-            if (nextCard.SpecificCardId.HasValue || nextCard.IsJoker == nextCard.SelectedPlayerId.HasValue)
-            {
-                return GameActionResult.Failed("Only Joker and color Destiny cards with exactly one form are supported.");
-            }
+                if (context.Cards.DestinyDeckCount <= 0)
+                {
+                    return ValidationResult.Failed((int)Status.DeckExhausted,
+                        "The Destiny deck is exhausted. Reshuffling is not implemented.");
+                }
 
-            var targetPlayerId = nextCard.SelectedPlayerId;
-            if (targetPlayerId.HasValue && !context.Players.IsPlayerExist(targetPlayerId.Value))
-            {
-                return GameActionResult.Failed("The Destiny card targets an unknown player.");
+                return ValidationResult.Ok;
             }
-
-            // A color identifies a system; an enemy in the aggressor's system is selected separately.
-            var defenderPlayerId = targetPlayerId == aggressorPlayerId ? null : targetPlayerId;
-            var events = new List<IGameEvent>();
-            if (discardActiveCard)
-            {
-                events.Add(new DiscardActiveDestinyCardGameEvent());
-            }
-
-            events.Add(new RemoveFirstDestinyCardGameEvent());
-            events.Add(new ApplyDestinyCardGameEvent(nextCard.ToSnapshot(), defenderPlayerId));
-            return GameActionResult.Success(events);
         }
     }
 }

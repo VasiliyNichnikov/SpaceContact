@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Core.Game.Dto.Snapshots;
 using Core.Game.Events;
@@ -8,52 +9,55 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class StartEncounterGameAction : BaseGameAction
+    public sealed class StartEncounterGameAction : ServerGameAction
     {
-        public override GameActionResult Execute(GameContext context, GameActor actor)
+        public enum Status
         {
-            if (context.Role != GameContextRole.Server || !actor.IsSystem)
-            {
-                return GameActionResult.Failed("Only the system can start an encounter on the server.");
-            }
+            InvalidPhase = 0,
+            MissingParticipants = 1,
+            UnknownAggressor = 2
+        }
+        
+        public override IActionValidator GetValidator()
+        {
+            return new Validator();
+        }
 
-            if (context.Phase.Type is not GamePhaseType.FirstMove)
+        protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
+        {
+            var players = context.Players.All.OrderBy(player => player.Order).ToList();
+            var aggressorPlayerId = context.Encounter.AggressorPlayerId;
+            var nextIndex = aggressorPlayerId.HasValue
+                ? (players.FindIndex(player => player.Id == aggressorPlayerId.Value) + 1) % players.Count
+                : 0;
+            return new IGameEvent[] { new ApplyAggressorPlayerGameEvent(players[nextIndex].Id) };
+        }
+        
+        private sealed class Validator : IActionValidator
+        {
+            public ValidationResult Check(GameContext context, GameActor actor)
             {
-                return GameActionResult.Failed("Start encounter can only be started in the phase FirstMove.");
-            }
-            
-            var playersSortedByOrder = context
-                .Players
-                .All
-                .OrderBy(p => p.Order)
-                .ToList();
-
-            if (playersSortedByOrder.Count == 0)
-            {
-                return GameActionResult.Failed("Players not found.");
-            }
-
-            var encounter = context.Encounter;
-            var nextAggressorIndex = 0;
-
-            if (encounter.AggressorPlayerId.HasValue)
-            {
-                var aggressorPlayerId = encounter.AggressorPlayerId.Value;
-                var currentAggressorIndex = playersSortedByOrder
-                    .FindIndex(p => p.Id == aggressorPlayerId);
-                if (currentAggressorIndex < 0)
+                if (context.Phase.Type != GamePhaseType.FirstMove)
                 {
-                    return GameActionResult.Failed("The current aggressor is not a participant.");
+                    return ValidationResult.Failed((int)Status.InvalidPhase,
+                        "An encounter can only start during FirstMove.");
                 }
 
-                nextAggressorIndex = currentAggressorIndex + 1 < playersSortedByOrder.Count
-                    ? currentAggressorIndex + 1
-                    : 0;
+                if (context.Players.All.Count == 0)
+                {
+                    return ValidationResult.Failed((int)Status.MissingParticipants,
+                        "Players not found.");
+                }
+
+                var aggressorPlayerId = context.Encounter.AggressorPlayerId;
+                if (aggressorPlayerId.HasValue && !context.Players.IsPlayerExist(aggressorPlayerId.Value))
+                {
+                    return ValidationResult.Failed((int)Status.UnknownAggressor,
+                        "The current aggressor is not a participant.");
+                }
+
+                return ValidationResult.Ok;
             }
-            
-            var selectedAggressor = playersSortedByOrder[nextAggressorIndex];
-            
-            return GameActionResult.Success(new ApplyAggressorPlayerGameEvent(selectedAggressor.Id));
         }
     }
 }

@@ -27,12 +27,12 @@ namespace Network.Requests
         {
             var action = request.Action;
             
-            if (action is not ClientGameAction)
+            if (action is not ClientGameAction clientAction)
             {
                 return GameApplyActionResponseDto.Rejected(action?.Id ?? Guid.Empty, "This action is not allowed from a client.");
             }
 
-            var result = _executor.Execute(action, GameActor.Player(senderId));
+            var result = _executor.ExecuteClientAction(clientAction, senderId);
 
             if (!result.IsSuccess)
             {

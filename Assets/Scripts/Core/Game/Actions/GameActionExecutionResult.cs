@@ -7,7 +7,7 @@ namespace Core.Game.Actions
     public sealed class GameActionExecutionResult
     {
         private GameActionExecutionResult(bool isSuccess, string? errorMessage, long revision, bool hasChanges,
-            bool isDuplicate, IReadOnlyDictionary<ulong, GameEventBatchData> batchesByRecipient)
+            bool isDuplicate, IReadOnlyDictionary<ulong, GameEventBatchData> batchesByRecipient, int? validationCode = null)
         {
             IsSuccess = isSuccess;
             ErrorMessage = errorMessage;
@@ -15,11 +15,14 @@ namespace Core.Game.Actions
             HasChanges = hasChanges;
             IsDuplicate = isDuplicate;
             BatchesByRecipient = batchesByRecipient;
+            ValidationCode = validationCode;
         }
 
         public bool IsSuccess { get; }
 
         public string? ErrorMessage { get; }
+
+        public int? ValidationCode { get; }
 
         public long Revision { get; }
 
@@ -29,10 +32,10 @@ namespace Core.Game.Actions
 
         public IReadOnlyDictionary<ulong, GameEventBatchData> BatchesByRecipient { get; }
 
-        internal static GameActionExecutionResult Rejected(long revision, string? errorMessage)
+        internal static GameActionExecutionResult Rejected(long revision, string? errorMessage, int? validationCode = null)
         {
             return new GameActionExecutionResult(false, errorMessage, revision, false, false,
-                new ReadOnlyDictionary<ulong, GameEventBatchData>(new Dictionary<ulong, GameEventBatchData>()));
+                new ReadOnlyDictionary<ulong, GameEventBatchData>(new Dictionary<ulong, GameEventBatchData>()), validationCode);
         }
 
         internal static GameActionExecutionResult Accepted(long revision, bool hasChanges,
@@ -44,7 +47,7 @@ namespace Core.Game.Actions
 
         internal GameActionExecutionResult AsDuplicate()
         {
-            return new GameActionExecutionResult(IsSuccess, ErrorMessage, Revision, HasChanges, true, BatchesByRecipient);
+            return new GameActionExecutionResult(IsSuccess, ErrorMessage, Revision, HasChanges, true, BatchesByRecipient, ValidationCode);
         }
     }
 }

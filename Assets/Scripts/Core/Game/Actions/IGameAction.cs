@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using Core.Game.Events;
 
 namespace Core.Game.Actions
 {
@@ -6,6 +8,8 @@ namespace Core.Game.Actions
     {
         Guid Id { get; }
         
-        GameActionResult Execute(GameContext context, GameActor actor);
+        IReadOnlyList<IGameEvent> Execute(GameContext context, GameActor actor);
+
+        IActionValidator GetValidator();
     }
 }

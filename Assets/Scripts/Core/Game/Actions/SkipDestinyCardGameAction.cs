@@ -1,52 +1,94 @@
 using System;
+using System.Collections.Generic;
 using Core.Game.Dto.Snapshots;
+using Core.Game.Events;
 using Newtonsoft.Json;
 
 namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class SkipDestinyCardGameAction : ClientGameAction
+    public sealed class SkipDestinyCardGameAction : AutomaticClientGameAction
     {
         public SkipDestinyCardGameAction(ulong newTargetPlayerId)
         {
             NewTargetPlayerId = newTargetPlayerId;
         }
-
-        [JsonProperty]
-        public ulong NewTargetPlayerId { get; }
-
-        public override GameActionResult Execute(GameContext context, GameActor actor)
+        
+        public enum Status
         {
-            if (context.Role != GameContextRole.Server || context.Phase.Type != GamePhaseType.Destiny)
+            InvalidPhase = 0,
+            MissingAggressor = 1,
+            InvalidActor = 2,
+            TargetAlreadySelected = 3,
+            InvalidOwnColorCard = 4,
+            DeckExhausted = 5
+        }
+
+        [JsonProperty] public ulong NewTargetPlayerId { get; }
+
+        public override IActionValidator GetValidator()
+        {
+            return new Validator(NewTargetPlayerId);
+        }
+
+        protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
+        {
+            return DestinyCardEventBuilder.Create(context, true);
+        }
+
+        private sealed class Validator : IActionValidator
+        {
+            private readonly ulong _newTargetPlayerId;
+
+            public Validator(ulong newTargetPlayerId)
             {
-                return GameActionResult.Failed("Destiny cards can only be skipped on the server during Destiny.");
+                _newTargetPlayerId = newTargetPlayerId;
             }
 
-            var aggressorPlayerId = context.Encounter.AggressorPlayerId;
-            if (!aggressorPlayerId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId.Value))
+            public ValidationResult Check(GameContext context, GameActor actor)
             {
-                return GameActionResult.Failed("The encounter requires an existing aggressor.");
-            }
+                if (context.Phase.Type != GamePhaseType.Destiny)
+                {
+                    return ValidationResult.Failed((int)Status.InvalidPhase,
+                        "Destiny cards can only be skipped during Destiny.");
+                }
 
-            if (!actor.IsSystem && actor.PlayerId != aggressorPlayerId)
-            {
-                return GameActionResult.Failed("Only the aggressor can skip a Destiny card.");
-            }
+                var aggressorPlayerId = context.Encounter.AggressorPlayerId;
+                if (!aggressorPlayerId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId.Value))
+                {
+                    return ValidationResult.Failed((int)Status.MissingAggressor,
+                        "The encounter requires an existing aggressor.");
+                }
 
-            if (context.Encounter.HasPlanetToAttack)
-            {
-                return GameActionResult.Failed("The encounter target has already been selected.");
-            }
+                if (actor.PlayerId != aggressorPlayerId)
+                {
+                    return ValidationResult.Failed((int)Status.InvalidActor,
+                        "Only the aggressor can skip a Destiny card.");
+                }
 
-            var activeCard = context.Cards.ActiveDestinyCard;
-            if (activeCard is null || activeCard.IsJoker || activeCard.SpecificCardId.HasValue ||
-                activeCard.SelectedPlayerId != aggressorPlayerId || NewTargetPlayerId != aggressorPlayerId)
-            {
-                return GameActionResult.Failed("Only the aggressor's own color Destiny card can be skipped.");
-            }
+                if (context.Encounter.HasPlanetToAttack)
+                {
+                    return ValidationResult.Failed((int)Status.TargetAlreadySelected,
+                        "The encounter target has already been selected.");
+                }
 
-            return ChooseDestinyCardGameAction.CreateSelectionResult(context, true);
+                var activeCard = context.Cards.ActiveDestinyCard;
+                if (activeCard is null || activeCard.IsJoker || activeCard.SpecificCardId.HasValue ||
+                    activeCard.SelectedPlayerId != aggressorPlayerId || _newTargetPlayerId != aggressorPlayerId)
+                {
+                    return ValidationResult.Failed((int)Status.InvalidOwnColorCard,
+                        "Only the aggressor's own color Destiny card can be skipped.");
+                }
+
+                if (context.Cards.DestinyDeckCount <= 0)
+                {
+                    return ValidationResult.Failed((int)Status.DeckExhausted,
+                        "The Destiny deck is exhausted. Reshuffling is not implemented.");
+                }
+
+                return ValidationResult.Ok;
+            }
         }
     }
 }

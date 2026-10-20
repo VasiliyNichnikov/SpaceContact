@@ -23,6 +23,13 @@ namespace Core.Game.Server
                 return null;
             }
 
+            var aggressorPlayerId = context.Encounter.AggressorPlayerId;
+            if (!aggressorPlayerId.HasValue)
+            {
+                return null;
+            }
+
+            var actor = GameActor.Player(aggressorPlayerId.Value);
             var candidatesByDefender = new List<List<SelectTargetPlanetGameAction>>();
             var planets = context.Galaxy.Planets.OrderBy(planet => planet.Id).ToArray();
             foreach (var player in context.Players.All.OrderBy(player => player.Order))
@@ -36,9 +43,7 @@ namespace Core.Game.Server
                 foreach (var planet in planets)
                 {
                     var action = new SelectTargetPlanetGameAction(planet.Id, player.Id);
-                    // Actions only validate and produce events; probing must never apply those events.
-                    // Reuse manual selection rules, including enemies in the aggressor's system.
-                    if (action.Execute(context, GameActor.System()).IsSuccess)
+                    if (action.GetValidator().Check(context, actor).IsSuccess)
                     {
                         candidates.Add(action);
                     }

@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using Core.Game.Events;
 
 namespace Core.Game.Actions
@@ -17,13 +17,40 @@ namespace Core.Game.Actions
             _batchFactory = batchFactory;
         }
 
-        public GameActionExecutionResult Execute(IGameAction action, GameActor actor)
+        public GameActionExecutionResult ExecuteClientAction(ClientGameAction action, ulong senderId)
+        {
+            return Execute(action, GameActor.Player(senderId));
+        }
+
+        public GameActionExecutionResult ExecuteServerAction(ServerGameAction action)
+        {
+            return Execute(action, GameActor.System());
+        }
+
+        internal GameActionExecutionResult ExecuteAutomaticAction(AutomaticClientGameAction action)
+        {
+            return Execute(action, GameActor.System());
+        }
+
+        private GameActionExecutionResult Execute(BaseGameAction action, GameActor initiator)
         {
             _context.BeginServerOperation();
 
             try
             {
-                if (!actor.IsSystem && (!actor.PlayerId.HasValue || !_context.Players.IsPlayerExist(actor.PlayerId.Value)))
+                if ((action is not ClientGameAction && action is not ServerGameAction) ||
+                    (!initiator.IsSystem && action is not ClientGameAction))
+                {
+                    return GameActionExecutionResult.Rejected(_context.Revision, "The action category is not allowed for this initiator.");
+                }
+
+                if (initiator.IsSystem && action is ClientGameAction &&
+                    action is not AutomaticClientGameAction)
+                {
+                    return GameActionExecutionResult.Rejected(_context.Revision, "This client action cannot run automatically.");
+                }
+
+                if (!initiator.IsSystem && (!initiator.PlayerId.HasValue || !_context.Players.IsPlayerExist(initiator.PlayerId.Value)))
                 {
                     return GameActionExecutionResult.Rejected(_context.Revision, "The sender must be a game participant.");
                 }
@@ -33,20 +60,33 @@ namespace Core.Game.Actions
                     return GameActionExecutionResult.Rejected(_context.Revision, "The action ID must not be empty.");
                 }
 
-                var key = new GameActionKey(actor, action.Id);
+                var key = new GameActionKey(initiator, action.Id);
                 if (_acceptedActions.TryGetValue(key, out var accepted))
                 {
                     return accepted.AsDuplicate();
                 }
 
-                var result = action.Execute(_context, actor);
-                if (!result.IsSuccess)
+                var actor = initiator;
+                if (initiator.IsSystem && action is ClientGameAction)
                 {
-                    return GameActionExecutionResult.Rejected(_context.Revision, result.ErrorMessage);
+                    var aggressorPlayerId = _context.Encounter.AggressorPlayerId;
+                    if (!aggressorPlayerId.HasValue || !_context.Players.IsPlayerExist(aggressorPlayerId.Value))
+                    {
+                        return GameActionExecutionResult.Rejected(_context.Revision, "Automatic actions require an existing aggressor.");
+                    }
+
+                    actor = GameActor.Player(aggressorPlayerId.Value);
+                }
+
+                var validation = action.GetValidator().Check(_context, actor);
+
+                if (!validation.IsSuccess)
+                {
+                    return GameActionExecutionResult.Rejected(_context.Revision, validation.ErrorMessage, validation.Result);
                 }
 
                 // Own the event sequence before invoking events or synchronous observers.
-                var events = result.Events.ToArray();
+                var events = action.Execute(_context, actor).ToArray();
                 var hasChanges = events.Length > 0;
                 if (hasChanges && _context.Revision == long.MaxValue)
                 {

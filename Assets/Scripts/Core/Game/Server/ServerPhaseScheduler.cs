@@ -220,7 +220,7 @@ namespace Core.Game.Server
             var target = _targetSelector.SelectTarget(_context);
             if (target is not null)
             {
-                return Execute(target);
+                return ExecuteAutomatic(target);
             }
 
             var card = _context.Cards.ActiveDestinyCard;
@@ -230,7 +230,7 @@ namespace Core.Game.Server
             {
                 // At most one skip per tick. Every successful skip consumes a card; an exhausted deck
                 // is rejected without discarding the last active card and blocks retries at this revision.
-                Execute(new SkipDestinyCardGameAction(aggressorId.Value));
+                ExecuteAutomatic(new SkipDestinyCardGameAction(aggressorId.Value));
                 return false;
             }
 
@@ -238,14 +238,28 @@ namespace Core.Game.Server
             return false;
         }
 
-        private bool Execute(IGameAction action)
+        private bool Execute(ServerGameAction action)
         {
             if (_disposed)
             {
                 return false;
             }
 
-            var result = _executor.Execute(action, GameActor.System());
+            return HandleExecutionResult(action, _executor.ExecuteServerAction(action));
+        }
+
+        private bool ExecuteAutomatic(AutomaticClientGameAction action)
+        {
+            if (_disposed)
+            {
+                return false;
+            }
+
+            return HandleExecutionResult(action, _executor.ExecuteAutomaticAction(action));
+        }
+
+        private bool HandleExecutionResult(BaseGameAction action, GameActionExecutionResult result)
+        {
             if (!result.IsSuccess)
             {
                 BlockAtCurrentState($"{action.GetType().Name} rejected: {result.ErrorMessage}");

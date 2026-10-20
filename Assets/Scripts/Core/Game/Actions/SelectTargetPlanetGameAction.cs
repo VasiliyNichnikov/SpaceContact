@@ -11,64 +11,39 @@ namespace Core.Game.Actions
 {
     [Serializable]
     [JsonObject(MemberSerialization.OptIn)]
-    public sealed class SelectTargetPlanetGameAction : ClientGameAction
+    public sealed class SelectTargetPlanetGameAction : AutomaticClientGameAction
     {
         public SelectTargetPlanetGameAction(int planetId, ulong? defenderPlayerId = null)
         {
             PlanetId = planetId;
             DefenderPlayerId = defenderPlayerId;
         }
-
-        [JsonProperty]
-        [StateRequired]
-        public int PlanetId { get; }
-
-        [JsonProperty]
-        public ulong? DefenderPlayerId { get; }
-
-        public override GameActionResult Execute(GameContext context, GameActor actor)
+        
+        public enum Status
         {
-            if (!CheckRoleAndPhase(context, out var error))
-            {
-                return GameActionResult.Failed(error);
-            }
+            InvalidPhase = 0,
+            MissingAggressor = 1,
+            InvalidActor = 2,
+            TargetAlreadySelected = 3,
+            InvalidDestinyCard = 4,
+            InvalidPlanet = 5,
+            InvalidOwnSystemTarget = 6,
+            InvalidForeignSystemTarget = 7,
+            InvalidDefenderSelection = 8
+        }
 
-            if (!CheckAggressorExists(context, out var aggressorPlayerId, out error) ||
-                !CheckActor(actor, aggressorPlayerId, out error) ||
-                !CheckTargetNotSelected(context.Encounter, out error))
-            {
-                return GameActionResult.Failed(error);
-            }
+        [JsonProperty] [StateRequired] public int PlanetId { get; }
 
-            if (!CheckDestinyCard(context, out var isJoker, out var cardPlayerId, out error))
-            {
-                return GameActionResult.Failed(error);
-            }
+        [JsonProperty] public ulong? DefenderPlayerId { get; }
 
-            if (!CheckPlanet(context, cardPlayerId, out var planetOwnerId, out error))
-            {
-                return GameActionResult.Failed(error);
-            }
+        public override IActionValidator GetValidator()
+        {
+            return new Validator(PlanetId, DefenderPlayerId);
+        }
 
-            var isOwnSystem = planetOwnerId == aggressorPlayerId;
-            var defenderPlayerId = DefenderPlayerId ?? planetOwnerId;
-            if (isOwnSystem)
-            {
-                if (!CheckOwnSystem(context, isJoker, aggressorPlayerId, out error))
-                {
-                    return GameActionResult.Failed(error);
-                }
-            }
-            else if (!CheckForeignSystem(planetOwnerId, out error))
-            {
-                return GameActionResult.Failed(error);
-            }
-
-            if (!CheckDefenderSelection(context.Encounter, isJoker || isOwnSystem, defenderPlayerId, out error))
-            {
-                return GameActionResult.Failed(error);
-            }
-
+        protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
+        {
+            var defenderPlayerId = DefenderPlayerId ?? context.Galaxy.GetPlanetOwnerId(PlanetId);
             var events = new List<IGameEvent>();
             if (!context.Encounter.HasDefender)
             {
@@ -76,145 +51,211 @@ namespace Core.Game.Actions
             }
 
             events.Add(new ApplyPlanetToAttackGameEvent(PlanetId));
-            return GameActionResult.Success(events);
+            return events;
         }
 
-        private static bool CheckRoleAndPhase(GameContext context, [NotNullWhen(false)] out string? error)
+        private sealed class Validator : IActionValidator
         {
-            error = context.Role != GameContextRole.Server || context.Phase.Type != GamePhaseType.Destiny
-                ? "Targets can only be selected on the server during Destiny."
-                : null;
+            private readonly int _planetId;
+            private readonly ulong? _defenderPlayerId;
 
-            return error is null;
-        }
-
-        private static bool CheckAggressorExists(GameContext context, out ulong aggressorPlayerId,
-            [NotNullWhen(false)] out string? error)
-        {
-            var selectedAggressorId = context.Encounter.AggressorPlayerId;
-            aggressorPlayerId = selectedAggressorId.GetValueOrDefault();
-            error = !selectedAggressorId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId)
-                ? "The encounter requires an existing aggressor."
-                : null;
-
-            return error is null;
-        }
-
-        private static bool CheckActor(GameActor actor, ulong aggressorPlayerId,
-            [NotNullWhen(false)] out string? error)
-        {
-            error = !actor.IsSystem && actor.PlayerId != aggressorPlayerId
-                ? "Only the aggressor can select the encounter target."
-                : null;
-
-            return error is null;
-        }
-
-        private static bool CheckTargetNotSelected(EncounterContext encounter,
-            [NotNullWhen(false)] out string? error)
-        {
-            error = encounter.HasPlanetToAttack ? "The encounter target has already been selected." : null;
-
-            return error is null;
-        }
-
-        private static bool CheckDestinyCard(GameContext context, out bool isJoker, out ulong? cardPlayerId,
-            [NotNullWhen(false)] out string? error)
-        {
-            var destinyCard = context.Cards.ActiveDestinyCard;
-            isJoker = destinyCard?.IsJoker ?? false;
-            cardPlayerId = destinyCard?.SelectedPlayerId;
-            if (destinyCard is null)
+            public Validator(int planetId, ulong? defenderPlayerId)
             {
-                error = "DestinyCard is null.";
-                return false;
+                _planetId = planetId;
+                _defenderPlayerId = defenderPlayerId;
             }
 
-            if (destinyCard.SpecificCardId.HasValue || isJoker == cardPlayerId.HasValue)
+            public ValidationResult Check(GameContext context, GameActor actor)
             {
-                error = "Only Joker and color Destiny cards with exactly one form are supported.";
-                return false;
+                if (!CheckPhase(context, out var error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidPhase, error);
+                }
+
+                if (!CheckAggressorExists(context, out var aggressorPlayerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.MissingAggressor, error);
+                }
+
+                if (!CheckActor(actor, aggressorPlayerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidActor, error);
+                }
+
+                if (!CheckTargetNotSelected(context.Encounter, out error))
+                {
+                    return ValidationResult.Failed((int)Status.TargetAlreadySelected,
+                        error);
+                }
+
+                if (!CheckDestinyCard(context, out var isJoker, out var cardPlayerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidDestinyCard, error);
+                }
+
+                if (!CheckPlanet(context, cardPlayerId, out var planetOwnerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidPlanet, error);
+                }
+
+                var isOwnSystem = planetOwnerId == aggressorPlayerId;
+                var defenderPlayerId = _defenderPlayerId ?? planetOwnerId;
+                if (isOwnSystem && !CheckOwnSystem(context, isJoker, aggressorPlayerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidOwnSystemTarget,
+                        error);
+                }
+
+                if (!isOwnSystem && !CheckForeignSystem(planetOwnerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidForeignSystemTarget,
+                        error);
+                }
+
+                if (!CheckDefenderSelection(context.Encounter, isJoker || isOwnSystem, defenderPlayerId, out error))
+                {
+                    return ValidationResult.Failed((int)Status.InvalidDefenderSelection,
+                        error);
+                }
+
+                return ValidationResult.Ok;
             }
 
-            error = cardPlayerId.HasValue && !context.Players.IsPlayerExist(cardPlayerId.Value)
-                ? "The Destiny card targets an unknown player."
-                : null;
-
-            return error is null;
-        }
-
-        private static bool CheckDefenderSelection(EncounterContext encounter, bool requiresNewDefender,
-            ulong defenderPlayerId, [NotNullWhen(false)] out string? error)
-        {
-            if (requiresNewDefender)
+            private static bool CheckPhase(GameContext context, [NotNullWhen(false)] out string? error)
             {
-                error = encounter.HasDefender ? "The defender has already been selected." : null;
+                error = context.Phase.Type != GamePhaseType.Destiny
+                    ? "Targets can only be selected during Destiny."
+                    : null;
+
                 return error is null;
             }
 
-            error = encounter.DefenderPlayerId != defenderPlayerId
-                ? "The defender must match the color Destiny card."
-                : null;
-
-            return error is null;
-        }
-
-        private bool CheckPlanet(GameContext context,
-            ulong? cardPlayerId,
-            out ulong planetOwnerId,
-            [NotNullWhen(false)] out string? error)
-        {
-            planetOwnerId = 0;
-            var planet = context.Galaxy.Planets.FirstOrDefault(candidate => candidate.Id == PlanetId);
-            if (planet is null)
+            private static bool CheckAggressorExists(GameContext context, out ulong aggressorPlayerId,
+                [NotNullWhen(false)] out string? error)
             {
-                error = $"Planet with id {PlanetId} not found in Galaxy.";
-                return false;
+                var selectedAggressorId = context.Encounter.AggressorPlayerId;
+                aggressorPlayerId = selectedAggressorId.GetValueOrDefault();
+                error = !selectedAggressorId.HasValue || !context.Players.IsPlayerExist(aggressorPlayerId)
+                    ? "The encounter requires an existing aggressor."
+                    : null;
+
+                return error is null;
             }
 
-            planetOwnerId = context.Galaxy.GetPlanetOwnerId(planet.Id);
-            if (!context.Players.IsPlayerExist(planetOwnerId))
+            private static bool CheckActor(GameActor actor, ulong aggressorPlayerId,
+                [NotNullWhen(false)] out string? error)
             {
-                error = "The target system belongs to an unknown player.";
-                return false;
+                error = actor.PlayerId != aggressorPlayerId
+                    ? "Only the aggressor can select the encounter target."
+                    : null;
+
+                return error is null;
             }
 
-            error = cardPlayerId.HasValue && cardPlayerId.Value != planetOwnerId
-                ? "The planet must belong to the system selected by the Destiny card."
-                : null;
-
-            return error is null;
-        }
-
-        private bool CheckOwnSystem(GameContext context, bool isJoker, ulong aggressorPlayerId,
-            [NotNullWhen(false)] out string? error)
-        {
-            if (isJoker)
+            private static bool CheckTargetNotSelected(EncounterContext encounter,
+                [NotNullWhen(false)] out string? error)
             {
-                error = "Joker can only target another player's system.";
-                return false;
+                error = encounter.HasPlanetToAttack ? "The encounter target has already been selected." : null;
+
+                return error is null;
             }
 
-            if (!DefenderPlayerId.HasValue || DefenderPlayerId.Value == aggressorPlayerId ||
-                !context.Players.IsPlayerExist(DefenderPlayerId.Value))
+            private static bool CheckDestinyCard(GameContext context, out bool isJoker, out ulong? cardPlayerId,
+                [NotNullWhen(false)] out string? error)
             {
-                error = "Select an existing opponent as the defender in your own system.";
-                return false;
+                var destinyCard = context.Cards.ActiveDestinyCard;
+                isJoker = destinyCard?.IsJoker ?? false;
+                cardPlayerId = destinyCard?.SelectedPlayerId;
+                if (destinyCard is null)
+                {
+                    error = "DestinyCard is null.";
+                    return false;
+                }
+
+                if (destinyCard.SpecificCardId.HasValue || isJoker == cardPlayerId.HasValue)
+                {
+                    error = "Only Joker and color Destiny cards with exactly one form are supported.";
+                    return false;
+                }
+
+                error = cardPlayerId.HasValue && !context.Players.IsPlayerExist(cardPlayerId.Value)
+                    ? "The Destiny card targets an unknown player."
+                    : null;
+
+                return error is null;
             }
 
-            error = !context.Galaxy.HasPlayerShipsOnPlanet(DefenderPlayerId.Value, PlanetId)
-                ? "The selected defender must have ships on the selected planet."
-                : null;
+            private static bool CheckDefenderSelection(EncounterContext encounter, bool requiresNewDefender,
+                ulong defenderPlayerId, [NotNullWhen(false)] out string? error)
+            {
+                if (requiresNewDefender)
+                {
+                    error = encounter.HasDefender ? "The defender has already been selected." : null;
+                    return error is null;
+                }
 
-            return error is null;
-        }
+                error = encounter.DefenderPlayerId != defenderPlayerId
+                    ? "The defender must match the color Destiny card."
+                    : null;
 
-        private bool CheckForeignSystem(ulong planetOwnerId, [NotNullWhen(false)] out string? error)
-        {
-            error = DefenderPlayerId.HasValue && DefenderPlayerId.Value != planetOwnerId
-                ? "The defender must own the selected system."
-                : null;
-            return error is null;
+                return error is null;
+            }
+
+            private bool CheckPlanet(GameContext context, ulong? cardPlayerId, out ulong planetOwnerId,
+                [NotNullWhen(false)] out string? error)
+            {
+                planetOwnerId = 0;
+                var planet = context.Galaxy.Planets.FirstOrDefault(candidate => candidate.Id == _planetId);
+                if (planet is null)
+                {
+                    error = $"Planet with id {_planetId} not found in Galaxy.";
+                    return false;
+                }
+
+                planetOwnerId = context.Galaxy.GetPlanetOwnerId(planet.Id);
+                if (!context.Players.IsPlayerExist(planetOwnerId))
+                {
+                    error = "The target system belongs to an unknown player.";
+                    return false;
+                }
+
+                error = cardPlayerId.HasValue && cardPlayerId.Value != planetOwnerId
+                    ? "The planet must belong to the system selected by the Destiny card."
+                    : null;
+
+                return error is null;
+            }
+
+            private bool CheckOwnSystem(GameContext context, bool isJoker, ulong aggressorPlayerId,
+                [NotNullWhen(false)] out string? error)
+            {
+                if (isJoker)
+                {
+                    error = "Joker can only target another player's system.";
+                    return false;
+                }
+
+                if (!_defenderPlayerId.HasValue || _defenderPlayerId.Value == aggressorPlayerId ||
+                    !context.Players.IsPlayerExist(_defenderPlayerId.Value))
+                {
+                    error = "Select an existing opponent as the defender in your own system.";
+                    return false;
+                }
+
+                error = !context.Galaxy.HasPlayerShipsOnPlanet(_defenderPlayerId.Value, _planetId)
+                    ? "The selected defender must have ships on the selected planet."
+                    : null;
+
+                return error is null;
+            }
+
+            private bool CheckForeignSystem(ulong planetOwnerId, [NotNullWhen(false)] out string? error)
+            {
+                error = _defenderPlayerId.HasValue && _defenderPlayerId.Value != planetOwnerId
+                    ? "The defender must own the selected system."
+                    : null;
+                return error is null;
+            }
         }
     }
 }
