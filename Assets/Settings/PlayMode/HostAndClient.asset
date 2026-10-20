@@ -16,17 +16,21 @@ MonoBehaviour:
   m_EnableEditors: 1
   m_MainEditorInstance:
     Name: Main Editor
-    <CorrespondingNodeId>k__BackingField: 
-    m_Nodes: []
+    <CorrespondingNodeId>k__BackingField: Main Editor|0_run
+    m_Nodes:
+    - Main Editor|0_run
+    - Main Editor|0_deploy
     m_Role: 3
     m_PlayerTag: 
     m_InitialScene: {fileID: 0}
   m_EditorInstances: []
   m_LocalInstances:
-  - Name: Instance
-    <CorrespondingNodeId>k__BackingField: 
-    m_Nodes: []
-    m_BuildProfile: {fileID: 11400000, guid: 874e153902ac5114ea79c0ca9168df94, type: 2}
+  - Name: Client 1
+    <CorrespondingNodeId>k__BackingField: Client 1 - Run
+    m_Nodes:
+    - Client 1 - Build
+    - Client 1 - Run
+    m_BuildProfile: {fileID: 11400000, guid: dc9cd6dc19de742bd84dda4c65b561dc, type: 2}
     m_ServerSettings:
       DeployMode: 0
       SimulatorSettings:
