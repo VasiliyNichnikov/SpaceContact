@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 namespace Core.Game.Dto.Snapshots
 {
     [Serializable]
+    [StateRule(typeof(DestinyDeckRule))]
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     public sealed class CardsSnapshot
     {
@@ -22,6 +23,12 @@ namespace Core.Game.Dto.Snapshots
         [StateVisibility(StateAudience.ServerOnly)]
         [StateRequired]
         public List<DestinyCardSnapshot>? DestinyDeck;
+
+        [JsonProperty(Required = Required.Always)]
+        [StateVisibility(StateAudience.Everyone)]
+        [StateRequired]
+        [StateRange(0, int.MaxValue)]
+        public int DestinyDeckCount;
 
         [StateVisibility(StateAudience.Everyone, Unordered = true)]
         [StateRequired]

@@ -15,7 +15,7 @@ namespace Core.Game.Events
 
         public IEnumerable<IGameEvent> ToClientEvents(GameContext context, ulong recipientPlayerId)
         {
-            yield break;
+            yield return new ApplyDestinyDeckCountGameEvent(context.Cards.DestinyDeckCount);
         }
     }
 }

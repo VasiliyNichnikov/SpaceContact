@@ -19,6 +19,8 @@ namespace Core.Game
 
         public DestinyCardData? ActiveDestinyCard { get; private set; }
 
+        public int DestinyDeckCount { get; private set; }
+
         public bool IsSpaceDeckKnown => _spaceCardsDeck is not null;
 
         public bool IsDestinyDeckKnown => _destinyCardsDeck is not null;
@@ -41,7 +43,24 @@ namespace Core.Game
 
         public void RemoveFirstDestinyCard()
         {
-            GetKnownDestinyDeck().RemoveAt(0);
+            var deck = GetKnownDestinyDeck();
+            deck.RemoveAt(0);
+            DestinyDeckCount = deck.Count;
+        }
+
+        public void SetDestinyDeckCount(int count)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), "The Destiny deck count cannot be negative.");
+            }
+
+            if (_destinyCardsDeck is not null && _destinyCardsDeck.Count != count)
+            {
+                throw new InvalidOperationException("The Destiny deck count disagrees with the known deck.");
+            }
+
+            DestinyDeckCount = count;
         }
 
         public void DiscardActiveDestinyCard()
@@ -92,6 +111,7 @@ namespace Core.Game
             _spaceCardsDeck = spaceDeck;
             _spaceCardsDiscard = spaceDiscard;
             _destinyCardsDeck = destinyDeck;
+            DestinyDeckCount = snapshot.DestinyDeckCount;
             _destinyCardsDiscard = destinyDiscard;
             _handsByPlayerId = hands;
             ActiveDestinyCard = activeDestinyCard;
@@ -104,6 +124,7 @@ namespace Core.Game
                 SpaceDeck = _spaceCardsDeck?.Select(card => card.ToSnapshot()).ToList(),
                 SpaceDiscard = _spaceCardsDiscard.Select(card => card.ToSnapshot()).ToList(),
                 DestinyDeck = _destinyCardsDeck?.Select(card => card.ToSnapshot()).ToList(),
+                DestinyDeckCount = DestinyDeckCount,
                 DestinyDiscard = _destinyCardsDiscard.Select(card => card.ToSnapshot()).ToList(),
                 ActiveDestinyCard = ActiveDestinyCard?.ToSnapshot()
             };
@@ -121,6 +142,7 @@ namespace Core.Game
             _spaceCardsDeck = prepared._spaceCardsDeck;
             _spaceCardsDiscard = prepared._spaceCardsDiscard;
             _destinyCardsDeck = prepared._destinyCardsDeck;
+            DestinyDeckCount = prepared.DestinyDeckCount;
             _destinyCardsDiscard = prepared._destinyCardsDiscard;
             _handsByPlayerId = prepared._handsByPlayerId;
             ActiveDestinyCard = prepared.ActiveDestinyCard;

@@ -36,7 +36,8 @@ namespace Core.Game.Cards
             var state = new CardsSnapshot
             {
                 SpaceDeck = spaceDeck,
-                DestinyDeck = destinyDeck
+                DestinyDeck = destinyDeck,
+                DestinyDeckCount = destinyDeck.Count
             };
 
             foreach (var player in sortedPlayers)
