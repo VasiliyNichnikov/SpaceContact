@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85b8498eddff48f2b8dc8062737a0227, type: 3}
   m_Name: PhaseDurationConfig
   m_EditorClassIdentifier: Client::Client.Configs.Game.GamePhaseDurationConfig
-  _regroupPhaseDuration: 60
-  _destinyPhaseDuration: 120
-  _launchPhaseDuration: 80
-  _alliancePhaseDuration: 90
+  _regroupPhaseDurationInSeconds: 60
+  _destinyPhaseDurationInSeconds: 120
+  _launchPhaseDurationInSeconds: 80
+  _alliancePhaseDurationInSeconds: 90
+  _readyTransitionDurationInSeconds: 3

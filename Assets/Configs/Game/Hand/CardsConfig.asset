@@ -67,4 +67,10 @@ MonoBehaviour:
   - Comment: "3 \u0438\u0433\u0440\u043E\u043A\u0430"
     PlayerCount: 3
     NumberOfColorCards: 3
+  - Comment: "4 players"
+    PlayerCount: 4
+    NumberOfColorCards: 3
+  - Comment: "5 players"
+    PlayerCount: 5
+    NumberOfColorCards: 3
   _numberOfJokersDestiny: 2
