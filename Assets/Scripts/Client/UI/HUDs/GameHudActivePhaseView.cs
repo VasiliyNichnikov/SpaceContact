@@ -1,5 +1,5 @@
 using Client.UI.Extensions;
-using Core.Game.Phases;
+using Core.Game.Dto.Snapshots;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +12,7 @@ namespace Client.UI.HUDs
 
         public void ShowPhase(GamePhaseType phase)
         {
-            _phaseNameText.SetText(phase.ToName());
+            _phaseNameText.SetText(phase.ToString());
         }
     }
 }

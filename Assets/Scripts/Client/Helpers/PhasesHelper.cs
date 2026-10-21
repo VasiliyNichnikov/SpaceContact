@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Core.Game.Phases;
+using Core.Game.Dto.Snapshots;
 using Logs;
 
 namespace Client.Helpers
@@ -8,7 +8,7 @@ namespace Client.Helpers
     public sealed class PhasesHelper
     {
         /// <summary>
-        /// Последовательность фаз важна
+        /// Consistency is important.
         /// </summary>
         private readonly List<GamePhaseType> _visiblePhases = new()
         {
