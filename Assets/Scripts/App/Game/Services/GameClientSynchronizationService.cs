@@ -2,11 +2,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Game;
+using GeneralUtils;
 using Core.Game.Dto;
 using Logs;
 using Network.Game;
 using Network.Requests;
-using Unity.Netcode;
 
 namespace App.Game.Services
 {
@@ -16,20 +16,17 @@ namespace App.Game.Services
         private readonly GameStartupNetwork _startupNetwork;
         private readonly CancellationTokenSource _disposeTokenSource = new();
         private readonly GameContext _context;
-        private readonly NetworkManager _networkManager;
         private readonly GameRevisionAckNetwork _revisionAckNetwork;
         
         public GameClientSynchronizationService(
             GameStartupNetwork startupNetwork,
             INetworkService networkService,
             GameContext context,
-            NetworkManager networkManager,
             GameRevisionAckNetwork revisionAckNetwork)
         {
             _startupNetwork = startupNetwork;
             _networkService = networkService;
             _context = context;
-            _networkManager = networkManager;
             _revisionAckNetwork = revisionAckNetwork;
             _startupNetwork.SnapshotSyncAllowed += LoadSnapshot;
         }
@@ -41,19 +38,14 @@ namespace App.Game.Services
 
         private void LoadSnapshot()
         {
-            if(_networkManager.IsServer)
-            {
-                return;
-            }
-            
             LoadSnapshotAsync(_disposeTokenSource.Token).FireAndForget();
         }
         
         private async Task LoadSnapshotAsync(CancellationToken ct)
         {
-            if(_networkManager.IsServer)
+            if (_context.Role != GameContextRole.Client)
             {
-                Logger.Error($"{nameof(GameClientSynchronizationService)}.{nameof(LoadSnapshotAsync)}: you cannot overwrite the server state.");
+                Logger.Error("Snapshot synchronization requires a client context.");
                 return;
             }
             
