@@ -6,28 +6,54 @@ using UnityEngine;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public class GameDestinyCardViewModel : IGameDestinyCardViewModel
+    public sealed class GameDestinyCardViewModel : IGameDestinyCardViewModel
     {
+        private readonly DestinyCardData _card;
         private readonly GameContext _context;
         private readonly PendingGameActions _pendingActions;
         private readonly Action _onSkipButtonClickAction;
 
         public GameDestinyCardViewModel(
-            GamePlayerData ownerPlayer, 
-            GameContext context,
+            DestinyCardData card, 
+            GameContext context, 
             PendingGameActions pendingActions, 
             Action onSkipButtonClickAction)
         {
+            _card = card;
             _context = context;
             _pendingActions = pendingActions;
-            Description = string.Empty;
-            BackgroundColor = ColorConvertor.FromCoreColor(ownerPlayer.Color);
             _onSkipButtonClickAction = onSkipButtonClickAction;
         }
 
-        public Color BackgroundColor { get; }
+        public Color BackgroundColor
+        {
+            get
+            {
+                var player = GetSelectedPlayer();
+                return player is null ? Color.white : ColorConvertor.FromCoreColor(player.Color);
+            }
+        }
 
-        public string Description { get; }
+        public string Description
+        {
+            get
+            {
+                if (_card.IsJoker)
+                {
+                    return "Joker: choose a planet in another player's system.";
+                }
+
+                var player = GetSelectedPlayer();
+                if (player is not null)
+                {
+                    return player.Id == _context.Encounter.AggressorPlayerId
+                        ? $"{player.Name}: choose an enemy on a planet in {player.Name}'s system."
+                        : $"Choose a planet in {player.Name}'s system.";
+                }
+
+                return "Unsupported Destiny card.";
+            }
+        }
 
         public bool IsSkipButtonVisible => CanSkip(_context, _pendingActions);
 
@@ -49,6 +75,13 @@ namespace Client.UI.HUDs.ViewModels
             {
                 _onSkipButtonClickAction.Invoke();
             }
+        }
+
+        private GamePlayerData? GetSelectedPlayer()
+        {
+            return _card.SelectedPlayerId != null && _context.Players.IsPlayerExist(_card.SelectedPlayerId.Value)
+                ? _context.Players.Get(_card.SelectedPlayerId.Value)
+                : null;
         }
     }
 }

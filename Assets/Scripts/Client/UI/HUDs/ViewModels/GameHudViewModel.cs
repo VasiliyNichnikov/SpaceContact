@@ -1,9 +1,8 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using Client.Game.Field;
 using Core.Game;
 using Core.Game.Actions;
-using Logs;
 using Reactivity;
 using VContainer;
 
@@ -12,7 +11,7 @@ namespace Client.UI.HUDs.ViewModels
     public sealed class GameHudViewModel : IGameHudViewModel
     {
         private readonly ReactivityProperty<IGameDestinyCardViewModel?> _destinyCardViewModel = new();
-        private readonly ReactivityProperty<GamePlayerBlockViewModel> _playerBlockViewModel = new();
+        private readonly ReactivityProperty<GamePlayerBlockViewModel?> _playerBlockViewModel = new();
 
         [Inject] private readonly GameContext _context = null!;
         [Inject] private readonly PendingGameActions _pendingGameActions = null!;
@@ -21,7 +20,9 @@ namespace Client.UI.HUDs.ViewModels
         [Inject] private readonly IGameHudTopViewModel _topViewModel = null!;
         [Inject] private readonly IGameHudBottomViewModel _bottomViewModel = null!;
 
-        private List<GamePlayerProfileViewModel> _playerProfilesViewModels = null!;
+        private readonly ReactivityListProperty<GamePlayerProfileViewModel> _playerProfilesViewModels = new(new());
+        private GamePlayerData[] _profilePlayers = Array.Empty<GamePlayerData>();
+        private GamePlayerProfileViewModel[] _profiles = Array.Empty<GamePlayerProfileViewModel>();
 
         public IGameHudTopViewModel TopViewModel =>
             _topViewModel;
@@ -32,74 +33,85 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityProperty<IGameDestinyCardViewModel?> DestinyCardViewModel =>
             _destinyCardViewModel;
 
-        public IReactivityProperty<GamePlayerBlockViewModel> OpponentPlayerViewModel =>
+        public IReactivityProperty<GamePlayerBlockViewModel?> OpponentPlayerViewModel =>
             _playerBlockViewModel;
 
-        public IReadOnlyCollection<GamePlayerProfileViewModel> PlayerProfilesViewModels =>
+        public IReactivityReadOnlyCollectionProperty<GamePlayerProfileViewModel> PlayerProfilesViewModels =>
             _playerProfilesViewModels;
 
         public void Init()
         {
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
-            _context.StateChanged += RefreshDestinyCard;
+            _context.StateChanged += Refresh;
             _pendingGameActions.Changed += RefreshDestinyCard;
-            _playerProfilesViewModels = CreatePlayerProfilesViewModels();
             _topViewModel.Init();
 
-            OpponentChanged();
-            RefreshDestinyCard();
+            Refresh();
         }
 
         public void Dispose()
         {
             TopViewModel.Dispose();
-            _context.StateChanged -= RefreshDestinyCard;
+            _context.StateChanged -= Refresh;
             _pendingGameActions.Changed -= RefreshDestinyCard;
             _fieldViewManager.OnInitialized -= OpponentChanged;
             _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
+        }
 
-            foreach (var playerProfileViewModel in _playerProfilesViewModels)
-            {
-                playerProfileViewModel.Dispose();
-            }
-
-            _playerProfilesViewModels.Clear();
+        private void Refresh()
+        {
+            RefreshProfiles();
+            OpponentChanged();
+            RefreshDestinyCard();
         }
 
         private void OpponentChanged()
         {
-            var viewedOpponentPlayer = _fieldViewManager.ViewedOpponentPlayer;
-
-            if (viewedOpponentPlayer == null)
+            var viewedPlayer = _fieldViewManager.ViewedOpponentPlayer;
+            if (_context.LocalPlayerState is null || viewedPlayer is null ||
+                !_context.Players.IsPlayerExist(viewedPlayer.Id))
             {
-                Logger.Error($"{nameof(GameHudViewModel)}.{nameof(OpponentChanged)}: viewedOpponentPlayer is null.");
+                _playerBlockViewModel.Value = null;
                 return;
             }
 
-            _playerBlockViewModel.Value = new GamePlayerBlockViewModel(viewedOpponentPlayer);
+            _playerBlockViewModel.Value = new GamePlayerBlockViewModel(_context.Players.Get(viewedPlayer.Id));
         }
 
         private void RefreshDestinyCard()
         {
-            var localPlayer = _context.LocalPlayerState;
-            if (localPlayer is null || _context.Cards.ActiveDestinyCard is null)
+            var card = _context.Cards.ActiveDestinyCard;
+            if (_context.LocalPlayerState is null || card is null)
             {
                 _destinyCardViewModel.Value = null;
                 return;
             }
 
-            _destinyCardViewModel.Value = new GameDestinyCardViewModel(
-                localPlayer, _context, _pendingGameActions, SkipDestinyCard);
+            _destinyCardViewModel.Value = new GameDestinyCardViewModel(card, _context, _pendingGameActions, SkipDestinyCard);
         }
 
-        private List<GamePlayerProfileViewModel> CreatePlayerProfilesViewModels()
+        private void RefreshProfiles()
         {
-            return _context
-                .Players
-                .All
-                .Select(player => new GamePlayerProfileViewModel(player))
-                .ToList();
+            var players = _context.LocalPlayerState is null
+                ? Array.Empty<GamePlayerData>()
+                : _context.Players.All.OrderBy(player => player.Order).ToArray();
+            var playersChanged = !_profilePlayers.SequenceEqual(players);
+            if (playersChanged)
+            {
+                _profilePlayers = players;
+                _profiles = players.Select(player => new GamePlayerProfileViewModel(player)).ToArray();
+            }
+
+            foreach (var profile in _profiles)
+            {
+                profile.Refresh(_context.Encounter);
+            }
+
+            if (playersChanged)
+            {
+                _playerProfilesViewModels.Value = _profiles;
+            }
         }
 
         private void SkipDestinyCard()

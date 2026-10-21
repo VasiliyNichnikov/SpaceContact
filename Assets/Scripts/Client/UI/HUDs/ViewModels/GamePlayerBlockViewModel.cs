@@ -4,16 +4,17 @@ using Color = UnityEngine.Color;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public class GamePlayerBlockViewModel
+    public sealed class GamePlayerBlockViewModel
     {
-        public string PlayerName { get; }
-        
-        public Color PlayerColor { get; }
+        private readonly GamePlayerData _player;
 
-        public GamePlayerBlockViewModel(GamePlayerData opponentPlayer)
+        public GamePlayerBlockViewModel(GamePlayerData player)
         {
-            PlayerName = $"Opponent: {opponentPlayer.Name}";
-            PlayerColor = ColorConvertor.FromCoreColor(opponentPlayer.Color);
+            _player = player;
         }
+
+        public string PlayerName => $"Opponent: {_player.Name}";
+
+        public Color PlayerColor => ColorConvertor.FromCoreColor(_player.Color);
     }
 }

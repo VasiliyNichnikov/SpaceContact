@@ -13,9 +13,17 @@ namespace Client.UI.HUDs
         [SerializeField]
         private Image _background = null!;
         
-        public void Refresh(GamePlayerBlockViewModel viewModel)
+        public void Refresh(GamePlayerBlockViewModel? viewModel)
         {
-            _playerNameText.SetText(viewModel.PlayerName);
+            var isActive = viewModel != null;
+            gameObject.SetActive(isActive);
+            
+            if (!isActive)
+            {
+                return;
+            }
+
+            _playerNameText.SetText(viewModel!.PlayerName);
             _background.color = viewModel.PlayerColor;
         }
     }

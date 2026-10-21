@@ -1,36 +1,37 @@
-using System;
-using Core.Game.Players;
+using Core.Game;
 using CoreConvertor;
 using Reactivity;
 using UnityEngine;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public sealed class GamePlayerProfileViewModel : IDisposable
+    public sealed class GamePlayerProfileViewModel
     {
+        private readonly GamePlayerData _player;
         private readonly ReactivityProperty<bool> _isDefaultFrameVisible = new(true);
         private readonly ReactivityProperty<bool> _isAttackerFrameVisible = new();
         private readonly ReactivityProperty<bool> _isDefenderFrameVisible = new();
-        
-        public GamePlayerProfileViewModel(IGamePlayer player)
+
+        public GamePlayerProfileViewModel(GamePlayerData player)
         {
-            PlayerColor = ColorConvertor.FromCoreColor(player.Color);
+            _player = player;
         }
-        
-        public Color PlayerColor { get; }
 
-        public IReactivityProperty<bool> IsDefaultFrameVisible => 
-            _isDefaultFrameVisible;
+        public Color PlayerColor => ColorConvertor.FromCoreColor(_player.Color);
 
-        public IReactivityProperty<bool> IsAttackerFrameVisible => 
-            _isAttackerFrameVisible;
+        public IReactivityProperty<bool> IsDefaultFrameVisible => _isDefaultFrameVisible;
 
-        public IReactivityProperty<bool> IsDefenderFrameVisible => 
-            _isDefenderFrameVisible;
+        public IReactivityProperty<bool> IsAttackerFrameVisible => _isAttackerFrameVisible;
 
-        public void Dispose()
+        public IReactivityProperty<bool> IsDefenderFrameVisible => _isDefenderFrameVisible;
+
+        public void Refresh(EncounterContext encounter)
         {
-            // nothing
+            var isAttacker = encounter.AggressorPlayerId == _player.Id;
+            var isDefender = encounter.DefenderPlayerId == _player.Id;
+            _isAttackerFrameVisible.Value = isAttacker;
+            _isDefenderFrameVisible.Value = isDefender;
+            _isDefaultFrameVisible.Value = !isAttacker && !isDefender;
         }
     }
 }
