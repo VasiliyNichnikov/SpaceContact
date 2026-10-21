@@ -41,7 +41,7 @@ namespace Editor
 
                 try
                 {
-                    T? config = AssetDatabase.LoadAssetAtPath<T>(path);
+                    var config = AssetDatabase.LoadAssetAtPath<T>(path);
 
                     if (config == null)
                     {
