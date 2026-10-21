@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Core.User;
 using Logs;
 using Network.Configs;
-using Network.Game.Mutation;
 using Unity.Netcode;
 using VContainer;
 using VContainer.Unity;
@@ -15,22 +14,19 @@ namespace Network.Game
         private readonly NetworkManager _networkManager;
         private readonly IObjectResolver _objectResolver;
         private readonly GameNetworkRegistrySO _gameNetworkRegistrySO;
-        private readonly ClientUsersRepository _usersRepository;
         private readonly Dictionary<ulong, IPrefabInitializerOnClients?> _initializers = new();
         
         public GameNetLoader(
             NetworkManager networkManager,
             IObjectResolver objectResolver,
-            GameNetworkRegistrySO gameNetworkRegistrySO,
-            ClientUsersRepository usersRepository)
+            GameNetworkRegistrySO gameNetworkRegistrySO)
         {
             _networkManager = networkManager;
             _objectResolver = objectResolver;
             _gameNetworkRegistrySO = gameNetworkRegistrySO;
-            _usersRepository = usersRepository;
         }
 
-        public event Action? OnGameIsReady;
+        public event Action? NetworkObjectsLoadedOnAllClients;
 
         public void LoadNetGame()
         {
@@ -41,7 +37,6 @@ namespace Network.Game
                 return;
             }
             
-            LoadPlayersNetwork();
             LoadEventRpcRelayNetwork();
         }
         
@@ -76,19 +71,6 @@ namespace Network.Game
             eventBroadcaster.SetRelayObject(eventRpcRelayInstance);
         }
         
-        private void LoadPlayersNetwork()
-        {
-            var users = _usersRepository.Users;
-
-            foreach (var player in users)
-            {
-                var gamePlayerPrefab = _gameNetworkRegistrySO.PlayerNetworkSync;
-                var gamePlayerInstance = _objectResolver.Instantiate(gamePlayerPrefab, null);
-                gamePlayerInstance.NetworkObject.SpawnAsPlayerObject(player.ClientId, destroyWithScene: true);
-                AddToInitializer(gamePlayerInstance.NetworkObjectId, gamePlayerInstance.Initializer);
-            }
-        }
-        
         private void AddToInitializer(ulong networkObjectId, IPrefabInitializerOnClients initializer)
         {
             if (_initializers.ContainsKey(networkObjectId))
@@ -115,7 +97,7 @@ namespace Network.Game
             
             if (_initializers.Count == 0)
             {
-                OnGameIsReady?.Invoke();
+                NetworkObjectsLoadedOnAllClients?.Invoke();
             }
         }
     }

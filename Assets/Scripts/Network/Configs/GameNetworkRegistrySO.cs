@@ -1,5 +1,4 @@
 using Network.Game;
-using Network.Game.Mutation;
 using UnityEngine;
 
 namespace Network.Configs
@@ -8,13 +7,7 @@ namespace Network.Configs
     public class GameNetworkRegistrySO : ScriptableObject
     {
         [SerializeField]
-        private GamePlayerNetworkSync _playerNetworkSync = null!;
-        
-        [SerializeField]
         private GameEventRpcRelayNetwork _eventRpcRelayNetwork = null!;
-        
-        public GamePlayerNetworkSync PlayerNetworkSync => 
-            _playerNetworkSync;
         
         public GameEventRpcRelayNetwork EventRpcRelayNetwork =>
             _eventRpcRelayNetwork;
