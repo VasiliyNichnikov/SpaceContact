@@ -5,7 +5,7 @@ namespace Core.Game.Validation
 {
     public sealed class StateRangeAttribute : StateValidationAttribute
     {
-        public StateRangeAttribute(double minimum, double maximum = double.MaxValue)
+        public StateRangeAttribute(double minimum, double maximum)
         {
             Minimum = minimum;
             Maximum = maximum;
