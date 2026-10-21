@@ -11,7 +11,7 @@ namespace Core.Game.Dto.Snapshots
     {
         [StateVisibility(StateAudience.Everyone)]
         [StateRequired]
-        [StateRange(0)]
+        [StateRange(0, int.MaxValue)]
         [StateIdentity(typeof(SpaceShipSnapshot))]
         public int ShipId;
     }

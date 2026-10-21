@@ -36,7 +36,7 @@ namespace Core.Game.Dto.Snapshots
         [JsonProperty]
         [StateVisibility(StateAudience.Everyone)]
         [StateRequired]
-        [StateRange(0)]
+        [StateRange(0, int.MaxValue)]
         public int Count
         {
             get => Cards?.Count ?? _declaredCount ?? 0;

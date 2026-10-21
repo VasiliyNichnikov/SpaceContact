@@ -19,7 +19,7 @@ namespace Core.Game.Dto.Snapshots
         public ulong? SelectedPlayerId;
 
         [StateVisibility(StateAudience.Everyone)]
-        [StateRange(0)]
+        [StateRange(0, int.MaxValue)]
         public int? SpecificCardId;
 
         private DestinyCardSnapshot(

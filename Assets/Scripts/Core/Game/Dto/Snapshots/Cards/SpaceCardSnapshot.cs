@@ -11,11 +11,11 @@ namespace Core.Game.Dto.Snapshots
     public struct SpaceCardSnapshot
     {
         [StateVisibility(StateAudience.Everyone)]
-        [StateRange(0)]
+        [StateRange(0, int.MaxValue)]
         public int? DamageCount;
 
         [StateVisibility(StateAudience.Everyone)]
-        [StateRange(0)]
+        [StateRange(0, int.MaxValue)]
         public int? ArtifactId;
 
         [StateVisibility(StateAudience.Everyone)]
