@@ -15,7 +15,8 @@ namespace Core.Game
         {
             None,
             ServerOperation,
-            ClientBatch
+            ClientBatch,
+            SnapshotLoad
         }
 
         public GameContextRole Role { get; }
@@ -59,6 +60,11 @@ namespace Core.Game
         {
             // Keep the first recovery boundary stable while newer live batches are waiting outside Core.
             RequiredSnapshotRevision ??= Math.Max(Revision, revision);
+        }
+
+        public void BeginSnapshotLoad()
+        {
+            _operation = Operation.SnapshotLoad;
         }
 
         public void BeginClientBatch()

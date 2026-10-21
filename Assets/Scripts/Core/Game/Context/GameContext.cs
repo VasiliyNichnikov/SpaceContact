@@ -70,39 +70,27 @@ namespace Core.Game
         public void LoadSnapshot(long revision, GameSnapshot snapshot)
         {
             EnsureAvailable();
-            if (IsInitialized && revision < Revision)
+            _state.BeginSnapshotLoad();
+
+            try
             {
-                throw new StateValidationException("$.Revision", "An older snapshot cannot replace the current state.");
-            }
+                if (IsInitialized && revision < Revision)
+                {
+                    throw new StateValidationException("$.Revision", "An older snapshot cannot replace the current state.");
+                }
 
-            if (_state.RequiredSnapshotRevision.HasValue && revision < _state.RequiredSnapshotRevision.Value)
+                if (_state.RequiredSnapshotRevision.HasValue && revision < _state.RequiredSnapshotRevision.Value)
+                {
+                    throw new StateValidationException("$.Revision", "The snapshot does not cover the revisions awaiting synchronization.");
+                }
+                
+                LoadSnapshotInternal(revision, snapshot);
+                NotifyStateChanged();
+            }
+            finally
             {
-                throw new StateValidationException("$.Revision", "The snapshot does not cover the revisions awaiting synchronization.");
+                _state.EndOperation();
             }
-
-            StateValidator.Validate(snapshot, Role, LocalPlayerId, revision);
-
-            var players = new PlayersContext();
-            var galaxy = new GalaxyContext();
-            var cards = new CardsContext();
-            var encounter = new EncounterContext();
-            var phase = new PhaseContext();
-
-            players.LoadSnapshot(snapshot.GamePlayers);
-            galaxy.LoadSnapshot(snapshot.Galaxy);
-            cards.LoadSnapshot(snapshot.Cards);
-            encounter.LoadSnapshot(snapshot.Encounter);
-            phase.LoadSnapshot(snapshot.Phase);
-
-            // Keep section instances and their subscriptions; only replace prepared data.
-            Players.ReplaceState(players);
-            Galaxy.ReplaceState(galaxy);
-            Cards.ReplaceState(cards);
-            Encounter.ReplaceState(encounter);
-            Phase.ReplaceState(phase);
-
-            _state.LoadSnapshot(revision);
-            NotifyStateChanged();
         }
 
         public GameSnapshot ToSnapshot()
@@ -210,6 +198,32 @@ namespace Core.Game
         internal void EndServerOperation()
         {
             _state.EndOperation();
+        }
+        
+        private void LoadSnapshotInternal(long revision, GameSnapshot snapshot)
+        {
+            StateValidator.Validate(snapshot, Role, LocalPlayerId, revision);
+
+            var players = new PlayersContext();
+            var galaxy = new GalaxyContext();
+            var cards = new CardsContext();
+            var encounter = new EncounterContext();
+            var phase = new PhaseContext();
+
+            players.LoadSnapshot(snapshot.GamePlayers);
+            galaxy.LoadSnapshot(snapshot.Galaxy);
+            cards.LoadSnapshot(snapshot.Cards);
+            encounter.LoadSnapshot(snapshot.Encounter);
+            phase.LoadSnapshot(snapshot.Phase);
+
+            // Keep section instances and their subscriptions; only replace prepared data.
+            Players.ReplaceState(players);
+            Galaxy.ReplaceState(galaxy);
+            Cards.ReplaceState(cards);
+            Encounter.ReplaceState(encounter);
+            Phase.ReplaceState(phase);
+
+            _state.LoadSnapshot(revision);
         }
 
         private GameSnapshot CreateSnapshot()

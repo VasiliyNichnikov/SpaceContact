@@ -126,8 +126,9 @@ namespace Core.Game
         internal void ReplaceState(EncounterContext prepared)
         {
             AggressorPlayerId = prepared.AggressorPlayerId;
-            DefenderPlayerId = prepared.DefenderPlayerId;
-            PlanetIdToAttack = prepared.PlanetIdToAttack;
+            // Snapshot installation publishes only the final GameContext.StateChanged notification.
+            _defenderPlayerId = prepared._defenderPlayerId;
+            _planetIdToAttack = prepared._planetIdToAttack;
             _aggressorUnionPlayerIds = prepared._aggressorUnionPlayerIds;
             _defenderUnionPlayerIds = prepared._defenderUnionPlayerIds;
         }
