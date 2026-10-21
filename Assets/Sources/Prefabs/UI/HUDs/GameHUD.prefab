@@ -2957,6 +2957,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Client::Client.UI.HUDs.GameHudTimerPhaseView
   _valueText: {fileID: 4640710870495871435}
   _markGameObject: {fileID: 5238987496676195748}
+  _readyButton: {fileID: 8223336864576235731}
 --- !u!1 &8201908919090251568
 GameObject:
   m_ObjectHideFlags: 0
