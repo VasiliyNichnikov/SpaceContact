@@ -61,6 +61,7 @@ namespace App.Game.Services
         {
             // Если не сделать - код не придет в исполнение
             _resolver.Resolve<GamePlanetInfoPresenter>();
+            _resolver.Resolve<GameClientSynchronizationService>().Start();
             _dialogsManager.CloseOpenedDialogs();
         }
         

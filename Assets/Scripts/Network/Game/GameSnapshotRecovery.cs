@@ -19,9 +19,7 @@ namespace Network.Game
         private readonly INetworkService _network;
         private readonly GameRevisionAckNetwork _ack;
         private readonly CancellationTokenSource _lifetime = new();
-        private bool _started;
-        private bool _disposed;
-        private bool _recovering;
+        private GameSnapshotRecoveryState _state;
         private long _highestObservedRevision;
 
         public GameSnapshotRecovery(
@@ -36,9 +34,12 @@ namespace Network.Game
             _ack = ack;
         }
 
+        private bool RequiresSnapshot =>
+            _context.IsSynchronizationRequired || _context.Revision < _highestObservedRevision;
+
         public void Start()
         {
-            if (_started || _disposed)
+            if (_state.IsStarted || _state.IsStopped)
             {
                 return;
             }
@@ -48,42 +49,90 @@ namespace Network.Game
                 throw new InvalidOperationException("Snapshot recovery requires the client context, including on the host.");
             }
 
-            _started = true;
+            _state.IsStarted = true;
             _applier.Completed += OnBatchCompleted;
+        }
+
+        public void AllowSynchronization()
+        {
+            if (_state.IsStopped)
+            {
+                return;
+            }
+
+            Start();
+            _state.IsSynchronizationAllowed = true;
+            TryStartRecovery();
+        }
+
+        // Stop is terminal for this game session; a new session gets a new recovery instance.
+        public void Stop()
+        {
+            if (_state.IsStopped)
+            {
+                return;
+            }
+
+            _state.IsStopped = true;
+            _state.IsSynchronizationAllowed = false;
+            _applier.Completed -= OnBatchCompleted;
+            _lifetime.Cancel();
         }
 
         public void Dispose()
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-            _applier.Completed -= OnBatchCompleted;
-            _lifetime.Cancel();
+            Stop();
             _lifetime.Dispose();
+        }
+
+        private static async Task ObserveAbandonedRequestAsync(Task request)
+        {
+            try
+            {
+                await request;
+            }
+            catch (Exception exception)
+            {
+                Logger.Error($"Snapshot request failed after synchronization was stopped: {exception}");
+            }
         }
 
         private void OnBatchCompleted(GameEventBatchApplyResult result, long observedRevision)
         {
-            _highestObservedRevision = Math.Max(_highestObservedRevision, observedRevision);
-            if (result.Status != GameEventBatchApplyStatus.SnapshotRequired)
+            if (_state.IsStopped)
             {
-                _ack.Send(_context.Revision, _context.Phase.Revision);
                 return;
             }
 
-            if (!_recovering)
+            _highestObservedRevision = Math.Max(_highestObservedRevision, observedRevision);
+            if (!_state.IsSynchronizationAllowed)
             {
-                _recovering = true;
-                RecoverAsync(_lifetime.Token).FireAndForget();
+                return;
             }
+
+            if (result.Status == GameEventBatchApplyStatus.SnapshotRequired || RequiresSnapshot)
+            {
+                TryStartRecovery();
+                return;
+            }
+
+            _ack.Send(_context.Revision, _context.Phase.Revision);
+        }
+
+        private void TryStartRecovery()
+        {
+            if (!_state.IsSynchronizationAllowed || _state.IsRecovering || !RequiresSnapshot)
+            {
+                return;
+            }
+
+            _state.IsRecovering = true;
+            RecoverAsync(_lifetime.Token).FireAndForget();
         }
 
         private async Task RecoverAsync(CancellationToken token)
         {
-            var cancelled = new TaskCompletionSource<bool>();
+            var cancelled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             await using var registration = token.Register(() => cancelled.TrySetResult(true));
             try
             {
@@ -92,16 +141,26 @@ namespace Network.Game
                     try
                     {
                         var dto = new GameSnapshotRequestDto();
-                        var response = await _network.GetDataAsync<GameSnapshotRequestDto, GameSnapshotResponseDto>(dto, NetworkRequestType.GetGameSnapshot, token);
+                        var request = _network.GetDataAsync<GameSnapshotRequestDto, GameSnapshotResponseDto>(
+                            dto, NetworkRequestType.GetGameSnapshot, token);
+                        await Task.WhenAny(request, cancelled.Task);
+                        
+                        if (token.IsCancellationRequested)
+                        {
+                            // Do not wait for a transport that ignores cancellation, or apply its late result.
+                            ObserveAbandonedRequestAsync(request).FireAndForget();
+                            return;
+                        }
+
+                        var response = await request;
                         
                         if (token.IsCancellationRequested)
                         {
                             return;
                         }
 
-                        // Live batches received during the request are covered by a newer snapshot.
-                        // Never ACK a snapshot that leaves an observed revision unapplied.
-                        if (response is not null && response.Revision >= _highestObservedRevision &&
+                        // Live batches received during the request must be covered before loading and ACKing.
+                        if (response != null && response.Revision >= _highestObservedRevision &&
                             response.Revision >= _context.Revision)
                         {
                             _context.LoadSnapshot(response.Revision, response.Snapshot);
@@ -110,29 +169,37 @@ namespace Network.Game
                                 return;
                             }
 
-                            if (_context.IsSynchronizationRequired || _context.Revision < _highestObservedRevision)
+                            if (!RequiresSnapshot)
                             {
-                                continue;
+                                _ack.Send(_context.Revision, _context.Phase.Revision);
+                                // Host ACK handling may synchronously deliver another batch.
+                                if (token.IsCancellationRequested || !RequiresSnapshot)
+                                {
+                                    return;
+                                }
                             }
-
-                            _ack.Send(_context.Revision, _context.Phase.Revision);
-                            return;
                         }
                     }
                     catch (Exception exception)
                     {
                         if (!token.IsCancellationRequested)
                         {
-                            Logger.Error($"Snapshot recovery failed: {exception}");
+                            Logger.Error($"Snapshot synchronization failed: {exception}");
                         }
                     }
 
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    // Cancellation completes normally; Task.Delay never receives a cancelled token.
                     await Task.WhenAny(Task.Delay(RetryDelayMilliseconds, token), cancelled.Task);
                 }
             }
             finally
             {
-                _recovering = false;
+                _state.IsRecovering = false;
             }
         }
     }

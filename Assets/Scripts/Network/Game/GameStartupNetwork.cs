@@ -12,6 +12,9 @@ namespace Network.Game
 
         public event Action? SnapshotSyncAllowed;
         
+        public bool IsSnapshotSynchronizationAllowed =>
+            IsClient && IsSpawned && IsSynchronizationStage(_stage.Value);
+
         public override void OnNetworkSpawn()
         {
             if (!IsClient)
@@ -48,6 +51,11 @@ namespace Network.Game
             _stage.Value = GameStartupStage.Running;
         }
 
+        private static bool IsSynchronizationStage(GameStartupStage stage)
+        {
+            return stage is GameStartupStage.SnapshotSyncAllowed or GameStartupStage.Running;
+        }
+
         private void OnStageChanged(GameStartupStage previous, GameStartupStage current)
         {
             ApplyStage(current);
@@ -55,7 +63,7 @@ namespace Network.Game
 
         private void ApplyStage(GameStartupStage stage)
         {
-            if (stage == GameStartupStage.SnapshotSyncAllowed)
+            if (IsSynchronizationStage(stage))
             {
                 SnapshotSyncAllowed?.Invoke();
             }
