@@ -1,41 +1,33 @@
-using Core.Game.Cards;
+using Core.Game;
 using UnityEngine;
-using Logger = Logs.Logger;
 
 namespace Client.UI.Dialogs.Game.Hand.ViewModels
 {
-    public class GamePlayerSpaceCardViewModel : IGamePlayerSpaceCardViewModel
+    public sealed class GamePlayerSpaceCardViewModel : IGamePlayerSpaceCardViewModel
     {
-        public GamePlayerSpaceCardViewModel(ISpaceCard spaceCard)
-        {
-            var data = InitTestValue(spaceCard);
-            Title = data.Title;
-            Value = data.Value;
-            BackgroundColor = data.BackgroundColor;
-        }
-        
-        public string Title { get; }
-        
-        public Color BackgroundColor { get; }
-        
-        public string Value { get; }
+        private readonly SpaceCardData _spaceCard;
 
-        private (string Title, Color BackgroundColor, string Value) InitTestValue(ISpaceCard spaceCard)
+        public GamePlayerSpaceCardViewModel(SpaceCardData spaceCard)
         {
-            switch (spaceCard)
-            {
-                case DamageSpaceCard damage:
-                    return ("Damage", Color.orange, damage.DamageCount.ToString());
-                
-                case ArtifactSpaceCard:
-                    return ("Artifact", Color.blue, "Artifact");
-                
-                case ConversationSpaceCard:
-                    return ("Conversation",  Color.green, "Conversation");
-            }
-            
-            Logger.Error("GamePlayerSpaceCardViewModel.InitTestValue: spaceCard is invalid.");
-            return ("ERROR", Color.red, "ERROR");
+            _spaceCard = spaceCard;
         }
+
+        public string Title => _spaceCard switch
+        {
+            { DamageCount: not null } => "Damage",
+            { ArtifactId: not null } => "Artifact",
+            { IsConversation: true } => "Conversation",
+            _ => "ERROR"
+        };
+
+        public Color BackgroundColor => _spaceCard switch
+        {
+            { DamageCount: not null } => Color.orange,
+            { ArtifactId: not null } => Color.blue,
+            { IsConversation: true } => Color.green,
+            _ => Color.red
+        };
+
+        public string Value => _spaceCard.DamageCount is int damageCount ? damageCount.ToString() : Title;
     }
 }

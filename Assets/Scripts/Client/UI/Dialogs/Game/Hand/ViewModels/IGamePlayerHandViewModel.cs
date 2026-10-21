@@ -7,5 +7,7 @@ namespace Client.UI.Dialogs.Game.Hand.ViewModels
         IReactivityProperty<bool> IsVisible { get; }
         
         IReactivityReadOnlyCollectionProperty<IGamePlayerSpaceCardViewModel> CardsViewModels { get; }
+
+        void Init();
     }
 }

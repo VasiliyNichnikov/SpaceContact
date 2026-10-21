@@ -31,6 +31,7 @@ namespace Client.UI.Dialogs.Game.Hand
         public void Init(IGamePlayerHandViewModel viewModel)
         {
             gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
+            _viewModel.Init();
             gameObject.Subscribe(_viewModel.CardsViewModels, RefreshCards);
             gameObject.Subscribe(_viewModel.IsVisible, RefreshVisibility);
         }

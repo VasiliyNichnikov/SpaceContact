@@ -5,6 +5,7 @@ using Client.Game.Field;
 using Client.Game.Planets.ViewModels;
 using Client.Helpers;
 using Client.UI;
+using Client.UI.Dialogs.Game.Hand.ViewModels;
 using Client.UI.Dialogs.Game.PlayerChoice.ViewModels;
 using Client.UI.HUDs;
 using Client.UI.HUDs.ViewModels;
@@ -98,6 +99,8 @@ namespace App.Game
             RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudBottomViewModel>(builder).AsImplementedInterfaces();
+            RegisterViewModel<GameHudBottomSwitchesViewModel>(builder);
+            builder.RegisterEntryPoint<GamePlayerHandViewModel>();
             RegisterViewModel<GameArrowsHolderViewModel>(builder);
             RegisterViewModel<GameHudTimerPhaseViewModel>(builder).AsImplementedInterfaces();
         }
