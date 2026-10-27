@@ -16,12 +16,6 @@ namespace Network.Game
         private GameEventBatchApplier _applier = null!;
         private GameSnapshotRecovery _recovery = null!;
 
-        public override void OnNetworkDespawn()
-        {
-            _recovery.Stop();
-            base.OnNetworkDespawn();
-        }
-
         public void SendEventsToClients(GameEventBatchData batchData, IReadOnlyList<ulong> targetClientIds)
         {
             if (!IsServer || !IsSpawned || targetClientIds.Count == 0)

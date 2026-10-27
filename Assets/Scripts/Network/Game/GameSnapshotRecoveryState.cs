@@ -4,7 +4,7 @@ namespace Network.Game
     {
         public bool IsStarted { get; set; }
 
-        public bool IsStopped { get; set; }
+        public bool IsDisposed { get; set; }
 
         public bool IsSynchronizationAllowed { get; set; }
 

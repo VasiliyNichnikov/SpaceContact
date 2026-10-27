@@ -15,6 +15,7 @@ namespace Core.Game.Actions
         private readonly PendingGameActions _pendingActions;
         private readonly GameEventBatchApplier _batchApplier;
         private readonly CancellationTokenSource _lifetimeCancellation = new();
+        private bool _disposed;
 
         public GameActionClient(IGameActionServerInteraction network, GameContext context,
             PendingGameActions pendingActions, GameEventBatchApplier batchApplier)
@@ -34,25 +35,42 @@ namespace Core.Game.Actions
 
         public void Dispose()
         {
+            _disposed = true;
             _lifetimeCancellation.Cancel();
             _lifetimeCancellation.Dispose();
         }
 
+        private static async Task ObserveAbandonedRequestAsync(Task request)
+        {
+            try
+            {
+                await request;
+            }
+            catch (Exception exception)
+            {
+                Logger.Error($"Action request failed after waiting ended: {exception}");
+            }
+        }
+
         private async Task<GameActionSendResult> SendAsync(ClientGameAction action, CancellationToken ct)
         {
-            EnsureCanSend();
             var actionId = action.Id;
-
-            if (ct.IsCancellationRequested)
+            if (_disposed || ct.IsCancellationRequested)
             {
                 return CreateCancelledResult(actionId, false);
             }
 
+            EnsureCanSend();
             if (actionId == Guid.Empty)
             {
                 throw new ArgumentException("An action must have a non-empty ID.", nameof(action));
             }
 
+            // Acquire cancellation before TryAdd invokes observers that can dispose the scene scope.
+            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(ct, _lifetimeCancellation.Token);
+            var token = cancellation.Token;
+            var cancelled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await using var registration = token.Register(() => cancelled.TrySetResult(true));
             if (!_pendingActions.TryAdd(action))
             {
                 throw new InvalidOperationException($"Action {actionId} is already pending.");
@@ -60,25 +78,38 @@ namespace Core.Game.Actions
 
             GameActionSendResult? result = null;
             var wasSent = false;
-            using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(ct, _lifetimeCancellation.Token);
-
             try
             {
-                EnsureCanSend();
-                wasSent = true;
-                var response = await _network.SendAsync(action, GameActor.Player(_context.LocalPlayerId), cancellation.Token);
-
-                if (cancellation.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                 {
-                    result = CreateCancelledResult(actionId, wasSent);
+                    result = CreateCancelledResult(actionId, false);
                     return result;
                 }
 
+                // Pending.Changed may have changed context availability before sending.
+                EnsureCanSend();
+                wasSent = true;
+                var request = _network.SendAsync(action, GameActor.Player(_context.LocalPlayerId), token);
+                await Task.WhenAny(request, cancelled.Task);
+                if (token.IsCancellationRequested)
+                {
+                    ObserveAbandonedRequestAsync(request).FireAndForget();
+                    result = CreateCancelledResult(actionId, true);
+                    return result;
+                }
+
+                var response = await request;
                 result = ProcessResponse(actionId, response);
                 return result;
             }
             catch (Exception exception)
             {
+                if (token.IsCancellationRequested)
+                {
+                    result = CreateCancelledResult(actionId, wasSent);
+                    return result;
+                }
+
                 if (wasSent)
                 {
                     result = RequireSnapshot(actionId, exception.Message);
@@ -89,7 +120,8 @@ namespace Core.Game.Actions
             finally
             {
                 _pendingActions.Remove(actionId);
-                if (result != null)
+                // Removing pending invokes observers too; shutdown suppresses completion notifications.
+                if (!_disposed && result != null)
                 {
                     NotifyCompleted(result);
                 }
@@ -128,7 +160,7 @@ namespace Core.Game.Actions
 
         private GameActionSendResult CreateCancelledResult(Guid actionId, bool wasSent)
         {
-            var batchResult = wasSent ? _batchApplier.Apply(null) : null;
+            var batchResult = wasSent && !_disposed ? _batchApplier.Apply(null) : null;
             return new GameActionSendResult(actionId, null, batchResult, null, isCancelled: true);
         }
 

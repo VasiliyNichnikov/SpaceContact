@@ -39,7 +39,7 @@ namespace Network.Game
 
         public void Start()
         {
-            if (_state.IsStarted || _state.IsStopped)
+            if (_state.IsStarted || _state.IsDisposed)
             {
                 return;
             }
@@ -55,7 +55,7 @@ namespace Network.Game
 
         public void AllowSynchronization()
         {
-            if (_state.IsStopped)
+            if (_state.IsDisposed)
             {
                 return;
             }
@@ -65,23 +65,11 @@ namespace Network.Game
             TryStartRecovery();
         }
 
-        // Stop is terminal for this game session; a new session gets a new recovery instance.
-        public void Stop()
-        {
-            if (_state.IsStopped)
-            {
-                return;
-            }
-
-            _state.IsStopped = true;
-            _state.IsSynchronizationAllowed = false;
-            _applier.Completed -= OnBatchCompleted;
-            _lifetime.Cancel();
-        }
-
         public void Dispose()
         {
-            Stop();
+            _state.IsDisposed = true;
+            _applier.Completed -= OnBatchCompleted;
+            _lifetime.Cancel();
             _lifetime.Dispose();
         }
 
@@ -93,13 +81,13 @@ namespace Network.Game
             }
             catch (Exception exception)
             {
-                Logger.Error($"Snapshot request failed after synchronization was stopped: {exception}");
+                Logger.Error($"Snapshot request failed after synchronization was disposed: {exception}");
             }
         }
 
         private void OnBatchCompleted(GameEventBatchApplyResult result, long observedRevision)
         {
-            if (_state.IsStopped)
+            if (_state.IsDisposed)
             {
                 return;
             }

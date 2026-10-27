@@ -27,14 +27,8 @@ namespace App.Game.Services
 
         public void Dispose()
         {
-            if (_disposed)
-            {
-                return;
-            }
-
             _disposed = true;
             _startupNetwork.SnapshotSyncAllowed -= OnSnapshotSyncAllowed;
-            _recovery.Stop();
         }
 
         private void OnSnapshotSyncAllowed()
