@@ -55,12 +55,16 @@ namespace Network.Game
             ClientRevisionChanged?.Invoke(clientId, revision);
         }
 
+        public bool HasAcknowledgedRevision(ulong clientId, long requiredRevision) =>
+            requiredRevision >= 0 && _revisionByClientId.TryGetValue(clientId, out var revision) &&
+            revision >= requiredRevision;
+
         public bool AreAllClientsAtRevision(long requiredRevision) =>
             AreAllClientsAtRevision(_revisionByClientId.Keys, requiredRevision);
 
         public bool AreAllClientsAtRevision(IReadOnlyCollection<ulong> requiredClientIds, long requiredRevision) =>
-            requiredClientIds.Count > 0 && requiredRevision >= 0 && requiredClientIds.All(clientId =>
-                _revisionByClientId.TryGetValue(clientId, out var revision) && revision >= requiredRevision);
+            requiredClientIds.Count > 0 && requiredClientIds.All(clientId =>
+                HasAcknowledgedRevision(clientId, requiredRevision));
 
         public bool AreAllPlayersAtEntry(IReadOnlyCollection<ulong> participantIds, long phaseRevision, long entryStateRevision) =>
             phaseRevision >= 0 && AreAllClientsAtRevision(participantIds, entryStateRevision) &&
