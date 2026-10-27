@@ -70,7 +70,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a42edb9b9b1425c9b885844617eedda, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Network::Network.Game.Mutation.GameEventRpcRelayNetwork
+  m_EditorClassIdentifier: Network::Network.Game.GameEventRpcRelayNetwork
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &-1212386267631166120
 MonoBehaviour:

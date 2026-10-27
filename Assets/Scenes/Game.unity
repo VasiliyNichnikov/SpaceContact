@@ -369,7 +369,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fccc4fb2f1ea42d98b7a8448b973e4d9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Network::Network.NetworkGameController
+  m_EditorClassIdentifier: Network::Network.Game.GameRevisionAckNetwork
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &1259885966
 MonoBehaviour:
