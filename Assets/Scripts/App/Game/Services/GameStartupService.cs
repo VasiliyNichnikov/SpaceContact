@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Client.UI;
-using Core.Game;
-using Core.Game.Phases;
 using Network.Game;
 using ServiceLayer;
 using Unity.Netcode;
@@ -12,104 +10,126 @@ using VContainer.Unity;
 
 namespace App.Game.Services
 {
-    public class GameStartupService : IStartable, ITickable, IDisposable
+    public sealed class GameStartupService : IInitializable, IStartable, IDisposable
     {
         private readonly NetworkManager _networkManager;
-        private readonly IServerStateMachineNetwork _serverStateMachineNetwork;
-        private readonly PhaseRegistrationService _phaseRegistrationService;
         private readonly IDialogsManager _dialogsManager;
         private readonly GameNetLoader _gameNetLoader;
         private readonly ContainerRegistrationService _containerRegistrationService;
-        private readonly GameStateMachine _gameStateMachine;
-        private readonly GamePlayersLoader _gamePlayersLoader;
         private readonly IObjectResolver _resolver;
+        private readonly GameStartupNetwork _gameStartupNetwork;
+
+        private NetworkSceneManager? _sceneManager;
+        private bool _bootstrapStarted;
+        private bool _synchronizationAllowed;
+        private bool _disposed;
 
         public GameStartupService(
             NetworkManager networkManager,
-            PhaseRegistrationService phaseRegistrationService,
             IDialogsManager dialogsManager,
-            IServerStateMachineNetwork serverStateMachineNetwork,
             GameNetLoader gameNetLoader,
             ContainerRegistrationService containerRegistrationService,
             IObjectResolver resolver,
-            GameStateMachine gameStateMachine,
-            GamePlayersLoader gamePlayersLoader)
+            GameStartupNetwork gameStartupNetwork)
         {
-            _phaseRegistrationService = phaseRegistrationService;
             _dialogsManager = dialogsManager;
             _networkManager = networkManager;
-            _serverStateMachineNetwork = serverStateMachineNetwork;
             _gameNetLoader = gameNetLoader;
             _containerRegistrationService = containerRegistrationService;
-            _gameStateMachine = gameStateMachine;
-            _gamePlayersLoader = gamePlayersLoader;
             _resolver = resolver;
-            
-            if (_networkManager.SceneManager != null)
-            {
-                _networkManager.SceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
-            }
-            
-            _gameNetLoader.OnGameIsReady += GameReady;
-            _containerRegistrationService.Register(ContainerType.Game, resolver);
+            _gameStartupNetwork = gameStartupNetwork;
         }
-        
-        void ITickable.Tick() => 
-            _gameStateMachine.Update();
-        
+
+        void IInitializable.Initialize()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _sceneManager = _networkManager.SceneManager;
+            if (_sceneManager != null)
+            {
+                _sceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
+            }
+
+            _gameNetLoader.NetworkObjectsLoadedOnAllClients += OnNetworkObjectsLoadedOnAllClients;
+            _containerRegistrationService.Register(ContainerType.Game, _resolver);
+        }
+
         void IStartable.Start()
         {
-            // Если не сделать - код не придет в исполнение
+            if (_disposed)
+            {
+                return;
+            }
+
             _resolver.Resolve<GamePlanetInfoPresenter>();
             _resolver.Resolve<GameClientSynchronizationService>().Start();
             _dialogsManager.CloseOpenedDialogs();
         }
-        
+
         void IDisposable.Dispose()
         {
-            if (_networkManager != null && _networkManager.SceneManager != null)
-            {
-                _networkManager.SceneManager.OnLoadEventCompleted -= OnSceneLoadCompleted;
-            }
-            
-            _containerRegistrationService.Unregister(ContainerType.Game);
-            _gameNetLoader.OnGameIsReady -= GameReady;
-        }
-        
-        private void OnSceneLoadCompleted(
-            string sceneName, 
-            LoadSceneMode loadMode,
-            List<ulong> clientsCompleted,
-            List<ulong> clientsTimedOut)
-        {
-            // Регистрация фаз должна быть и на сервере и на клиенте
-            _phaseRegistrationService.ConfigureRegistry();
-            
-            // Загружаем игроков на клиенте и сервере
-            _gamePlayersLoader.Init();
-            
-            // Загружаем все игровые объекты
-            if (_networkManager.IsServer)
-            {
-                // Регистрируем игровые запросы
-                var requestsRegisterService = _resolver.Resolve<GameServerRequestsRegisterService>();
-                requestsRegisterService.ConfigureRegistry();
-                // Грузим основной Core
-                var serverCoreLoader = _resolver.Resolve<GameServerCoreLoader>();
-                serverCoreLoader.Init();
-                // Затем на основе Core грузится Net объекты
-                _gameNetLoader.LoadNetGame();
-            }
-        }
-
-        private void GameReady()
-        {
-            if (!_networkManager.IsServer)
+            if (_disposed)
             {
                 return;
             }
-            
-            _serverStateMachineNetwork.ServerTransitionTo<GameInitializationPhase>();
+
+            _disposed = true;
+            UnsubscribeSceneLoad();
+            _gameNetLoader.NetworkObjectsLoadedOnAllClients -= OnNetworkObjectsLoadedOnAllClients;
+            _containerRegistrationService.Unregister(ContainerType.Game);
+        }
+
+        private void OnSceneLoadCompleted(string sceneName, LoadSceneMode loadMode,
+            List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+        {
+            if (_disposed || _bootstrapStarted || !_networkManager.IsServer)
+            {
+                return;
+            }
+
+            // Claim startup before invoking code that can synchronously call back into this service.
+            _bootstrapStarted = true;
+            UnsubscribeSceneLoad();
+            _resolver.Resolve<GameServerRequestsRegisterService>().ConfigureRegistry();
+            var bootstrap = _resolver.Resolve<GameServerBootstrap>();
+            bootstrap.Init();
+            if (_disposed)
+            {
+                return;
+            }
+
+            _gameNetLoader.LoadNetGame();
+            // The loader may have completed before this service subscribed.
+            if (_gameNetLoader.IsLoaded)
+            {
+                OnNetworkObjectsLoadedOnAllClients();
+            }
+        }
+
+        private void OnNetworkObjectsLoadedOnAllClients()
+        {
+            if (_disposed || _synchronizationAllowed)
+            {
+                return;
+            }
+
+            _synchronizationAllowed = true;
+            _gameNetLoader.NetworkObjectsLoadedOnAllClients -= OnNetworkObjectsLoadedOnAllClients;
+            _gameStartupNetwork.AllowSnapshotSynchronization();
+        }
+
+        private void UnsubscribeSceneLoad()
+        {
+            if (_sceneManager == null)
+            {
+                return;
+            }
+
+            _sceneManager.OnLoadEventCompleted -= OnSceneLoadCompleted;
+            _sceneManager = null;
         }
     }
 }

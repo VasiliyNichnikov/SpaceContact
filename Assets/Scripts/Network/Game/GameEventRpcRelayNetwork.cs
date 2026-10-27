@@ -18,7 +18,7 @@ namespace Network.Game
 
         public override void OnNetworkDespawn()
         {
-            _recovery.Dispose();
+            _recovery.Stop();
             base.OnNetworkDespawn();
         }
 

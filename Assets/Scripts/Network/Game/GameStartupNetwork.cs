@@ -15,6 +15,9 @@ namespace Network.Game
         public bool IsSnapshotSynchronizationAllowed =>
             IsClient && IsSpawned && IsSynchronizationStage(_stage.Value);
 
+        public bool IsWaitingForInitialAcknowledgements =>
+            IsServer && IsSpawned && _stage.Value == GameStartupStage.SnapshotSyncAllowed;
+
         public override void OnNetworkSpawn()
         {
             if (!IsClient)
@@ -33,7 +36,7 @@ namespace Network.Game
 
         public void AllowSnapshotSynchronization()
         {
-            if(!IsServer)
+            if (!IsServer || !IsSpawned || _stage.Value != GameStartupStage.Loading)
             {
                 return;
             }
@@ -43,7 +46,7 @@ namespace Network.Game
 
         public void MarkGameRunning()
         {
-            if (!IsServer)
+            if (!IsWaitingForInitialAcknowledgements)
             {
                 return;
             }

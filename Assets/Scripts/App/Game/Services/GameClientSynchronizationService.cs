@@ -17,11 +17,6 @@ namespace App.Game.Services
 
         public void Start()
         {
-            if (_disposed)
-            {
-                return;
-            }
-
             _recovery.Start();
             _startupNetwork.SnapshotSyncAllowed += OnSnapshotSyncAllowed;
             if (_startupNetwork.IsSnapshotSynchronizationAllowed)
@@ -39,7 +34,7 @@ namespace App.Game.Services
 
             _disposed = true;
             _startupNetwork.SnapshotSyncAllowed -= OnSnapshotSyncAllowed;
-            _recovery.Dispose();
+            _recovery.Stop();
         }
 
         private void OnSnapshotSyncAllowed()

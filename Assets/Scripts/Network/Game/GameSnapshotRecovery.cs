@@ -121,7 +121,7 @@ namespace Network.Game
 
         private void TryStartRecovery()
         {
-            if (!_state.IsSynchronizationAllowed || _state.IsRecovering || !RequiresSnapshot)
+            if (_state.IsRecovering || !RequiresSnapshot)
             {
                 return;
             }
