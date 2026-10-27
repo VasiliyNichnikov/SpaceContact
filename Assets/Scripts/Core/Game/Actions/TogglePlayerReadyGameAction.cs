@@ -11,18 +11,28 @@ namespace Core.Game.Actions
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class TogglePlayerReadyGameAction : ClientGameAction
     {
+        [JsonConstructor]
+        public TogglePlayerReadyGameAction(long expectedPhaseRevision)
+        {
+            ExpectedPhaseRevision = expectedPhaseRevision;
+        }
+
         public enum Status
         {
             MissingParticipant = 0,
             UnknownParticipant = 1,
             PhaseTimerNotRunning = 2,
             PhaseDeadlineElapsed = 3,
-            ReadyDeadlineElapsed = 4
+            ReadyDeadlineElapsed = 4,
+            StalePhase = 5
         }
-        
+
+        [JsonProperty(Required = Required.Always)]
+        public long ExpectedPhaseRevision { get; }
+
         public override IActionValidator GetValidator()
         {
-            return new Validator();
+            return new Validator(ExpectedPhaseRevision);
         }
 
         protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
@@ -38,9 +48,16 @@ namespace Core.Game.Actions
 
             return new IGameEvent[] { readyEvent };
         }
-        
+
         private sealed class Validator : IActionValidator
         {
+            private readonly long _expectedPhaseRevision;
+
+            public Validator(long expectedPhaseRevision)
+            {
+                _expectedPhaseRevision = expectedPhaseRevision;
+            }
+
             public ValidationResult Check(GameContext context, GameActor actor)
             {
                 if (!actor.PlayerId.HasValue)
@@ -57,6 +74,12 @@ namespace Core.Game.Actions
                 }
 
                 var phase = context.Phase;
+                if (phase.Revision != _expectedPhaseRevision)
+                {
+                    return ValidationResult.Failed((int)Status.StalePhase,
+                        "The readiness command belongs to another phase entry.");
+                }
+
                 if (!TransitionPhaseHelper.IsTimedPhase(phase.Type) || !phase.EndTimeInSeconds.HasValue)
                 {
                     return ValidationResult.Failed((int)Status.PhaseTimerNotRunning,

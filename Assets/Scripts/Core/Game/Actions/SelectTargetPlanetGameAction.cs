@@ -13,12 +13,16 @@ namespace Core.Game.Actions
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class SelectTargetPlanetGameAction : AutomaticClientGameAction
     {
-        public SelectTargetPlanetGameAction(int planetId, ulong? defenderPlayerId = null)
+        [JsonConstructor]
+        public SelectTargetPlanetGameAction(int planetId, long expectedPhaseRevision, int expectedDestinyDeckCount,
+            ulong? defenderPlayerId = null)
         {
             PlanetId = planetId;
             DefenderPlayerId = defenderPlayerId;
+            ExpectedPhaseRevision = expectedPhaseRevision;
+            ExpectedDestinyDeckCount = expectedDestinyDeckCount;
         }
-        
+
         public enum Status
         {
             InvalidPhase = 0,
@@ -29,16 +33,24 @@ namespace Core.Game.Actions
             InvalidPlanet = 5,
             InvalidOwnSystemTarget = 6,
             InvalidForeignSystemTarget = 7,
-            InvalidDefenderSelection = 8
+            InvalidDefenderSelection = 8,
+            StalePhase = 9,
+            StaleDestinyCard = 10
         }
 
         [JsonProperty] [StateRequired] public int PlanetId { get; }
 
         [JsonProperty] public ulong? DefenderPlayerId { get; }
 
+        [JsonProperty(Required = Required.Always)]
+        public long ExpectedPhaseRevision { get; }
+
+        [JsonProperty(Required = Required.Always)]
+        public int ExpectedDestinyDeckCount { get; }
+
         public override IActionValidator GetValidator()
         {
-            return new Validator(PlanetId, DefenderPlayerId);
+            return new Validator(PlanetId, DefenderPlayerId, ExpectedPhaseRevision, ExpectedDestinyDeckCount);
         }
 
         protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
@@ -58,11 +70,16 @@ namespace Core.Game.Actions
         {
             private readonly int _planetId;
             private readonly ulong? _defenderPlayerId;
+            private readonly long _expectedPhaseRevision;
+            private readonly int _expectedDestinyDeckCount;
 
-            public Validator(int planetId, ulong? defenderPlayerId)
+            public Validator(int planetId, ulong? defenderPlayerId, long expectedPhaseRevision,
+                int expectedDestinyDeckCount)
             {
                 _planetId = planetId;
                 _defenderPlayerId = defenderPlayerId;
+                _expectedPhaseRevision = expectedPhaseRevision;
+                _expectedDestinyDeckCount = expectedDestinyDeckCount;
             }
 
             public ValidationResult Check(GameContext context, GameActor actor)
@@ -70,6 +87,18 @@ namespace Core.Game.Actions
                 if (!CheckPhase(context, out var error))
                 {
                     return ValidationResult.Failed((int)Status.InvalidPhase, error);
+                }
+
+                if (context.Phase.Revision != _expectedPhaseRevision)
+                {
+                    return ValidationResult.Failed((int)Status.StalePhase,
+                        "The target selection belongs to another Destiny phase entry.");
+                }
+
+                if (context.Cards.DestinyDeckCount != _expectedDestinyDeckCount)
+                {
+                    return ValidationResult.Failed((int)Status.StaleDestinyCard,
+                        "The active Destiny card has changed since this target selection was created.");
                 }
 
                 if (!CheckAggressorExists(context, out var aggressorPlayerId, out error))

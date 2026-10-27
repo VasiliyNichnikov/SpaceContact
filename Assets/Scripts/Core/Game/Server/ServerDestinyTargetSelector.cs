@@ -42,7 +42,8 @@ namespace Core.Game.Server
                 var candidates = new List<SelectTargetPlanetGameAction>();
                 foreach (var planet in planets)
                 {
-                    var action = new SelectTargetPlanetGameAction(planet.Id, player.Id);
+                    var action = new SelectTargetPlanetGameAction(planet.Id, context.Phase.Revision,
+                        context.Cards.DestinyDeckCount, player.Id);
                     if (action.GetValidator().Check(context, actor).IsSuccess)
                     {
                         candidates.Add(action);

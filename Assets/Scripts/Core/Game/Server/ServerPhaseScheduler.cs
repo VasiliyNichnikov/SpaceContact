@@ -230,7 +230,8 @@ namespace Core.Game.Server
             {
                 // At most one skip per tick. Every successful skip consumes a card; an exhausted deck
                 // is rejected without discarding the last active card and blocks retries at this revision.
-                ExecuteAutomatic(new SkipDestinyCardGameAction(aggressorId.Value));
+                var action = new SkipDestinyCardGameAction(aggressorId.Value, _context.Phase.Revision, _context.Cards.DestinyDeckCount);
+                ExecuteAutomatic(action);
                 return false;
             }
 

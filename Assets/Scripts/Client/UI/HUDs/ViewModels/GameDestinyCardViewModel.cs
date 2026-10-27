@@ -10,19 +10,16 @@ namespace Client.UI.HUDs.ViewModels
     {
         private readonly DestinyCardData _card;
         private readonly GameContext _context;
-        private readonly PendingGameActions _pendingActions;
-        private readonly Action _onSkipButtonClickAction;
+        private readonly GameActionClient _actionClient;
 
         public GameDestinyCardViewModel(
             DestinyCardData card, 
             GameContext context, 
-            PendingGameActions pendingActions, 
-            Action onSkipButtonClickAction)
+            GameActionClient actionClient)
         {
             _card = card;
             _context = context;
-            _pendingActions = pendingActions;
-            _onSkipButtonClickAction = onSkipButtonClickAction;
+            _actionClient = actionClient;
         }
 
         public Color BackgroundColor
@@ -55,26 +52,24 @@ namespace Client.UI.HUDs.ViewModels
             }
         }
 
-        public bool IsSkipButtonVisible => CanSkip(_context, _pendingActions);
-
-        public static bool CanSkip(GameContext context, PendingGameActions pendingActions)
-        {
-            var localPlayer = context.LocalPlayerState;
-            if (localPlayer is null || pendingActions.HasAny)
-            {
-                return false;
-            }
-
-            var action = new SkipDestinyCardGameAction(localPlayer.Id);
-            return action.GetValidator().Check(context, GameActor.Player(localPlayer.Id)).IsSuccess;
-        }
+        public bool IsSkipButtonVisible => _actionClient.ValidateAction(CreateSkipAction());
 
         public void OnSkipButtonClickHandler()
         {
-            if (IsSkipButtonVisible)
+            var action = CreateSkipAction();
+            
+            if (_actionClient.ValidateAction(action))
             {
-                _onSkipButtonClickAction.Invoke();
+                _actionClient.Send(action);
             }
+        }
+
+        private SkipDestinyCardGameAction CreateSkipAction()
+        {
+            return new SkipDestinyCardGameAction(
+                _context.LocalPlayerId, 
+                _context.Phase.Revision,
+                _context.Cards.DestinyDeckCount);
         }
 
         private GamePlayerData? GetSelectedPlayer()

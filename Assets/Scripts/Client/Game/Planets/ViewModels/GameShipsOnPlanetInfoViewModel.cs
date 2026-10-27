@@ -91,9 +91,11 @@ namespace Client.Game.Planets.ViewModels
                     items.Add(new GameShipsInfoViewModel(player.Color, count));
                 }
 
-                if (GameChoicePlanetToAttackViewModel.CanSelect(_context, _pendingActions, _planetId, player.Id))
+                var viewModel = new GameChoicePlanetToAttackViewModel(_planetId, player, _context, _actionClient);
+                
+                if (viewModel.IsButtonVisible())
                 {
-                    items.Add(new GameChoicePlanetToAttackViewModel(_planetId, player, _context, _actionClient, _pendingActions));
+                    items.Add(viewModel);
                 }
             }
 

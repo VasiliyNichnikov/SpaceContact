@@ -32,12 +32,14 @@ namespace Client.UI.HUDs.ViewModels
 
         public void OnReadyButtonClickHandler()
         {
-            if (!CanSendReady())
+            var action = new TogglePlayerReadyGameAction(_gameContext.Phase.Revision);
+            
+            if (!_actionClient.ValidateAction(action))
             {
                 return;
             }
 
-            _actionClient.Send(new TogglePlayerReadyGameAction());
+            _actionClient.Send(action);
         }
 
         public void Update()
@@ -51,19 +53,9 @@ namespace Client.UI.HUDs.ViewModels
             _pendingActions.Changed -= Refresh;
         }
 
-        private bool CanSendReady()
-        {
-            var validator = new TogglePlayerReadyGameAction().GetValidator();
-            var localPlayer = _gameContext.LocalPlayerState;
-            
-            return localPlayer != null && 
-                   !_pendingActions.HasAny &&
-                   validator.Check(_gameContext, GameActor.Player(localPlayer.Id)).IsSuccess;
-        }
-
         private void Refresh()
         {
-            _canToggleReady.Value = CanSendReady();
+            _canToggleReady.Value = _actionClient.ValidateAction(new TogglePlayerReadyGameAction(_gameContext.Phase.Revision));
             _isReadyToNextPhase.Value = _gameContext.LocalPlayerState?.IsReady ?? false;
             var deadline = GetDeadline();
             var remaining = deadline.HasValue

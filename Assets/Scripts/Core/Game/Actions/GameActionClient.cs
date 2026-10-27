@@ -28,6 +28,20 @@ namespace Core.Game.Actions
 
         public event Action<GameActionSendResult>? Completed;
 
+        public bool ValidateAction(ClientGameAction action)
+        {
+            var localPlayer = _context.LocalPlayerState;
+
+            if (localPlayer == null || _pendingActions.HasAny)
+            {
+                return false;
+            }
+
+            var validator = action.GetValidator();
+
+            return validator.Check(_context, GameActor.Player(localPlayer.Id)).IsSuccess;
+        }
+        
         public void Send(ClientGameAction action)
         {
             SendAsync(action, CancellationToken.None).FireAndForget(exception => Logger.Error($"Action send failed: {exception}"));

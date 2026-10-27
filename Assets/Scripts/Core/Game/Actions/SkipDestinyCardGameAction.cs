@@ -10,11 +10,17 @@ namespace Core.Game.Actions
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class SkipDestinyCardGameAction : AutomaticClientGameAction
     {
-        public SkipDestinyCardGameAction(ulong newTargetPlayerId)
+        [JsonConstructor]
+        public SkipDestinyCardGameAction(
+            ulong newTargetPlayerId, 
+            long expectedPhaseRevision,
+            int expectedDestinyDeckCount)
         {
             NewTargetPlayerId = newTargetPlayerId;
+            ExpectedPhaseRevision = expectedPhaseRevision;
+            ExpectedDestinyDeckCount = expectedDestinyDeckCount;
         }
-        
+
         public enum Status
         {
             InvalidPhase = 0,
@@ -22,14 +28,22 @@ namespace Core.Game.Actions
             InvalidActor = 2,
             TargetAlreadySelected = 3,
             InvalidOwnColorCard = 4,
-            DeckExhausted = 5
+            DeckExhausted = 5,
+            StalePhase = 6,
+            StaleDestinyCard = 7
         }
 
         [JsonProperty] public ulong NewTargetPlayerId { get; }
 
+        [JsonProperty(Required = Required.Always)]
+        public long ExpectedPhaseRevision { get; }
+
+        [JsonProperty(Required = Required.Always)]
+        public int ExpectedDestinyDeckCount { get; }
+
         public override IActionValidator GetValidator()
         {
-            return new Validator(NewTargetPlayerId);
+            return new Validator(NewTargetPlayerId, ExpectedPhaseRevision, ExpectedDestinyDeckCount);
         }
 
         protected override IReadOnlyList<IGameEvent> ExecuteCore(GameContext context, GameActor actor)
@@ -40,10 +54,14 @@ namespace Core.Game.Actions
         private sealed class Validator : IActionValidator
         {
             private readonly ulong _newTargetPlayerId;
+            private readonly long _expectedPhaseRevision;
+            private readonly int _expectedDestinyDeckCount;
 
-            public Validator(ulong newTargetPlayerId)
+            public Validator(ulong newTargetPlayerId, long expectedPhaseRevision, int expectedDestinyDeckCount)
             {
                 _newTargetPlayerId = newTargetPlayerId;
+                _expectedPhaseRevision = expectedPhaseRevision;
+                _expectedDestinyDeckCount = expectedDestinyDeckCount;
             }
 
             public ValidationResult Check(GameContext context, GameActor actor)
@@ -52,6 +70,18 @@ namespace Core.Game.Actions
                 {
                     return ValidationResult.Failed((int)Status.InvalidPhase,
                         "Destiny cards can only be skipped during Destiny.");
+                }
+
+                if (context.Phase.Revision != _expectedPhaseRevision)
+                {
+                    return ValidationResult.Failed((int)Status.StalePhase,
+                        "The skip command belongs to another Destiny phase entry.");
+                }
+
+                if (context.Cards.DestinyDeckCount != _expectedDestinyDeckCount)
+                {
+                    return ValidationResult.Failed((int)Status.StaleDestinyCard,
+                        "The active Destiny card has changed since this skip command was created.");
                 }
 
                 var aggressorPlayerId = context.Encounter.AggressorPlayerId;

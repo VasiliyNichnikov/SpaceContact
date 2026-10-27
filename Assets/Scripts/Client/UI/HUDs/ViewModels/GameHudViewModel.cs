@@ -88,7 +88,7 @@ namespace Client.UI.HUDs.ViewModels
                 return;
             }
 
-            _destinyCardViewModel.Value = new GameDestinyCardViewModel(card, _context, _pendingGameActions, SkipDestinyCard);
+            _destinyCardViewModel.Value = new GameDestinyCardViewModel(card, _context, _actionClient);
         }
 
         private void RefreshProfiles()
@@ -112,17 +112,6 @@ namespace Client.UI.HUDs.ViewModels
             {
                 _playerProfilesViewModels.Value = _profiles;
             }
-        }
-
-        private void SkipDestinyCard()
-        {
-            if (!GameDestinyCardViewModel.CanSkip(_context, _pendingGameActions))
-            {
-                return;
-            }
-
-            var skipDestinyCardGameAction = new SkipDestinyCardGameAction(_context.LocalPlayerId);
-            _actionClient.Send(skipDestinyCardGameAction);
         }
     }
 }
