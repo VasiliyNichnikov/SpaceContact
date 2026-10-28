@@ -8,9 +8,9 @@ namespace Core.Game.Events
     [JsonObject(MemberSerialization.OptIn)]
     public sealed class ApplyStartReadyTransitionTimerGameEvent : PublicGameEvent
     {
-        public ApplyStartReadyTransitionTimerGameEvent(double readyTransitionTime)
+        public ApplyStartReadyTransitionTimerGameEvent(double readyTransitionTimeInSeconds)
         {
-            ReadyTransitionTimeInSeconds = readyTransitionTime;
+            ReadyTransitionTimeInSeconds = readyTransitionTimeInSeconds;
         }
 
         [JsonProperty]
