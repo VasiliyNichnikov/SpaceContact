@@ -9,7 +9,7 @@ namespace Core.Game.Server
 {
     public sealed class ServerPhaseScheduler : IDisposable
     {
-        private readonly GameContext _context;
+        private readonly ServerGameContext _context;
         private readonly GameActionExecutor _executor;
         private readonly IServerEventBroadcaster _broadcaster;
         private readonly IPhaseEntryAcknowledgements _acknowledgements;
@@ -24,7 +24,7 @@ namespace Core.Game.Server
         private bool _updating;
 
         public ServerPhaseScheduler(
-            GameContext context,
+            ServerGameContext context,
             GameActionExecutor executor,
             IServerEventBroadcaster broadcaster,
             IPhaseEntryAcknowledgements acknowledgements,
@@ -67,7 +67,7 @@ namespace Core.Game.Server
         }
 
         private bool CanRun() =>
-            !_disposed && _context.Role == GameContextRole.Server && _context.IsInitialized &&
+            !_disposed && _context.IsInitialized &&
             !_context.IsOperationFaulted && _context.Players.All.Count > 0;
 
         private bool CanStart() =>

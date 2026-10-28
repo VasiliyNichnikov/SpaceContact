@@ -9,7 +9,7 @@ namespace App.Game.Services
 {
     public sealed class GamePresentationStartup : IStartable, IDisposable
     {
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly GameFieldPlanetsViewProvider _fieldPlanetsViewProvider;
         private readonly IGameFieldViewManager _fieldViewManager;
         private readonly GameUILoader _uiLoader;
@@ -18,7 +18,7 @@ namespace App.Game.Services
         private bool _isLoaded;
 
         public GamePresentationStartup(
-            GameContext context,
+            ClientGameContext context,
             GameFieldPlanetsViewProvider fieldPlanetsViewProvider,
             IGameFieldViewManager fieldViewManager,
             GameUILoader uiLoader, GamePlanetInfoPresenter planetInfoPresenter)

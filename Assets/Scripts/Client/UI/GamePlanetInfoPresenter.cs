@@ -16,7 +16,7 @@ namespace Client.UI
         private readonly Queue<GameShipsOnPlanetInfoView> _usedPlanetInfoViews = new();
         private readonly Queue<GameShipsOnPlanetInfoView> _unusedPlanetInfoViews = new();
 
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly IGameFieldViewManager _fieldViewManager;
         private readonly GameFieldPlanetsViewProvider _planetsViewProvider;
         private readonly GameShipsOnPlanetInfoViewFactory _planetInfoViewFactory;
@@ -28,7 +28,7 @@ namespace Client.UI
         private readonly List<GameShipsOnPlanetInfoViewModel> _currentPlayerPlanetInfoViewModels = new();
 
         public GamePlanetInfoPresenter(
-            GameContext context,
+            ClientGameContext context,
             IGameFieldViewManager fieldViewManager,
             GameFieldPlanetsViewProvider planetsViewProvider,
             GameShipsOnPlanetInfoViewFactory planetInfoViewFactory,

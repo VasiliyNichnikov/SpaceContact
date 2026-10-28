@@ -112,8 +112,7 @@ namespace App.Game
 
         private static void RegisterClientServices(IContainerBuilder builder)
         {
-            // Unkeyed resolution always supplies the local client projection, including on the host.
-            builder.Register<GameContext>(Lifetime.Singleton).WithParameter(GameContextRole.Client);
+            builder.Register<ClientGameContext>(Lifetime.Singleton);
             builder.Register<PendingGameActions>(Lifetime.Singleton);
             builder.Register<GameEventBatchApplier>(Lifetime.Singleton);
             builder.Register<GameActionServerInteraction>(Lifetime.Singleton).As<IGameActionServerInteraction>();
@@ -124,13 +123,13 @@ namespace App.Game
 
         private static void RegisterServerServices(IContainerBuilder builder)
         {
-            builder.Register<GameContext>(Lifetime.Singleton).Keyed(GameContextRole.Server).WithParameter(GameContextRole.Server);
+            builder.Register<ServerGameContext>(Lifetime.Singleton);
 
-            RegisterServerService<GameStateProjector>(builder);
-            RegisterServerService<GameActionExecutor>(builder);
-            RegisterServerService<GameServerBootstrap>(builder);
-            RegisterServerService<GameServerRequestsRegisterService>(builder);
-            RegisterServerService<ServerPhaseScheduler>(builder);
+            builder.Register<GameStateProjector>(Lifetime.Singleton);
+            builder.Register<GameActionExecutor>(Lifetime.Singleton);
+            builder.Register<GameServerBootstrap>(Lifetime.Singleton);
+            builder.Register<GameServerRequestsRegisterService>(Lifetime.Singleton);
+            builder.Register<ServerPhaseScheduler>(Lifetime.Singleton);
 
             builder.Register<GameEventBatchFactory>(Lifetime.Singleton);
             builder.Register<GameServerEventBroadcaster>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
@@ -142,11 +141,6 @@ namespace App.Game
             builder.Register<GalaxyInitialStateFactory>(Lifetime.Singleton);
             builder.Register<PhaseInitialStateFactory>(Lifetime.Singleton);
             builder.Register<PlayerInitialStateFactory>(Lifetime.Singleton);
-        }
-
-        private static void RegisterServerService<T>(IContainerBuilder builder)
-        {
-            builder.Register<T>(Lifetime.Singleton).WithParameter<GameContext>(resolver => resolver.Resolve<GameContext>(GameContextRole.Server));
         }
     }
 }

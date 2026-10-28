@@ -7,9 +7,9 @@ namespace Core.Game.Events
 {
     public sealed class GameEventBatchApplier
     {
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
 
-        public GameEventBatchApplier(GameContext context)
+        public GameEventBatchApplier(ClientGameContext context)
         {
             _context = context;
         }

@@ -16,13 +16,13 @@ namespace App.Game.Services
         private readonly GameStateProjector _projector;
         private readonly GameActionExecutor _executor;
         private readonly IServerEventBroadcaster _broadcaster;
-        private readonly GameContext _context;
+        private readonly ServerGameContext _context;
 
         private ReadOnlyCollection<INetworkRequestHandler>? _handlers;
 
         public GameServerRequestsRegisterService(NetworkRequestRouter router,
             INetworkSerializer networkSerializer, GameStateProjector projector, GameActionExecutor executor,
-            IServerEventBroadcaster broadcaster, GameContext context)
+            IServerEventBroadcaster broadcaster, ServerGameContext context)
         {
             _router = router;
             _networkSerializer = networkSerializer;

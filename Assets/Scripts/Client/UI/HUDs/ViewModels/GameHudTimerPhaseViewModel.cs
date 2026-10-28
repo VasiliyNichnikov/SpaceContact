@@ -14,7 +14,7 @@ namespace Client.UI.HUDs.ViewModels
         private readonly ReactivityProperty<bool> _isReadyToNextPhase = new();
         private readonly ReactivityProperty<bool> _canToggleReady = new();
 
-        [Inject] private readonly GameContext _gameContext = null!;
+        [Inject] private readonly ClientGameContext _gameContext = null!;
         [Inject] private readonly GameActionClient _actionClient = null!;
         [Inject] private readonly PendingGameActions _pendingActions = null!;
 
@@ -23,18 +23,6 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityProperty<bool> IsReadyToNextPhase => _isReadyToNextPhase;
 
         public IReactivityProperty<bool> CanToggleReady => _canToggleReady;
-
-        void IInitializable.Initialize()
-        {
-            _gameContext.StateChanged += Refresh;
-            _pendingActions.Changed += Refresh;
-            Refresh();
-        }
-
-        void ITickable.Tick()
-        {
-            Refresh();
-        }
 
         public void OnReadyButtonClickHandler()
         {
@@ -52,6 +40,18 @@ namespace Client.UI.HUDs.ViewModels
         {
             _gameContext.StateChanged -= Refresh;
             _pendingActions.Changed -= Refresh;
+        }
+
+        void IInitializable.Initialize()
+        {
+            _gameContext.StateChanged += Refresh;
+            _pendingActions.Changed += Refresh;
+            Refresh();
+        }
+
+        void ITickable.Tick()
+        {
+            Refresh();
         }
 
         private void Refresh()

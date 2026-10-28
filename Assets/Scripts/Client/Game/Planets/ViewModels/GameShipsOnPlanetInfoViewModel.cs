@@ -19,14 +19,14 @@ namespace Client.Game.Planets.ViewModels
         private readonly ReactivityListProperty<IGameShipsOnPlanetInfoItemViewModel> _infoViewModels = new();
         private readonly ReactivityProperty<bool> _isVisible = new();
         private readonly ReactivityProperty<Color> _borderColor = new();
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly int _planetId;
         private readonly IGameCurrentPlayerInfoTabController _infoTabController;
         private readonly GameActionClient _actionClient;
         private readonly PendingGameActions _pendingActions;
         private bool _isDisposed;
 
-        public GameShipsOnPlanetInfoViewModel(int planetId, GameContext context,
+        public GameShipsOnPlanetInfoViewModel(int planetId, ClientGameContext context,
             IGameCurrentPlayerInfoTabController infoTabController, GameActionClient actionClient,
             PendingGameActions pendingActions)
         {

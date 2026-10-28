@@ -8,13 +8,13 @@ namespace Client.Game.Planets.ViewModels
     {
         private readonly int _planetId;
         private readonly ulong _defenderPlayerId;
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly GameActionClient _actionClient;
 
         public GameChoicePlanetToAttackViewModel(
             int planetId, 
             GamePlayerData defender, 
-            GameContext context,
+            ClientGameContext context,
             GameActionClient actionClient)
         {
             _planetId = planetId;

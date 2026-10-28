@@ -9,12 +9,12 @@ namespace Client.UI.Dialogs.Game.Hand.ViewModels
 {
     public sealed class GamePlayerHandViewModel : IGamePlayerHandViewModel, IDisposable
     {
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly ReactivityProperty<bool> _isVisible = new();
         private readonly ReactivityListProperty<IGamePlayerSpaceCardViewModel> _cardsViewModels = new();
         private readonly IGameCurrentPlayerInfoTabController _infoTabController;
 
-        public GamePlayerHandViewModel(GameContext context, IGameCurrentPlayerInfoTabController infoTabController)
+        public GamePlayerHandViewModel(ClientGameContext context, IGameCurrentPlayerInfoTabController infoTabController)
         {
             _context = context;
             _infoTabController = infoTabController;

@@ -6,9 +6,9 @@ namespace Core.Game
 {
     public sealed class GameFieldManager : IGameFieldManager
     {
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         
-        public GameFieldManager(GameContext context)
+        public GameFieldManager(ClientGameContext context)
         {
             _context = context;
         }

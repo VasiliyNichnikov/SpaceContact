@@ -11,13 +11,13 @@ namespace Core.Game.Actions
     public sealed class GameActionClient : IDisposable
     {
         private readonly IGameActionServerInteraction _network;
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly PendingGameActions _pendingActions;
         private readonly GameEventBatchApplier _batchApplier;
         private readonly CancellationTokenSource _lifetimeCancellation = new();
         private bool _disposed;
 
-        public GameActionClient(IGameActionServerInteraction network, GameContext context,
+        public GameActionClient(IGameActionServerInteraction network, ClientGameContext context,
             PendingGameActions pendingActions, GameEventBatchApplier batchApplier)
         {
             _network = network;
@@ -144,11 +144,6 @@ namespace Core.Game.Actions
 
         private void EnsureCanSend()
         {
-            if (_context.Role != GameContextRole.Client)
-            {
-                throw new InvalidOperationException("The action client requires a client context.");
-            }
-
             if (_context.IsBusy || _context.IsSynchronizationRequired || _context.LocalPlayerState is null)
             {
                 throw new InvalidOperationException("A synchronized local player is required to send an action.");

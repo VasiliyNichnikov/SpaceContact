@@ -14,7 +14,7 @@ namespace Client.Game.Field
         private const float AnimationDurationBetweenPlanets = 0.7f;
 
         private readonly GameFieldPlanetsViewProvider _planetsViewProvider;
-        private readonly GameContext _gameContext;
+        private readonly ClientGameContext _gameContext;
 
         private readonly List<GamePlayerData> _opponents = new();
 
@@ -23,7 +23,7 @@ namespace Client.Game.Field
         private int _selectedOpponentIndex;
         private Sequence? _currentSequenceAnimation;
 
-        public GameFieldViewManager(GameFieldPlanetsViewProvider planetsViewProvider, GameContext gameContext)
+        public GameFieldViewManager(GameFieldPlanetsViewProvider planetsViewProvider, ClientGameContext gameContext)
         {
             _planetsViewProvider = planetsViewProvider;
             _gameContext = gameContext;

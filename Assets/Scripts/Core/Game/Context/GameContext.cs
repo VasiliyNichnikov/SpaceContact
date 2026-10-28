@@ -6,12 +6,12 @@ using Logs;
 
 namespace Core.Game
 {
-    public sealed class GameContext
+    public abstract class GameContext
     {
         private readonly IGameDataProvider _dataProvider;
         private GameContextState _state;
 
-        public GameContext(
+        protected GameContext(
             IGameServerTime time, 
             IGameDataProvider dataProvider, 
             GameContextRole role,

@@ -14,7 +14,7 @@ namespace Client.UI.HUDs.ViewModels
         private readonly ReactivityProperty<IGameDestinyCardViewModel?> _destinyCardViewModel = new();
         private readonly ReactivityProperty<GamePlayerBlockViewModel?> _playerBlockViewModel = new();
 
-        [Inject] private readonly GameContext _context = null!;
+        [Inject] private readonly ClientGameContext _context = null!;
         [Inject] private readonly PendingGameActions _pendingGameActions = null!;
         [Inject] private readonly GameActionClient _actionClient = null!;
         [Inject] private readonly IGameFieldViewManager _fieldViewManager = null!;
@@ -40,6 +40,14 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityReadOnlyCollectionProperty<GamePlayerProfileViewModel> PlayerProfilesViewModels =>
             _playerProfilesViewModels;
 
+        public void Dispose()
+        {
+            _context.StateChanged -= Refresh;
+            _pendingGameActions.Changed -= RefreshDestinyCard;
+            _fieldViewManager.OnInitialized -= OpponentChanged;
+            _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
+        }
+
         void IInitializable.Initialize()
         {
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
@@ -48,14 +56,6 @@ namespace Client.UI.HUDs.ViewModels
             _pendingGameActions.Changed += RefreshDestinyCard;
 
             Refresh();
-        }
-
-        public void Dispose()
-        {
-            _context.StateChanged -= Refresh;
-            _pendingGameActions.Changed -= RefreshDestinyCard;
-            _fieldViewManager.OnInitialized -= OpponentChanged;
-            _fieldViewManager.OnViewedOpponentChanged -= OpponentChanged;
         }
 
         private void Refresh()

@@ -14,7 +14,7 @@ namespace Network.Game
     {
         private const int RetryDelayMilliseconds = 1000;
 
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly GameEventBatchApplier _applier;
         private readonly INetworkService _network;
         private readonly GameRevisionAckNetwork _ack;
@@ -23,7 +23,7 @@ namespace Network.Game
         private long _highestObservedRevision;
 
         public GameSnapshotRecovery(
-            GameContext context, 
+            ClientGameContext context,
             GameEventBatchApplier applier,
             INetworkService network, 
             GameRevisionAckNetwork ack)
@@ -42,11 +42,6 @@ namespace Network.Game
             if (_state.IsStarted || _state.IsDisposed)
             {
                 return;
-            }
-
-            if (_context.Role != GameContextRole.Client)
-            {
-                throw new InvalidOperationException("Snapshot recovery requires the client context, including on the host.");
             }
 
             _state.IsStarted = true;

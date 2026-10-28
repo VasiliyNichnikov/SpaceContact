@@ -7,11 +7,11 @@ namespace Network.Requests
     public sealed class GetGameSnapshotStateNetworkRequestHandler : NetworkRequestHandler<GameSnapshotRequestDto, GameSnapshotResponseDto>
     {
         private readonly GameStateProjector _projector;
-        private readonly GameContext _context;
+        private readonly ServerGameContext _context;
         
         public GetGameSnapshotStateNetworkRequestHandler(
             INetworkSerializer serializer,
-            GameStateProjector projector, GameContext context) : base(serializer)
+            GameStateProjector projector, ServerGameContext context) : base(serializer)
         {
             _projector = projector;
             _context = context;

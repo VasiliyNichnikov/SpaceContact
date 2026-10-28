@@ -7,12 +7,12 @@ namespace Client.Game.Planets.ViewModels
     public sealed class GameShipsOnPlanetInfoViewModelFactory
     {
         private readonly IGameCurrentPlayerInfoTabController _infoTabController;
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly GameActionClient _actionClient;
         private readonly PendingGameActions _pendingActions;
 
         public GameShipsOnPlanetInfoViewModelFactory(IGameCurrentPlayerInfoTabController infoTabController,
-            GameContext context, GameActionClient actionClient, PendingGameActions pendingActions)
+            ClientGameContext context, GameActionClient actionClient, PendingGameActions pendingActions)
         {
             _infoTabController = infoTabController;
             _context = context;

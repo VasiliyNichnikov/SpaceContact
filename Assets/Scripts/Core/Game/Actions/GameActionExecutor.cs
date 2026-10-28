@@ -7,11 +7,11 @@ namespace Core.Game.Actions
 {
     public sealed class GameActionExecutor
     {
-        private readonly GameContext _context;
+        private readonly ServerGameContext _context;
         private readonly GameEventBatchFactory _batchFactory;
         private readonly Dictionary<GameActionKey, GameActionExecutionResult> _acceptedActions = new();
 
-        public GameActionExecutor(GameContext context, GameEventBatchFactory batchFactory)
+        public GameActionExecutor(ServerGameContext context, GameEventBatchFactory batchFactory)
         {
             _context = context;
             _batchFactory = batchFactory;

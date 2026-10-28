@@ -17,7 +17,7 @@ namespace App.Game.Services
     {
         private const long DefaultRevision = 10;
 
-        [Inject] private readonly GameContext _context = null!;
+        [Inject] private readonly ServerGameContext _context = null!;
         [Inject] private readonly GalaxyInitialStateFactory _galaxyFactory = null!;
         [Inject] private readonly PlayerInitialStateFactory _playerFactory = null!;
         [Inject] private readonly CardsInitialStateFactory _cardsFactory = null!;

@@ -10,11 +10,11 @@ namespace Client.UI.HUDs.ViewModels
 {
     public class GameHudTopViewModel : IGameHudTopViewModel, IInitializable, IDisposable
     {
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly EventProvider _activePhaseChangedEvent = new();
         private readonly PhasesHelper _phasesHelper;
 
-        public GameHudTopViewModel(GameContext context, PhasesHelper phasesHelper)
+        public GameHudTopViewModel(ClientGameContext context, PhasesHelper phasesHelper)
         {
             _context = context;
             _phasesHelper = phasesHelper;
@@ -26,15 +26,15 @@ namespace Client.UI.HUDs.ViewModels
 
         public IReadOnlyCollection<GamePhaseType> PhaseScale { get; private set; } = Array.Empty<GamePhaseType>();
 
+        public void Dispose()
+        {
+            _context.StateChanged -= Refresh;
+        }
+
         void IInitializable.Initialize()
         {
             _context.StateChanged += Refresh;
             Refresh();
-        }
-
-        public void Dispose()
-        {
-            _context.StateChanged -= Refresh;
         }
 
         private void Refresh()

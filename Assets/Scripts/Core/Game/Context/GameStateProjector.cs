@@ -6,9 +6,9 @@ namespace Core.Game
 {
     public sealed class GameStateProjector
     {
-        private readonly GameContext _context;
+        private readonly ServerGameContext _context;
 
-        public GameStateProjector(GameContext context)
+        public GameStateProjector(ServerGameContext context)
         {
             _context = context;
         }
@@ -18,7 +18,7 @@ namespace Core.Game
 
         public GameSnapshot CreateSnapshot(ulong recipientPlayerId)
         {
-            if (_context.Role != GameContextRole.Server || !_context.IsInitialized)
+            if (!_context.IsInitialized)
             {
                 throw new InvalidOperationException("Projection requires an initialized server context.");
             }

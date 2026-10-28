@@ -9,12 +9,12 @@ namespace Client.UI.HUDs.ViewModels
     public sealed class GameDestinyCardViewModel : IGameDestinyCardViewModel
     {
         private readonly DestinyCardData _card;
-        private readonly GameContext _context;
+        private readonly ClientGameContext _context;
         private readonly GameActionClient _actionClient;
 
         public GameDestinyCardViewModel(
             DestinyCardData card, 
-            GameContext context, 
+            ClientGameContext context,
             GameActionClient actionClient)
         {
             _card = card;
