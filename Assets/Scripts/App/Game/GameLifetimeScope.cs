@@ -96,13 +96,13 @@ namespace App.Game
         
         private static void RegisterViewModels(IContainerBuilder builder)
         {
-            RegisterViewModel<GameHudViewModel>(builder).AsImplementedInterfaces();
-            RegisterViewModel<GameHudTopViewModel>(builder).AsImplementedInterfaces();
+            builder.RegisterEntryPoint<GameHudViewModel>();
+            builder.RegisterEntryPoint<GameHudTopViewModel>();
             RegisterViewModel<GameHudBottomViewModel>(builder).AsImplementedInterfaces();
             RegisterViewModel<GameHudBottomSwitchesViewModel>(builder);
             builder.RegisterEntryPoint<GamePlayerHandViewModel>();
             RegisterViewModel<GameArrowsHolderViewModel>(builder);
-            RegisterViewModel<GameHudTimerPhaseViewModel>(builder).AsImplementedInterfaces();
+            builder.RegisterEntryPoint<GameHudTimerPhaseViewModel>();
         }
 
         private static RegistrationBuilder RegisterViewModel<T>(IContainerBuilder builder)

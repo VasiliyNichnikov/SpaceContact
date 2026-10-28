@@ -1,8 +1,8 @@
 using Client.Attributes;
 using Client.UI.HUDs.ViewModels;
 using Client.UI.Utils;
-using Reactivity;
 using TMPro;
+using Reactivity;
 using UnityEngine;
 using UnityEngine.UI;
 using VContainer;
@@ -20,24 +20,20 @@ namespace Client.UI.HUDs
         [SerializeField]
         private Button _readyButton = null!;
 
-        private IGameHudTimerPhaseViewModel? _viewModel;
+        private IGameHudTimerPhaseViewModel _viewModel = null!;
 
         [CalledFromUnity]
         public void OnReadyButtonClick() =>
-            _viewModel?.OnReadyButtonClickHandler();
+            _viewModel.OnReadyButtonClickHandler();
 
         [Inject]
         private void Constructor(IGameHudTimerPhaseViewModel viewModel)
         {
-            gameObject.UpdateViewModelDisposable(ref _viewModel!, viewModel);
-            viewModel.Init();
+            gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
             gameObject.Subscribe(viewModel.RemainingTimeInSeconds, SetValueText);
             gameObject.Subscribe(viewModel.IsReadyToNextPhase, _markGameObject.SetActive);
             gameObject.Subscribe(viewModel.CanToggleReady, SetReadyButtonInteractable);
         }
-
-        private void Update() =>
-            _viewModel?.Update();
 
         private void SetValueText(int value)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Client.UI.HUDs.ViewModels;
@@ -33,8 +34,7 @@ namespace Client.UI.HUDs
         [Inject]
         private void Construct(IObjectResolver resolver, IGameHudViewModel viewModel)
         {
-            gameObject.UpdateViewModelDisposable(ref _viewModel, viewModel);
-            _viewModel.Init();
+            gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
             gameObject.Subscribe(_viewModel.DestinyCardViewModel, InitDestinyCardViewModel);
             gameObject.Subscribe(_viewModel.OpponentPlayerViewModel, _gameOpponentPlayerBlockView.Refresh);
             _topView.Init(viewModel.TopViewModel);
@@ -55,8 +55,9 @@ namespace Client.UI.HUDs
             _gameDestinyCard.Init(viewModel);
         }
 
-        private void InitGamePlayerProfiles(IReadOnlyCollection<GamePlayerProfileViewModel> viewModels)
+        private void InitGamePlayerProfiles(IReadOnlyCollection<GamePlayerProfileViewModel>? viewModels)
         {
+            viewModels ??= Array.Empty<GamePlayerProfileViewModel>();
             _playerProfilesContainer.gameObject.SetActive(viewModels.Count > 0);
             if (viewModels.Count == 0)
             {

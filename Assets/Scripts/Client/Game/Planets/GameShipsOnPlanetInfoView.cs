@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Client.Configs.Game;
 using Client.Game.Planets.ViewModels;
@@ -23,13 +24,10 @@ namespace Client.Game.Planets
         
         private GameShipsOnPlanetInfoViewModel _viewModel = null!;
         private GameUIShipsOnPlanetItemsRegistrySO _uiShipsOnPlanetItemsRegistrySO = null!;
-        
-        [Inject]
-        private void Constructor(GameUIShipsOnPlanetItemsRegistrySO uiShipsOnPlanetItemsRegistrySO)
-        {
-            _uiShipsOnPlanetItemsRegistrySO = uiShipsOnPlanetItemsRegistrySO;
-        }
-        
+
+        public RectTransform RectTransform =>
+            _rectTransform;
+
         public void Init(GameShipsOnPlanetInfoViewModel viewModel)
         {
             gameObject.UpdateViewModelSimple(ref _viewModel, viewModel);
@@ -37,11 +35,8 @@ namespace Client.Game.Planets
             gameObject.Subscribe(_viewModel.IsVisible, gameObject.SetActive);
             gameObject.Subscribe(_viewModel.BorderColor, color => _borderImage.color = color);
         }
-        
-        public RectTransform RectTransform => 
-            _rectTransform;
-        
-        public void Show() => 
+
+        public void Show() =>
             gameObject.SetActive(true);
         
         public void Hide() => 
@@ -61,8 +56,16 @@ namespace Client.Game.Planets
             createdObject.Init(viewModel);
         }
 
-        private void RefreshItems(IReadOnlyCollection<IGameShipsOnPlanetInfoItemViewModel> viewModels)
+        [Inject]
+        private void Constructor(GameUIShipsOnPlanetItemsRegistrySO uiShipsOnPlanetItemsRegistrySO)
         {
+            _uiShipsOnPlanetItemsRegistrySO = uiShipsOnPlanetItemsRegistrySO;
+        }
+
+        private void RefreshItems(IReadOnlyCollection<IGameShipsOnPlanetInfoItemViewModel>? viewModels)
+        {
+            viewModels ??= Array.Empty<IGameShipsOnPlanetInfoItemViewModel>();
+
             while (_createdItems.Count > 0)
             {
                 var item = _createdItems.Dequeue();

@@ -1,9 +1,8 @@
-using System;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public interface IGameHudTimerPhaseViewModel : IDisposable
+    public interface IGameHudTimerPhaseViewModel
     {
         IReactivityProperty<int> RemainingTimeInSeconds { get; }
 
@@ -12,9 +11,5 @@ namespace Client.UI.HUDs.ViewModels
         IReactivityProperty<bool> CanToggleReady { get; }
 
         void OnReadyButtonClickHandler();
-
-        void Update();
-
-        void Init();
     }
 }

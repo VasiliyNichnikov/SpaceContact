@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Client.Data.Game;
@@ -22,12 +23,6 @@ namespace Client.UI.Dialogs.Game.Hand
         private PlayerHandDisplayData _displayData;
         private IGamePlayerHandViewModel _viewModel = null!;
 
-        [Inject]
-        private void Constructor(PlayerHandDisplayData displayData)
-        {
-            _displayData = displayData;
-        }
-
         public void Init(IGamePlayerHandViewModel viewModel)
         {
             gameObject.UpdateChildViewModel(ref _viewModel, viewModel);
@@ -35,27 +30,28 @@ namespace Client.UI.Dialogs.Game.Hand
             gameObject.Subscribe(_viewModel.CardsViewModels, RefreshCards);
             gameObject.Subscribe(_viewModel.IsVisible, RefreshVisibility);
         }
-        
-        private void Show() => 
-            gameObject.SetActive(true);
-        
-        private void Hide() => 
-            gameObject.SetActive(false);
+
+        [Inject]
+        private void Constructor(PlayerHandDisplayData displayData)
+        {
+            _displayData = displayData;
+        }
 
         private void RefreshVisibility(bool isVisible)
         {
-            if (isVisible)
-            {
-                Show();
-            }
-            else
-            {
-                Hide();
-            }
+            gameObject.SetActive(isVisible && _viewModel.CardsViewModels.Value is { Count: > 0 });
         }
-        
-        private void RefreshCards(IReadOnlyCollection<IGamePlayerSpaceCardViewModel> viewModels)
+
+        private void RefreshCards(IReadOnlyCollection<IGamePlayerSpaceCardViewModel>? viewModels)
         {
+            viewModels ??= Array.Empty<IGamePlayerSpaceCardViewModel>();
+            RefreshVisibility(_viewModel.IsVisible.Value);
+
+            if (viewModels.Count == 0)
+            {
+                return;
+            }
+
             var viewModelsAsList = viewModels.ToList();
             UIUtils.CreateRequiredNumberOfItems(
                 _spaceCardsContainer,

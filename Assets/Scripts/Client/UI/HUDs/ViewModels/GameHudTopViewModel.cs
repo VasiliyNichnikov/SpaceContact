@@ -4,10 +4,11 @@ using Client.Helpers;
 using Core.Game;
 using Core.Game.Dto.Snapshots;
 using Reactivity;
+using VContainer.Unity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public class GameHudTopViewModel : IGameHudTopViewModel
+    public class GameHudTopViewModel : IGameHudTopViewModel, IInitializable, IDisposable
     {
         private readonly GameContext _context;
         private readonly EventProvider _activePhaseChangedEvent = new();
@@ -25,7 +26,7 @@ namespace Client.UI.HUDs.ViewModels
 
         public IReadOnlyCollection<GamePhaseType> PhaseScale { get; private set; } = Array.Empty<GamePhaseType>();
 
-        public void Init()
+        void IInitializable.Initialize()
         {
             _context.StateChanged += Refresh;
             Refresh();

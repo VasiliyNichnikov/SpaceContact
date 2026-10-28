@@ -5,10 +5,11 @@ using Core.Game;
 using Core.Game.Actions;
 using Reactivity;
 using VContainer;
+using VContainer.Unity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public sealed class GameHudViewModel : IGameHudViewModel
+    public sealed class GameHudViewModel : IGameHudViewModel, IInitializable, IDisposable
     {
         private readonly ReactivityProperty<IGameDestinyCardViewModel?> _destinyCardViewModel = new();
         private readonly ReactivityProperty<GamePlayerBlockViewModel?> _playerBlockViewModel = new();
@@ -39,20 +40,18 @@ namespace Client.UI.HUDs.ViewModels
         public IReactivityReadOnlyCollectionProperty<GamePlayerProfileViewModel> PlayerProfilesViewModels =>
             _playerProfilesViewModels;
 
-        public void Init()
+        void IInitializable.Initialize()
         {
             _fieldViewManager.OnViewedOpponentChanged += OpponentChanged;
             _fieldViewManager.OnInitialized += OpponentChanged;
             _context.StateChanged += Refresh;
             _pendingGameActions.Changed += RefreshDestinyCard;
-            _topViewModel.Init();
 
             Refresh();
         }
 
         public void Dispose()
         {
-            TopViewModel.Dispose();
             _context.StateChanged -= Refresh;
             _pendingGameActions.Changed -= RefreshDestinyCard;
             _fieldViewManager.OnInitialized -= OpponentChanged;

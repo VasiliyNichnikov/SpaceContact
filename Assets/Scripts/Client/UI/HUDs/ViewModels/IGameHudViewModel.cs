@@ -1,9 +1,8 @@
-using System;
 using Reactivity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public interface IGameHudViewModel : IDisposable
+    public interface IGameHudViewModel
     {
         IGameHudTopViewModel TopViewModel { get; }
         
@@ -14,7 +13,5 @@ namespace Client.UI.HUDs.ViewModels
         IReactivityProperty<GamePlayerBlockViewModel?> OpponentPlayerViewModel { get; }
         
         IReactivityReadOnlyCollectionProperty<GamePlayerProfileViewModel> PlayerProfilesViewModels { get; }
-
-        void Init();
     }
 }

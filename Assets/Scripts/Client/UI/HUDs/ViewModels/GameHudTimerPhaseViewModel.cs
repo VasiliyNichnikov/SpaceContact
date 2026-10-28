@@ -4,10 +4,11 @@ using Core.Game.Actions;
 using Core.Helpers;
 using Reactivity;
 using VContainer;
+using VContainer.Unity;
 
 namespace Client.UI.HUDs.ViewModels
 {
-    public sealed class GameHudTimerPhaseViewModel : IGameHudTimerPhaseViewModel
+    public sealed class GameHudTimerPhaseViewModel : IGameHudTimerPhaseViewModel, IInitializable, ITickable, IDisposable
     {
         private readonly ReactivityProperty<int> _remainingTimeInSeconds = new();
         private readonly ReactivityProperty<bool> _isReadyToNextPhase = new();
@@ -23,10 +24,15 @@ namespace Client.UI.HUDs.ViewModels
 
         public IReactivityProperty<bool> CanToggleReady => _canToggleReady;
 
-        public void Init()
+        void IInitializable.Initialize()
         {
             _gameContext.StateChanged += Refresh;
             _pendingActions.Changed += Refresh;
+            Refresh();
+        }
+
+        void ITickable.Tick()
+        {
             Refresh();
         }
 
@@ -40,11 +46,6 @@ namespace Client.UI.HUDs.ViewModels
             }
 
             _actionClient.Send(action);
-        }
-
-        public void Update()
-        {
-            Refresh();
         }
 
         public void Dispose()
